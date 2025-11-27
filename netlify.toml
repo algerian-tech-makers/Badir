@@ -1,12 +1,14 @@
 [build]
-  command = "prisma generate && npm run build"
+  command = "npm rebuild @tailwindcss/node && prisma generate && npm run build"
   publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "22"
+  NPM_CONFIG_PLATFORM = "linux"
+  NPM_CONFIG_ARCH = "x64"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [[redirects]]
   from = "/api/*"
