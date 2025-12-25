@@ -27,21 +27,23 @@ export async function loginAction(data: LoginFormData): Promise<LoginState> {
       asResponse: true,
     });
 
-    if (response.status === 401) {
-      return {
-        success: false,
-        error: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-      };
-    } else if (response.status === 400) {
-      return {
-        success: false,
-        error: "البيانات المدخلة غير صحيحة",
-      };
-    } else {
-      return {
-        success: false,
-        error: "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى",
-      };
+    if (!response.ok) {
+      if (response.status === 401) {
+        return {
+          success: false,
+          error: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+        };
+      } else if (response.status === 400) {
+        return {
+          success: false,
+          error: "البيانات المدخلة غير صحيحة",
+        };
+      } else {
+        return {
+          success: false,
+          error: "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى",
+        };
+      }
     }
 
     return {
