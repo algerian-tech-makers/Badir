@@ -3,7 +3,6 @@
 import { initialSignupSchema, type InitialSignupFormData } from "@/schemas";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { UserType } from "@prisma/client";
 
@@ -11,13 +10,13 @@ export type SignupState = {
   success?: boolean;
   message?: string;
   error?: string;
+  redirectTo?: string;
 };
 
 export async function signupAction(
   _prevState: SignupState | null,
   formData: FormData,
 ): Promise<SignupState> {
-  let completeRoute = "";
   try {
     const data: InitialSignupFormData = {
       email: formData.get("email") as string,
@@ -87,11 +86,16 @@ export async function signupAction(
       }
     }
 
-    if (validatedData.data.userType === "both") {
-      completeRoute = "/complete-profile/user";
-    } else {
-      completeRoute = "/complete-profile/organization";
-    }
+    const completeRoute =
+      validatedData.data.userType === "both"
+        ? "/complete-profile/user"
+        : "/complete-profile/organization";
+
+    return {
+      success: true,
+      message: "تم إنشاء الحساب بنجاح",
+      redirectTo: completeRoute,
+    };
   } catch (error) {
     console.error("Signup error:", error);
 
@@ -107,6 +111,4 @@ export async function signupAction(
       error: "حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.",
     };
   }
-
-  redirect(completeRoute);
 }

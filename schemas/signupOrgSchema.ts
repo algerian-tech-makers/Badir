@@ -107,7 +107,8 @@ export const signupOrgStep4Schema = z.object({
 
 // Step 5 Schema - Document uploads
 export const signupOrgStep5Schema = z.object({
-  officialLicense: z.string().min(1, "مطلوب تحميل الترخيص الرسمي"),
+  // officialLicense: z.string().min(1, "مطلوب تحميل الترخيص الرسمي"),
+  officialLicense: z.string().optional(), //? Make optional temporarily
   logo: z.string().min(1, "مطلوب تحميل الشعار"),
   identificationCard: z.string().optional(),
 });

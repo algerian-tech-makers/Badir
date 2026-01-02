@@ -39,8 +39,9 @@ export const NewInitiativeSchema = z
 
     categoryId: z.string().min(1, "يجب اختيار تصنيف"),
 
-    location: z.string().min(3, "يجب إدخال موقع المبادرة"),
-    city: z.string().min(1, "يجب إدخال المدينة"),
+    isOnline: z.boolean().default(false),
+    location: z.string().optional(),
+    city: z.string().optional(),
     state: z.string().optional(),
     country: z.string().default("Algeria"),
 
@@ -83,6 +84,30 @@ export const NewInitiativeSchema = z
     {
       message: "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء",
       path: ["endDate"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (!data.isOnline) {
+        return data.location && data.location.length >= 3;
+      }
+      return true;
+    },
+    {
+      message: "يجب إدخال موقع المبادرة",
+      path: ["location"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (!data.isOnline) {
+        return data.city && data.city.length >= 1;
+      }
+      return true;
+    },
+    {
+      message: "يجب إدخال المدينة",
+      path: ["city"],
     },
   )
   .refine(

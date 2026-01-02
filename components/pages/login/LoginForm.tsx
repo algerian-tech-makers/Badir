@@ -10,12 +10,14 @@ import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import AppButton from "@/components/AppButton";
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
 
 export default function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
   const [isLoginSuccessful, setIsLoginSuccessful] = useState(false);
+  const router = useRouter();
 
   const {
     control,
@@ -33,6 +35,8 @@ export default function LoginForm() {
     mode: "onBlur",
   });
 
+  const { refetch } = useSession();
+
   const onSubmit = (data: LoginFormData) => {
     startTransition(async () => {
       const result = await loginAction(data);
@@ -44,10 +48,11 @@ export default function LoginForm() {
         }
         const callbackFromSearchParams = searchParams.get("callbackUrl");
         if (callbackFromSearchParams) {
-          window.location.href = callbackFromSearchParams;
+          router.replace(callbackFromSearchParams);
           return;
         }
-        window.location.href = result.redirectTo;
+        router.replace(result.redirectTo);
+        await refetch?.();
       } else {
         setIsLoginSuccessful(false);
         if (result.errors) {

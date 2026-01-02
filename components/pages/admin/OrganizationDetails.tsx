@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import Link from "next/link";
 import {
-  ArrowLeft,
   Building2,
   Mail,
   Phone,
@@ -19,6 +20,10 @@ import {
   XCircle,
   AlertTriangle,
   ExternalLink,
+  ArrowRight,
+  FileText,
+  ImageIcon,
+  Circle,
 } from "lucide-react";
 import { AdminService } from "@/services/admin";
 import { formatDate } from "@/lib/utils";
@@ -53,7 +58,6 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
     }
 
     try {
-      // Replace with actual server action call
       startTransition(async () => {
         const result = await updateOrganizationStatusAction(
           organization.id,
@@ -80,7 +84,7 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
       {/* Header */}
       <div className="mb-6 flex items-center gap-4">
         <Button variant="ghost" size="sm" className="p-2">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" />
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -88,7 +92,22 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
           </h1>
           <p className="text-gray-600">تفاصيل المنظمة</p>
         </div>
-        <AdminOrganizationStatusBadge status={organization.isVerified} />
+        <div className="flex flex-col items-end gap-2">
+          <AdminOrganizationStatusBadge status={organization.isVerified} />
+          <Badge
+            variant={organization.owner.isActive ? "default" : "secondary"}
+            className="flex items-center gap-1 text-xs"
+          >
+            <Circle
+              className={`h-2 w-2 fill-current ${
+                organization.owner.isActive ? "text-green-500" : "text-gray-400"
+              }`}
+            />
+            {organization.owner.isActive
+              ? "مالك المنظمة نشط"
+              : "مالك المنظمة غير نشط"}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -432,7 +451,132 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
           </Card>
         </div>
       </div>
+      {/* Documents Section */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            المستندات والصور
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {/* Logo */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                شعار المنظمة
+              </Label>
+              {organization.logo ? (
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-50">
+                  <Image
+                    src={organization.logo}
+                    alt="شعار المنظمة"
+                    fill
+                    className="object-contain p-2"
+                  />
+                  <Link
+                    href={organization.logo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-2 left-2"
+                  >
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="h-8 w-8 p-0"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed bg-gray-50">
+                  <div className="text-center">
+                    <ImageIcon className="mx-auto h-8 w-8 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-500">لا يوجد شعار</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
+            {/* Official License */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                الترخيص الرسمي
+              </Label>
+              {organization.officialLicense ? (
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-50">
+                  <Image
+                    src={organization.officialLicense}
+                    alt="الترخيص الرسمي"
+                    fill
+                    className="object-contain p-2"
+                  />
+                  <Link
+                    href={organization.officialLicense}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-2 left-2"
+                  >
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="h-8 w-8 p-0"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed bg-gray-50">
+                  <div className="text-center">
+                    <FileText className="mx-auto h-8 w-8 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-500">لا يوجد ترخيص</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Identification Card */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                بطاقة الهوية
+              </Label>
+              {organization.identificationCard ? (
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-50">
+                  <Image
+                    src={organization.identificationCard}
+                    alt="بطاقة الهوية"
+                    fill
+                    className="object-contain p-2"
+                  />
+                  <Link
+                    href={organization.identificationCard}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-2 left-2"
+                  >
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="h-8 w-8 p-0"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed bg-gray-50">
+                  <div className="text-center">
+                    <FileText className="mx-auto h-8 w-8 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-500">لا توجد بطاقة</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       {isPending && (
         <Alert className="fixed right-4 bottom-4 w-auto">
           <AlertTriangle className="h-4 w-4" />

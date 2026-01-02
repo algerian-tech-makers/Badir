@@ -123,6 +123,7 @@ model Initiative {
   descriptionEn          String?                 @map("description_en")
   shortDescriptionAr     String?                 @map("short_description_ar") @db.VarChar(500)
   shortDescriptionEn     String?                 @map("short_description_en") @db.VarChar(500)
+  isOnline               Boolean                 @default(false) @map("is_online")
   location               String                  @db.VarChar(255)
   city                   String                  @db.VarChar(100)
   state                  String?                 @db.VarChar(100)

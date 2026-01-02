@@ -316,6 +316,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
               onBlur={onBlur}
               disabled={disabled}
               className={baseInputClasses}
+              dir={type === "number" || type === "email" ? "ltr" : "rtl"}
               {...props}
             />
           );
@@ -546,6 +547,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                   disabled && "bg-neutrals-200 cursor-not-allowed",
                   className,
                 )}
+                dir="rtl"
               >
                 <SelectValue placeholder={placeholder || `اختر ${label}`} />
               </SelectTrigger>

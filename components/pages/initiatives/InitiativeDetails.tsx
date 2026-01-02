@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, User, Building, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Clock,
+  User,
+  Building,
+  ChevronDown,
+  ChevronUp,
+  Wifi,
+  MapPin,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import parse from "html-react-parser";
@@ -60,6 +68,18 @@ export default function InitiativeDetails({
   }
   return (
     <>
+      {/* Cover Image */}
+      {initiative.coverImage && (
+        <div className="relative mb-6 h-64 w-full overflow-hidden rounded-lg md:h-80">
+          <Image
+            src={initiative.coverImage}
+            alt={initiative.titleAr}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+
       {/* Description */}
       <div className="mb-6">
         <h2 className="text-neutrals-700 mb-2 text-xl font-semibold">
@@ -98,6 +118,21 @@ export default function InitiativeDetails({
         </h2>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Online/Onsite */}
+          <div className="flex gap-3">
+            {initiative.isOnline ? (
+              <Wifi className="text-primary-600 h-5 w-5" />
+            ) : (
+              <MapPin className="text-primary-600 h-5 w-5" />
+            )}
+            <div>
+              <p className="text-neutrals-500 text-sm">نوع المبادرة</p>
+              <p className="text-neutrals-700 font-medium">
+                {initiative.isOnline ? "عن بُعد" : "حضوري"}
+              </p>
+            </div>
+          </div>
+
           {/* Date and Time */}
           <div className="flex gap-3">
             <Image

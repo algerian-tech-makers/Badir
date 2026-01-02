@@ -36,6 +36,7 @@ export default function Step6Documents() {
                 onChange(JSON.stringify(value)),
               )
             }
+            isOptional={true} //? Make optional temporarily
           />
         )}
       />

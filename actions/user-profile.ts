@@ -202,6 +202,12 @@ export async function completeProfileAction(
 
     const validatedData = registrationSchema.parse(data);
 
+    const finalEducationalLevel =
+      validatedData.educationalLevel === "other" &&
+      validatedData.customEducationalLevel
+        ? validatedData.customEducationalLevel
+        : validatedData.educationalLevel;
+
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -239,7 +245,7 @@ export async function completeProfileAction(
         where: { id: existingQualification.id },
         data: {
           specification: validatedData.specification,
-          educationalLevel: validatedData.educationalLevel,
+          educationalLevel: finalEducationalLevel,
           currentJob: validatedData.currentJob || "",
           updatedAt: new Date(),
         },
@@ -249,7 +255,7 @@ export async function completeProfileAction(
         data: {
           userId: session.user.id,
           specification: validatedData.specification,
-          educationalLevel: validatedData.educationalLevel,
+          educationalLevel: finalEducationalLevel,
           currentJob: validatedData.currentJob || "",
         },
       });
