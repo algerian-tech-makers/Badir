@@ -44,3 +44,9 @@ next-env.d.ts
 /lib/generated/prisma
 
 /*.txt
+
+
+# docker files (I used it just to emulate vercel environment locally)
+dockerfile
+docker-compose.yml
+.dockerignore
