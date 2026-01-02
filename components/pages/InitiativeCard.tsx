@@ -36,6 +36,7 @@ export default function InitiativeCard({
     maxParticipants,
     organizer,
     registrationDeadline,
+    isOnline,
   } = initiative;
 
   const now = new Date();
@@ -80,12 +81,12 @@ export default function InitiativeCard({
                 <TooltipTrigger>
                   <div
                     className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
-                      initiative.isOnline
+                      isOnline
                         ? "bg-blue-100 text-blue-700"
                         : "bg-green-100 text-green-700"
                     }`}
                   >
-                    {initiative.isOnline ? (
+                    {isOnline ? (
                       <>
                         <Wifi className="h-3 w-3" />
                         <span>عن بُعد</span>
@@ -100,7 +101,7 @@ export default function InitiativeCard({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    {initiative.isOnline
+                    {isOnline
                       ? "مبادرة عن بُعد - يمكن المشاركة من أي مكان"
                       : "مبادرة حضورية - تتطلب الحضور الفعلي"}
                   </p>
@@ -141,15 +142,17 @@ export default function InitiativeCard({
 
         {/* Location and participants */}
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-          <div className="text-neutrals-600 flex items-center gap-2 text-sm md:text-base">
-            <Image
-              src="/images/icons/map-pin.svg"
-              alt="عدد المشاركين"
-              width={24}
-              height={24}
-            />
-            <span>{city}</span>
-          </div>
+          {!isOnline && city && (
+            <div className="text-neutrals-600 flex items-center gap-2 text-sm md:text-base">
+              <Image
+                src="/images/icons/map-pin.svg"
+                alt="عدد المشاركين"
+                width={24}
+                height={24}
+              />
+              <span>{city}</span>
+            </div>
+          )}
 
           <div className="text-neutrals-600 flex items-center gap-2 text-sm md:text-base">
             <Image

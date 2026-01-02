@@ -112,6 +112,7 @@ erDiagram
         enum sex
         string bio
         enum userType
+        enum role
         decimal latitude
         decimal longitude
         string city
@@ -121,6 +122,9 @@ erDiagram
         datetime createdAt
         datetime updatedAt
         boolean profileCompleted
+        boolean newsletterSubscribed
+        datetime newsletterSubscribedAt
+        string mailerLiteId
     }
 
     Organization {
@@ -186,6 +190,7 @@ erDiagram
         string descriptionEn
         string shortDescriptionAr
         string shortDescriptionEn
+        boolean isOnline
         string location
         string city
         string state
@@ -423,6 +428,12 @@ actions
 │  ├─ submitRating.ts  # Submit rating action
 │  └─ user-profile.ts  # User profile actions
 ```
+
+---
+
+## Admin Setup
+
+To promote a user to admin role, run: `npm run admin:promote` and follow the prompts to enter the user's email address.
 
 ---
 
