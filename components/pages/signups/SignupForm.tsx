@@ -12,6 +12,7 @@ import { ChevronLeft, Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { initialSignupSchema, type InitialSignupFormData } from "@/schemas";
 import { UserType } from "@prisma/client";
+import { useSession } from "@/lib/auth-client";
 
 export function SignupForm() {
   const pathname = usePathname();
@@ -35,6 +36,7 @@ export function SignupForm() {
       userType: isUserSigningUp ? "both" : ("organization" as UserType),
     },
   });
+  const { refetch } = useSession();
 
   const onSubmit = (data: InitialSignupFormData) => {
     startTransition(async () => {
@@ -49,15 +51,13 @@ export function SignupForm() {
         if (result.error) {
           setIsRegisterSuccessful(false);
           toast.error(result.error);
-        } else if (result.success && result.message) {
+        } else if (result.success && result.redirectTo) {
           setIsRegisterSuccessful(true);
-          toast.success(result.message);
-
-          const completeRoute =
-            data.userType === "both"
-              ? "/complete-profile/user"
-              : "/complete-profile/organization";
-          router.push(completeRoute);
+          if (result.message) {
+            toast.success(result.message);
+          }
+          router.push(result.redirectTo);
+          await refetch?.();
         }
       } catch (error) {
         console.error("Signup error:", error);

@@ -48,6 +48,10 @@ export const step2Schema = z.object({
     .string()
     .min(1, "المستوى التعليمي مطلوب")
     .max(100, "المستوى التعليمي يجب أن يكون أقل من 100 حرف"),
+  customEducationalLevel: z
+    .string()
+    .max(100, "المستوى التعليمي المخصص يجب أن يكون أقل من 100 حرف")
+    .optional(),
   currentJob: z
     .string()
     .optional()
@@ -93,10 +97,10 @@ export const sexOptions = [
 ];
 
 export const educationalLevelOptions = [
-  { value: "other", label: "أخرى" },
   { value: "postgraduate", label: "دراسات عليا" },
   { value: "university", label: "جامعي" },
   { value: "secondary", label: "ثانوي" },
+  { value: "other", label: "أخرى" },
 ];
 
 export const userTypeOptions = [
@@ -132,6 +136,7 @@ export const profileDefaultValues: RegistrationFormData = {
 
   specification: "",
   educationalLevel: "",
+  customEducationalLevel: "",
   currentJob: "",
   bio: "",
   userType: "both",

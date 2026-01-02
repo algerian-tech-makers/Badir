@@ -26,6 +26,7 @@ import {
   Users,
   ArrowUpRight,
   Loader2,
+  Circle,
 } from "lucide-react";
 import { AdminOrganizationCard, AdminService } from "@/services/admin";
 import { AdminOrganizationStatusBadge } from "../AdminStatusBadge";
@@ -225,6 +226,19 @@ const OrganizationsManagement = ({
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <AdminOrganizationStatusBadge status={org.isVerified} />
+                        <Badge
+                          variant={org.owner.isActive ? "default" : "secondary"}
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <Circle
+                            className={`h-2 w-2 fill-current ${
+                              org.owner.isActive
+                                ? "text-green-500"
+                                : "text-gray-400"
+                            }`}
+                          />
+                          {org.owner.isActive ? "نشط" : "غير نشط"}
+                        </Badge>
                         <Badge variant="outline" className="text-xs">
                           {org.organizationType}
                         </Badge>

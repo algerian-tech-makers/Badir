@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import emailConfig from "@/lib/email";
 import { PaginatedResponse, PaginationParams } from "@/types/Pagination";
 import {
   Organization,
@@ -7,6 +8,10 @@ import {
   InitiativeStatus,
   Prisma,
 } from "@prisma/client";
+import { Resend } from "resend";
+import { render } from "@react-email/components";
+import OrganizationStatusEmail from "@/emails/OrganizationStatusEmail";
+import InitiativeStatusEmail from "@/emails/InitiativeStatusEmail";
 
 export interface AdminOrganizationCard extends Organization {
   owner: {
@@ -14,6 +19,7 @@ export interface AdminOrganizationCard extends Organization {
     name: string;
     email: string;
     phone?: string | null;
+    isActive: boolean;
   };
   _count: {
     initiatives: number;
@@ -48,6 +54,8 @@ export interface InitiativeFilters {
   categoryId?: string;
   city?: string;
 }
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export class AdminService {
   static API_PATH = "/admin";
@@ -101,6 +109,7 @@ export class AdminService {
             name: true,
             email: true,
             phone: true,
+            isActive: true,
           },
         },
         _count: {
@@ -232,7 +241,7 @@ export class AdminService {
   static async updateOrganizationStatus(
     organizationId: string,
     status: OrganizationStatus,
-    adminUserId: string,
+    _adminUserId: string,
     rejectionReason?: string,
   ) {
     try {
@@ -252,8 +261,28 @@ export class AdminService {
         },
       });
 
-      // TODO: Send notification email to organization owner
-      //  implement email service here
+      const emailHtml = await render(
+        OrganizationStatusEmail({
+          organizationName: organization.name,
+          ownerName: organization.owner.name,
+          status: status === "approved" ? "approved" : "rejected",
+          rejectionReason: status === "rejected" ? rejectionReason : undefined,
+          dashboardLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://badir.space"}/profile`,
+        }),
+      );
+
+      await resend.emails.send({
+        from: emailConfig.fromEmail,
+        to: `"${organization.owner.name}" <${organization.owner.email}>`,
+        subject:
+          status === "approved"
+            ? `تم قبول منظمتك "${organization.name}" على منصة بادر 🎉`
+            : `تحديث بخصوص طلب منظمتك "${organization.name}" على منصة بادر`,
+        replyTo: emailConfig.contactEmail,
+        html: emailHtml,
+        headers: { "X-Entity-Ref-ID": `badir-org-status-${Date.now()}` },
+        tags: [{ name: "category", value: "organization-status" }],
+      });
 
       return {
         success: true,
@@ -273,7 +302,7 @@ export class AdminService {
   static async updateInitiativeStatus(
     initiativeId: string,
     status: InitiativeStatus,
-    adminUserId: string,
+    _adminUserId: string,
     rejectionReason?: string,
   ) {
     try {
@@ -293,8 +322,33 @@ export class AdminService {
         },
       });
 
-      // TODO: Send notification email to initiative organizer
-      // You can implement email service here
+      if (initiative.organizerUser) {
+        const emailHtml = await render(
+          InitiativeStatusEmail({
+            initiativeName: initiative.titleAr,
+            organizerName: initiative.organizerUser.name,
+            status: status === "published" ? "published" : "cancelled",
+            rejectionReason:
+              status === "cancelled" ? rejectionReason : undefined,
+            initiativeLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://badir.space"}/initiatives/${initiative.id}`,
+          }),
+        );
+
+        await resend.emails.send({
+          from: emailConfig.fromEmail,
+          to: `"${initiative.organizerUser.name}" <${initiative.organizerUser.email}>`,
+          subject:
+            status === "published"
+              ? `تم نشر مبادرتك "${initiative.titleAr}" على منصة بادر 🎉`
+              : `تحديث بخصوص مبادرتك "${initiative.titleAr}" على منصة بادر`,
+          replyTo: emailConfig.contactEmail,
+          html: emailHtml,
+          headers: {
+            "X-Entity-Ref-ID": `badir-initiative-status-${Date.now()}`,
+          },
+          tags: [{ name: "category", value: "initiative-status" }],
+        });
+      }
 
       return {
         success: true,
@@ -324,6 +378,7 @@ export class AdminService {
             email: true,
             phone: true,
             createdAt: true,
+            isActive: true,
           },
         },
         initiatives: {

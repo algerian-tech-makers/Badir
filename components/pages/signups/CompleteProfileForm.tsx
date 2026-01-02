@@ -19,7 +19,6 @@ import Image from "next/image";
 import Step1PersonalInfo from "./form-steps/user/Step1PersonalInfo";
 import Step2Qualifications from "./form-steps/user/Step2Qualifications";
 import Step3TemsAndConditions from "./form-steps/user/Step3TemsAndConditions";
-import { AUTHORIZED_REDIRECTION } from "@/data/routes";
 
 const asideImage1 = "/images/auth-form-aside.png";
 const asideImage2 = "/images/auth-form-aside2.png";

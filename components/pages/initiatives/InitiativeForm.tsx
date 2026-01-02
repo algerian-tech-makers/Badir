@@ -109,6 +109,7 @@ export default function InitiativeForm({
       categoryId:
         initialData?.categoryId ||
         (categories.length > 0 ? categories[0].value : ""),
+      isOnline: initialData?.isOnline || false,
       location: initialData?.location || "",
       city: initialData?.city || "",
       state: initialData?.state || "",
@@ -127,6 +128,7 @@ export default function InitiativeForm({
     mode: "onBlur",
   });
   const requiresForm = watch("requiresForm");
+  const isOnline = watch("isOnline");
 
   // submit as draft
   const saveAsDraft = () => {
@@ -159,8 +161,8 @@ export default function InitiativeForm({
           descriptionEn: data.descriptionEn
             ? sanitize(data.descriptionEn)
             : undefined,
-          location: sanitize(data.location),
-          city: sanitize(data.city),
+          location: data.location ? sanitize(data.location) : undefined,
+          city: data.city ? sanitize(data.city) : undefined,
           state: data.state ? sanitize(data.state) : undefined,
           // Sanitize form questions
           participationQstForm: data.participationQstForm?.map((field) => ({
@@ -209,7 +211,12 @@ export default function InitiativeForm({
   return (
     <div className="mx-auto w-full max-w-4xl">
       <form onSubmit={formSubmitHandler} className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
+          dir="rtl"
+        >
           <TabsList className="mb-6 grid w-full grid-cols-3">
             <TabsTrigger value="basic-info">المعلومات الأساسية</TabsTrigger>
             <TabsTrigger value="participation">المشاركة</TabsTrigger>
@@ -382,84 +389,106 @@ export default function InitiativeForm({
                 موقع المبادرة
               </h3>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {/* Location Address */}
+              {/* Online/On-site Toggle */}
+              <div className="mb-4">
                 <Controller
-                  name="location"
+                  name="isOnline"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field: { onChange, value } }) => (
                     <FormInput
-                      type="text"
-                      label="العنوان التفصيلي"
-                      name="location"
-                      placeholder="أدخل العنوان التفصيلي للمبادرة"
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={errors.location?.message}
-                      rtl={true}
-                    />
-                  )}
-                />
-
-                {/* City */}
-                <Controller
-                  name="city"
-                  control={control}
-                  render={({ field }) => (
-                    <FormInput
-                      type="text"
-                      label="المدينة"
-                      name="city"
-                      placeholder="أدخل المدينة"
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={errors.city?.message}
-                      rtl={true}
-                    />
-                  )}
-                />
-
-                {/* State */}
-                <Controller
-                  name="state"
-                  control={control}
-                  render={({ field }) => (
-                    <FormInput
-                      type="text"
-                      label="الولاية"
-                      name="state"
-                      placeholder="أدخل الولاية"
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={errors.state?.message}
-                      isOptional
-                      rtl={true}
-                    />
-                  )}
-                />
-
-                {/* Country */}
-                <Controller
-                  name="country"
-                  control={control}
-                  render={({ field: { onChange, value, onBlur } }) => (
-                    <FormInput
-                      type="select"
-                      options={COUNTRIES}
-                      name="country"
-                      label="البلد"
-                      placeholder="الجزائر"
-                      value={value || "Algeria"}
+                      type="switch"
+                      label="مبادرة عبر الإنترنت"
+                      name="isOnline"
+                      value={value}
                       onChange={onChange}
-                      onBlur={onBlur}
-                      error={errors.country?.message}
                     />
                   )}
                 />
               </div>
+
+              {isOnline ? (
+                <div className="bg-primary-50 border-primary-200 rounded-lg border p-4 text-center">
+                  <p className="text-primary-700 text-sm">
+                    هذه مبادرة عبر الإنترنت - لا حاجة لتحديد الموقع الجغرافي
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {/* Location Address */}
+                  <Controller
+                    name="location"
+                    control={control}
+                    render={({ field }) => (
+                      <FormInput
+                        type="text"
+                        label="العنوان التفصيلي"
+                        name="location"
+                        placeholder="أدخل العنوان التفصيلي للمبادرة"
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        error={errors.location?.message}
+                      />
+                    )}
+                  />
+
+                  {/* City */}
+                  <Controller
+                    name="city"
+                    control={control}
+                    render={({ field }) => (
+                      <FormInput
+                        type="text"
+                        label="المدينة"
+                        name="city"
+                        placeholder="أدخل المدينة"
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        error={errors.city?.message}
+                      />
+                    )}
+                  />
+
+                  {/* State */}
+                  <Controller
+                    name="state"
+                    control={control}
+                    render={({ field }) => (
+                      <FormInput
+                        type="text"
+                        label="الولاية"
+                        name="state"
+                        placeholder="أدخل الولاية"
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        error={errors.state?.message}
+                        isOptional
+                      />
+                    )}
+                  />
+
+                  {/* Country */}
+                  <Controller
+                    name="country"
+                    control={control}
+                    render={({ field: { onChange, value, onBlur } }) => (
+                      <FormInput
+                        type="select"
+                        options={COUNTRIES}
+                        name="country"
+                        label="البلد"
+                        placeholder="الجزائر"
+                        value={value || "Algeria"}
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        error={errors.country?.message}
+                      />
+                    )}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Date and Time Section */}
