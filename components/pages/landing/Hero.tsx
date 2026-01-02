@@ -67,7 +67,7 @@ export default function Hero() {
               icon={<ArrowUpLeft className="h-4 w-4 sm:h-6 sm:w-6" />}
               border="rounded"
               size="lg"
-              url="/signup/organization"
+              url="/signup/user"
             >
               تطوَّع الآن
             </AppButton>
