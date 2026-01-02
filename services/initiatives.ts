@@ -33,6 +33,7 @@ export interface InitiativeCard {
     name: string;
     image?: string | null;
   };
+  isOnline: boolean;
 }
 
 export interface InitiativeFilters {
@@ -246,6 +247,7 @@ export class InitiativeService {
           image:
             initiative.organizerUser?.image || initiative.organizerOrg?.logo,
         },
+        isOnline: initiative.isOnline,
       }));
 
       const totalPages = Math.ceil(total / limit);

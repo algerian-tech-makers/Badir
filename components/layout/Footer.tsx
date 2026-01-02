@@ -181,7 +181,7 @@ export default function Footer() {
           <div className="text-neutrals-400 text-center text-sm">
             © {currentYear} منصة بادر - جميع الحقوق محفوظة
           </div>
-          <div className="text-neutrals-300 text-center text-sm">
+          {/* <div className="text-neutrals-300 text-center text-sm">
             <a
               href="https://github.com/algerian-tech-makers/Badir"
               target="_blank"
@@ -198,7 +198,8 @@ export default function Footer() {
               </svg>
               للمساهمة
             </a>
-          </div>
+          </div> */}
+          {/* It will be enabled after a period*/}
         </div>
       </div>
     </footer>

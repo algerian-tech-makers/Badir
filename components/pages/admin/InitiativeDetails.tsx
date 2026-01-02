@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 import {
   Mail,
   Phone,
@@ -10,6 +11,8 @@ import {
   Users,
   FileText,
   AlertTriangle,
+  Wifi,
+  MapPin,
 } from "lucide-react";
 import { AdminService } from "@/services/admin";
 import { AdminInitiativeStatusBadge } from "../AdminStatusBadge";
@@ -45,6 +48,18 @@ const InitiativeDetails = ({ initiative }: InitiativeDetailsProps) => {
         <AdminInitiativeStatusBadge status={initiative.status} />
       </div>
 
+      {/* Cover Image */}
+      {initiative.coverImage && (
+        <div className="relative mb-6 h-64 w-full overflow-hidden rounded-lg md:h-80">
+          <Image
+            src={initiative.coverImage}
+            alt={initiative.titleAr}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main Details */}
         <div className="space-y-6 lg:col-span-2">
@@ -71,6 +86,25 @@ const InitiativeDetails = ({ initiative }: InitiativeDetailsProps) => {
                   <p className="mt-1 text-gray-900">
                     {initiative.titleEn || "غير متوفر"}
                   </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">
+                    نوع المبادرة
+                  </Label>
+                  <div className="mt-1 flex items-center gap-2">
+                    {initiative.isOnline ? (
+                      <>
+                        <Wifi className="h-4 w-4 text-blue-600" />
+                        <span className="text-gray-900">عن بُعد</span>
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="h-4 w-4 text-green-600" />
+                        <span className="text-gray-900">ميداني</span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div>

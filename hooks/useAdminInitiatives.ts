@@ -45,7 +45,7 @@ export function useAdminInitiatives(
   }, [filters.search]);
 
   const fetchInitiatives = useCallback(
-    async (page: number = pagination.page) => {
+    async (page: number = 1) => {
       try {
         setIsLoading(true);
 
@@ -75,13 +75,7 @@ export function useAdminInitiatives(
         setIsLoading(false);
       }
     },
-    [
-      pagination.page,
-      pagination.limit,
-      filters.status,
-      filters.categoryId,
-      debouncedSearch,
-    ],
+    [pagination.limit, filters.status, filters.categoryId, debouncedSearch],
   );
 
   // Fetch when filters change
@@ -105,7 +99,7 @@ export function useAdminInitiatives(
 
   const refetch = useCallback(() => {
     fetchInitiatives(pagination.page);
-  }, [fetchInitiatives, pagination.page]);
+  }, [fetchInitiatives]);
 
   return {
     initiatives,

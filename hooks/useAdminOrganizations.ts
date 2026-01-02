@@ -45,7 +45,7 @@ export function useAdminOrganizations(
   }, [filters.search]);
 
   const fetchOrganizations = useCallback(
-    async (page: number = pagination.page) => {
+    async (page: number = 1) => {
       try {
         setIsLoading(true);
 
@@ -76,7 +76,6 @@ export function useAdminOrganizations(
       }
     },
     [
-      pagination.page,
       pagination.limit,
       filters.status,
       filters.organizationType,
