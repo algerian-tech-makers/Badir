@@ -149,22 +149,26 @@ export default function InitiativeForm({
       startTransition(async () => {
         const sanitizedData: NewInitiativeFormData = {
           ...data,
-          titleAr: sanitize(data.titleAr),
-          titleEn: data.titleEn ? sanitize(data.titleEn) : undefined,
-          shortDescriptionAr: data.shortDescriptionAr
-            ? sanitize(data.shortDescriptionAr)
-            : undefined,
-          shortDescriptionEn: data.shortDescriptionEn
-            ? sanitize(data.shortDescriptionEn)
-            : undefined,
-          descriptionAr: data.descriptionAr ? sanitize(data.descriptionAr) : "",
-          descriptionEn: data.descriptionEn
-            ? sanitize(data.descriptionEn)
-            : undefined,
-          location: data.location ? sanitize(data.location) : undefined,
-          city: data.city ? sanitize(data.city) : undefined,
-          state: data.state ? sanitize(data.state) : undefined,
-          // Sanitize form questions
+          ...Object.fromEntries(
+            Object.entries({
+              titleAr: data.titleAr,
+              titleEn: data.titleEn,
+              shortDescriptionAr: data.shortDescriptionAr,
+              shortDescriptionEn: data.shortDescriptionEn,
+              descriptionAr: data.descriptionAr,
+              descriptionEn: data.descriptionEn,
+              location: data.location,
+              city: data.city,
+              state: data.state,
+            }).map(([key, value]) => [
+              key,
+              value
+                ? sanitize(value)
+                : key === "descriptionAr"
+                  ? ""
+                  : undefined,
+            ]),
+          ),
           participationQstForm: data.participationQstForm?.map((field) => ({
             ...field,
             question: sanitize(field.question),

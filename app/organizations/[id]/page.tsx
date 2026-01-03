@@ -15,6 +15,7 @@ import { Metadata } from "next";
 import OrgInitiative from "@/components/pages/OrgInitiative";
 import { workAreaOptions } from "@/types/Profile";
 import { getTranslatedCountryName } from "@/lib/utils";
+import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 
 export async function generateMetadata({
   params,
@@ -45,6 +46,16 @@ export default async function OrganizationProfilePage({
   const orgData = await OrganizationService.getOrganizationById(id);
 
   if (!orgData) {
+    notFound();
+  }
+
+  const session = await getSessionWithCheckProfile();
+  const isOwner = session?.user?.id === orgData.userId;
+  const isAdmin = session?.user?.role === "ADMIN";
+  const isApproved = orgData.isVerified === "approved";
+
+  // Only show to approved organizations, the owner, or admins
+  if (!isApproved && !isOwner && !isAdmin) {
     notFound();
   }
 

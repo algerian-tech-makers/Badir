@@ -75,6 +75,7 @@ model Organization {
   userRole            String             @map("user_role") @db.VarChar(100)
   workAreas           String[]           @map("work_areas")
   isVerified          OrganizationStatus @default(pending) @map("is_verified")
+  isFeaturedPartner   Boolean            @default(false) @map("is_featured_partner")
   initiatives         Initiative[]       @relation("OrganizationInitiatives")
   owner               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   supportRequests     SupportRequest[]

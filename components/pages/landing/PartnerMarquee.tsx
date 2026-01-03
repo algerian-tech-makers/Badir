@@ -52,7 +52,7 @@ const PartnerMarquee = ({ partners }: { partners: Partner[] }) => {
               </>
             )}
           </div>
-          <span className="text-neutrals-100 mt-2 block w-max text-center text-sm font-medium">
+          <span className="text-neutrals-100 mt-2 block w-20 truncate text-center text-sm font-medium">
             {partner.name}
           </span>
         </div>

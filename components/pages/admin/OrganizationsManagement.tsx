@@ -227,14 +227,13 @@ const OrganizationsManagement = ({
                       <div className="flex flex-col items-end gap-2">
                         <AdminOrganizationStatusBadge status={org.isVerified} />
                         <Badge
-                          variant={org.owner.isActive ? "default" : "secondary"}
-                          className="flex items-center gap-1 text-xs"
+                          className={`flex items-center gap-1 text-xs ${org.owner.isActive ? "bg-secondary-100 text-primary-400" : "bg-neutrals-300 text-neutrals-600"}`}
                         >
                           <Circle
                             className={`h-2 w-2 fill-current ${
                               org.owner.isActive
-                                ? "text-green-500"
-                                : "text-gray-400"
+                                ? "text-primary-400"
+                                : "text-gray-600"
                             }`}
                           />
                           {org.owner.isActive ? "نشط" : "غير نشط"}

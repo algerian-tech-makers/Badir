@@ -5,13 +5,11 @@ import { Partner } from "@/types/Statics";
 
 export default async function Partners() {
   let fivePartners: Partner[] = [];
-  const initialData = await OrganizationService.getMany(
-    {},
-    { page: 1, limit: 4 },
-  );
+
+  const featuredOrgs = await OrganizationService.getFeaturedPartners();
 
   const fetched =
-    initialData.data.map((item) => {
+    featuredOrgs.map((item) => {
       return {
         name: item.name,
         imageSrc: item.logo,
@@ -26,6 +24,7 @@ export default async function Partners() {
   } else {
     fivePartners = [...fetched];
 
+    // Fill remaining slots with static partners if less than 5
     const remainingItems = Math.max(0, 5 - fivePartners.length);
 
     for (let i = 0; i < remainingItems; i++) {

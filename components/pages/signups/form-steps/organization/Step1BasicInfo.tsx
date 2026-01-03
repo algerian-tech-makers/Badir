@@ -3,9 +3,21 @@
 import { Controller, useFormContext } from "react-hook-form";
 import FormInput from "@/components/FormInput";
 import { SignupOrgStep1Data } from "@/schemas";
+import { useMemo } from "react";
+import { countryList } from "@/data/statics";
 
 export default function Step1BasicInfoForm() {
-  const { control } = useFormContext<SignupOrgStep1Data>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<SignupOrgStep1Data>();
+
+  const COUNTRIES = useMemo(() => {
+    return countryList.sort().map((country) => ({
+      value: country.labelEn,
+      label: country.label,
+    }));
+  }, []);
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -173,16 +185,17 @@ export default function Step1BasicInfoForm() {
         <Controller
           name="country"
           control={control}
-          render={({ field, fieldState }) => (
+          render={({ field: { onChange, value, onBlur } }) => (
             <FormInput
-              type="text"
-              label="الدولة"
-              name={field.name}
-              placeholder="الدولة"
-              value={field.value}
-              onChange={field.onChange}
-              error={fieldState.error?.message}
-              rtl={true}
+              type="select"
+              options={COUNTRIES}
+              name="country"
+              label="البلد"
+              placeholder="الجزائر"
+              value={value || "Algeria"}
+              onChange={onChange}
+              onBlur={onBlur}
+              error={errors.country?.message}
             />
           )}
         />

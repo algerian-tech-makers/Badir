@@ -143,6 +143,27 @@ export class InitiativeService {
         where.organizerType = filters.organizerType;
       }
 
+      // Ensure only initiatives from verified organizations or individual users (just for safety, in normal flow, orgs are verified before publishing)
+      const organizationFilter: Prisma.InitiativeWhereInput = {
+        OR: [
+          { organizerType: "user" },
+          {
+            AND: [
+              { organizerType: "organization" },
+              { organizerOrg: { isVerified: "approved" } },
+            ],
+          },
+        ],
+      };
+
+      // Combine with existing where clause
+      where.AND = where.AND
+        ? [
+            ...(Array.isArray(where.AND) ? where.AND : [where.AND]),
+            organizationFilter,
+          ]
+        : organizationFilter;
+
       // Available spots filter
       if (filters.hasAvailableSpots) {
         const initiativesWithSpots = await prisma.$queryRaw<{ id: string }[]>`

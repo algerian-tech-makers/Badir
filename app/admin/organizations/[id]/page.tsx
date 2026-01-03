@@ -11,13 +11,14 @@ interface OrganizationDetailsPageProps {
 export default async function OrganizationDetailsPage({
   params,
 }: OrganizationDetailsPageProps) {
+  const { id } = await params;
   const session = await getSessionWithCheckProfile();
 
   if (session?.user?.role !== "ADMIN") {
     redirect("/");
   }
 
-  const result = await getOrganizationDetailsAction(params.id);
+  const result = await getOrganizationDetailsAction(id);
 
   if (!result.success) {
     if (result.error === "المنظمة غير موجودة") {

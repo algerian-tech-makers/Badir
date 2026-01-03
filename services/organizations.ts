@@ -18,6 +18,8 @@ export interface OrganizationCard {
 
 export interface OrganizationFilters {
   search?: string;
+  isVerified?: OrganizationStatus;
+  isFeaturedPartner?: boolean;
 }
 
 export class OrganizationService {
@@ -75,6 +77,12 @@ export class OrganizationService {
         { name: { contains: filters.search, mode: "insensitive" } },
         { description: { contains: filters.search, mode: "insensitive" } },
       ];
+    }
+    if (filters.isVerified) {
+      where.isVerified = filters.isVerified;
+    }
+    if (filters.isFeaturedPartner !== undefined) {
+      where.isFeaturedPartner = filters.isFeaturedPartner;
     }
 
     const total = await prisma.organization.count({ where });
@@ -163,5 +171,56 @@ export class OrganizationService {
 
   static async getOrganizationsCount() {
     return await prisma.organization.count();
+  }
+
+  /**
+   * Get featured partner organizations (max 5, approved only)
+   */
+  static async getFeaturedPartners(): Promise<OrganizationCard[]> {
+    const organizations = await prisma.organization.findMany({
+      where: {
+        isFeaturedPartner: true,
+        isVerified: "approved",
+      },
+      take: 5,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return organizations.map((org) => ({
+      id: org.id,
+      shortName: org.shortName,
+      name: org.name,
+      logo: org.logo,
+      description: org.description,
+      headquarters: org.headquarters,
+      city: org.city,
+      country: org.country,
+      foundingDate: org.foundingDate,
+      membersCount: org.membersCount,
+      isApproved: org.isVerified,
+    }));
+  }
+
+  /**
+   * Toggle featured partner status
+   */
+  static async toggleFeaturedPartner(
+    id: string,
+    isFeatured: boolean,
+  ): Promise<Organization> {
+    // If setting as featured, check if we already have 5 partners
+    if (isFeatured) {
+      const currentPartners = await prisma.organization.count({
+        where: { isFeaturedPartner: true },
+      });
+      if (currentPartners >= 5) {
+        throw new Error("لا يمكن إضافة أكثر من 5 شركاء مميزين");
+      }
+    }
+
+    return await prisma.organization.update({
+      where: { id },
+      data: { isFeaturedPartner: isFeatured },
+    });
   }
 }
