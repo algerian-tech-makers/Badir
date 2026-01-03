@@ -95,12 +95,13 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
         <div className="flex flex-col items-end gap-2">
           <AdminOrganizationStatusBadge status={organization.isVerified} />
           <Badge
-            variant={organization.owner.isActive ? "default" : "secondary"}
-            className="flex items-center gap-1 text-xs"
+            className={`flex items-center gap-1 text-xs ${organization.owner.isActive ? "bg-secondary-100 text-primary-400" : "bg-neutrals-300 text-neutrals-600"}`}
           >
             <Circle
               className={`h-2 w-2 fill-current ${
-                organization.owner.isActive ? "text-green-500" : "text-gray-400"
+                organization.owner.isActive
+                  ? "text-primary-400"
+                  : "text-gray-600"
               }`}
             />
             {organization.owner.isActive

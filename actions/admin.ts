@@ -356,3 +356,64 @@ export async function deleteInitiativeCategoryAction(
     };
   }
 }
+
+/**
+ * Get approved organizations for partner selection
+ */
+export async function getApprovedOrganizationsAction(
+  filters: { search?: string } = {},
+  page: number = 1,
+  limit: number = 20,
+) {
+  try {
+    await checkAdminPermission();
+
+    const result = await AdminService.getApprovedOrganizations(filters, {
+      page,
+      limit,
+    });
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error fetching approved organizations:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "حدث خطأ أثناء جلب المنظمات",
+    };
+  }
+}
+
+/**
+ * Toggle featured partner status for an organization
+ */
+export async function toggleFeaturedPartnerAction(
+  organizationId: string,
+  isFeatured: boolean,
+): Promise<ActionResponse<{}, {}>> {
+  try {
+    await checkAdminPermission();
+
+    await AdminService.toggleFeaturedPartner(organizationId, isFeatured);
+
+    revalidatePath("/admin/partners");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      message: isFeatured
+        ? "تم إضافة المنظمة كشريك مميز بنجاح"
+        : "تم إزالة المنظمة من الشركاء المميزين",
+      data: {},
+    };
+  } catch (error) {
+    console.error("Error toggling featured partner:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "حدث خطأ أثناء تحديث الشريك",
+    };
+  }
+}

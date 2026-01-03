@@ -1,7 +1,14 @@
 "use client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Building2, Users, Home, Tag } from "lucide-react";
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
+  Home,
+  Tag,
+  Handshake,
+} from "lucide-react";
 import Logout from "@/components/Logout";
 import { usePathname } from "next/navigation";
 const navigation = [
@@ -24,6 +31,11 @@ const navigation = [
     name: "إدارة الفئات",
     href: "/admin/categories",
     icon: Tag,
+  },
+  {
+    name: "إدارة الشركاء",
+    href: "/admin/partners",
+    icon: Handshake,
   },
 ];
 const AdminSidebar = () => {

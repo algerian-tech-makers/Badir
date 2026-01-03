@@ -554,4 +554,86 @@ export class AdminService {
       },
     };
   }
+
+  /**
+   * Get approved organizations for partner selection
+   */
+  static async getApprovedOrganizations(
+    filters: { search?: string } = {},
+    pagination: PaginationParams = { page: 1, limit: 20 },
+  ): Promise<
+    PaginatedResponse<{
+      id: string;
+      name: string;
+      logo: string | null;
+      isFeaturedPartner: boolean;
+    }>
+  > {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.OrganizationWhereInput = {
+      isVerified: "approved",
+    };
+
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: "insensitive" } },
+        { shortName: { contains: filters.search, mode: "insensitive" } },
+      ];
+    }
+
+    const [total, organizations] = await Promise.all([
+      prisma.organization.count({ where }),
+      prisma.organization.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          isFeaturedPartner: true,
+        },
+        orderBy: [{ isFeaturedPartner: "desc" }, { name: "asc" }],
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: organizations,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
+
+  /**
+   * Toggle featured partner status for an organization
+   */
+  static async toggleFeaturedPartner(
+    organizationId: string,
+    isFeatured: boolean,
+  ): Promise<void> {
+    // If setting as featured, check if we already have 5 partners
+    if (isFeatured) {
+      const currentPartners = await prisma.organization.count({
+        where: { isFeaturedPartner: true },
+      });
+      if (currentPartners >= 5) {
+        throw new Error("لا يمكن إضافة أكثر من 5 شركاء مميزين");
+      }
+    }
+
+    await prisma.organization.update({
+      where: { id: organizationId },
+      data: { isFeaturedPartner: isFeatured },
+    });
+  }
 }
