@@ -63,7 +63,7 @@ async function seedDatabase() {
       organizationType: "charity",
       workAreas: ["education", "health", "humanitarian"],
       userRole: "manager",
-      isVerified: "approved",
+      status: "approved",
     },
   });
 
@@ -75,7 +75,7 @@ async function seedDatabase() {
       nameEn: "Volunteering and Community Service",
       descriptionAr: "مبادرات تطوعية وخدمة المجتمع",
       descriptionEn: "Volunteering and community service initiatives",
-      icon: "users",
+      // icon: "users",
       bgColor: "#F59E0B",
       textColor: "#FFFFFF",
       isActive: true,

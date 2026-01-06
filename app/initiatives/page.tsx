@@ -30,7 +30,7 @@ export default async function Page() {
         initialData={initialInitiatives}
         categories={categories}
         isOrg={!!org}
-        isOrgVerified={org?.isVerified === OrganizationStatus.approved}
+        isOrgVerified={org?.status === OrganizationStatus.approved}
         userId={session?.user.id}
       />
     );

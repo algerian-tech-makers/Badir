@@ -102,7 +102,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
       setOrganizations((prev) =>
         prev.map((org) =>
           org.id === id
-            ? { ...org, isVerified: status as "approved" | "rejected" }
+            ? { ...org, status: status as "approved" | "rejected" }
             : org,
         ),
       );
@@ -354,9 +354,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                          <AdminOrganizationStatusBadge
-                            status={org.isVerified}
-                          />
+                          <AdminOrganizationStatusBadge status={org.status} />
                           <span className="text-sm text-gray-500">
                             {org._count.initiatives} مبادرة
                           </span>
@@ -451,7 +449,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                                   </div>
 
                                   <div className="flex justify-center gap-4 pt-4">
-                                    {selectedOrg.isVerified === "pending" && (
+                                    {selectedOrg.status === "pending" && (
                                       <>
                                         <Button
                                           onClick={() =>
@@ -487,7 +485,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                             </DialogContent>
                           </Dialog>
 
-                          {org.isVerified === "pending" && (
+                          {org.status === "pending" && (
                             <div className="flex gap-1">
                               <Button
                                 size="sm"

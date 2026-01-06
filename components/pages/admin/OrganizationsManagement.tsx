@@ -85,12 +85,12 @@ const OrganizationsManagement = ({
         if (result.success) {
           setOrganizations((prev) =>
             prev.map((org) =>
-              org.id === id ? { ...org, isVerified: status } : org,
+              org.id === id ? { ...org, status: status } : org,
             ),
           );
           toast.success("تم تحديث حالة المنظمة بنجاح");
           setSelectedOrg((prev) =>
-            prev && prev.id === id ? { ...prev, isVerified: status } : prev,
+            prev && prev.id === id ? { ...prev, status: status } : prev,
           );
           setShowRejectionDialog(false);
           setShowDetailsDialog(false);
@@ -225,7 +225,7 @@ const OrganizationsManagement = ({
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <AdminOrganizationStatusBadge status={org.isVerified} />
+                        <AdminOrganizationStatusBadge status={org.status} />
                         <Badge
                           className={`flex items-center gap-1 text-xs ${org.owner.isActive ? "bg-secondary-100 text-primary-400" : "bg-neutrals-300 text-neutrals-600"}`}
                         >
@@ -447,7 +447,7 @@ const OrganizationsManagement = ({
                                 </div>
 
                                 {/* Action Buttons */}
-                                {selectedOrg.isVerified === "pending" && (
+                                {selectedOrg.status === "pending" && (
                                   <div className="flex justify-center gap-4 border-t pt-4">
                                     <Button
                                       onClick={() =>
@@ -477,11 +477,11 @@ const OrganizationsManagement = ({
                                 )}
 
                                 {/* Status Info */}
-                                {selectedOrg.isVerified !== "pending" && (
+                                {selectedOrg.status !== "pending" && (
                                   <div className="border-t py-4 text-center">
                                     <div className="flex items-center justify-center gap-2">
                                       <AdminOrganizationStatusBadge
-                                        status={selectedOrg.isVerified}
+                                        status={selectedOrg.status}
                                       />
                                       <span className="text-sm text-gray-600">
                                         تم التحديث في{" "}
@@ -495,7 +495,7 @@ const OrganizationsManagement = ({
                           </DialogContent>
                         </Dialog>
 
-                        {org.isVerified === "pending" && (
+                        {org.status === "pending" && (
                           <div className="flex gap-1">
                             <Button
                               size="sm"
