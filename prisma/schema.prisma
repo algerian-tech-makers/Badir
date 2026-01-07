@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL") // You may get red wiggles here, it's fine, just because of prisma extension is expecting prisma v7
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -21,7 +21,6 @@ model User {
   sex                    Sex                     @default(male)
   bio                    String?
   userType               UserType                @map("user_type")
-  role                   UserRole                @default(USER)
   latitude               Decimal?                @db.Decimal(10, 8)
   longitude              Decimal?                @db.Decimal(11, 8)
   city                   String?                 @db.VarChar(100)
@@ -31,9 +30,10 @@ model User {
   createdAt              DateTime                @default(now()) @map("created_at")
   updatedAt              DateTime                @default(now()) @updatedAt @map("updated_at")
   profileCompleted       Boolean                 @default(false) @map("profile_completed")
+  mailerLiteId           String?                 @map("mailerlite_id") @db.VarChar(100)
   newsletterSubscribed   Boolean                 @default(false) @map("newsletter_subscribed")
   newsletterSubscribedAt DateTime?               @map("newsletter_subscribed_at")
-  mailerLiteId           String?                 @map("mailerlite_id") @db.VarChar(100)
+  role                   UserRole                @default(USER)
   accounts               Account[]
   participations         InitiativeParticipant[]
   posts                  InitiativePost[]
@@ -74,7 +74,7 @@ model Organization {
   socialLinks         Json?              @map("social_links")
   userRole            String             @map("user_role") @db.VarChar(100)
   workAreas           String[]           @map("work_areas")
-  isVerified          OrganizationStatus @default(pending) @map("is_verified")
+  status              OrganizationStatus @default(pending)
   isFeaturedPartner   Boolean            @default(false) @map("is_featured_partner")
   initiatives         Initiative[]       @relation("OrganizationInitiatives")
   owner               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -124,7 +124,6 @@ model Initiative {
   descriptionEn          String?                 @map("description_en")
   shortDescriptionAr     String?                 @map("short_description_ar") @db.VarChar(500)
   shortDescriptionEn     String?                 @map("short_description_en") @db.VarChar(500)
-  isOnline               Boolean                 @default(false) @map("is_online")
   location               String                  @db.VarChar(255)
   city                   String                  @db.VarChar(100)
   state                  String?                 @db.VarChar(100)
@@ -142,6 +141,7 @@ model Initiative {
   createdAt              DateTime                @default(now()) @map("created_at")
   updatedAt              DateTime                @default(now()) @updatedAt @map("updated_at")
   participationQstForm   Json?                   @map("participation_qst_form")
+  isOnline               Boolean                 @default(false) @map("is_online")
   participants           InitiativeParticipant[]
   posts                  InitiativePost[]
   category               InitiativeCategory      @relation(fields: [categoryId], references: [id])
@@ -299,6 +299,29 @@ model Verification {
   @@map("verification")
 }
 
+model WebhookEvent {
+  id        String   @id @default(cuid())
+  provider  String   @db.VarChar(50)
+  type      String   @db.VarChar(100)
+  payload   Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([provider, createdAt])
+  @@map("webhook_events")
+}
+
+model PostEmailQueue {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  email        String   @db.VarChar(255)
+  initiativeId String   @map("initiative_id")
+  postId       String   @map("post_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("post_email_queue")
+}
+
 enum UserType {
   helper
   participant
@@ -388,27 +411,4 @@ enum SupportUrgency {
 enum SupportStatus {
   active
   closed
-}
-
-model WebhookEvent {
-  id        String   @id @default(cuid())
-  provider  String   @db.VarChar(50)
-  type      String   @db.VarChar(100)
-  payload   Json
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@index([provider, createdAt])
-  @@map("webhook_events")
-}
-
-model PostEmailQueue {
-  id           String   @id @default(cuid())
-  userId       String   @map("user_id")
-  email        String   @db.VarChar(255)
-  initiativeId String   @map("initiative_id")
-  postId       String   @map("post_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  @@index([createdAt])
-  @@map("post_email_queue")
 }

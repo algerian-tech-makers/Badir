@@ -186,7 +186,7 @@ export async function completeOrgProfileAction(
         officialLicense: processedFormData.officialLicense || undefined,
         identificationCard: processedFormData.identificationCard || undefined,
         userRole: processedFormData.role || "رئيس المنظمة",
-        isVerified: OrganizationStatus.pending,
+        status: OrganizationStatus.pending,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -400,6 +400,8 @@ export async function updateOrganizationProfileAction(
     });
 
     revalidatePath("/profile");
+    revalidatePath("/organizations");
+    revalidatePath("/");
 
     return {
       success: true,

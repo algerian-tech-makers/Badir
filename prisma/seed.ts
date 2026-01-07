@@ -42,7 +42,7 @@ async function main() {
       organizationType: "charity",
       workAreas: ["education", "health", "humanitarian"],
       userRole: "manager",
-      isVerified: "approved",
+      status: "approved",
     },
   });
 
@@ -54,7 +54,7 @@ async function main() {
       nameEn: "Volunteering and Community Service",
       descriptionAr: "مبادرات تطوعية وخدمة المجتمع",
       descriptionEn: "Volunteering and community service initiatives",
-      icon: "users",
+      // icon: "users",
       bgColor: "#F59E0B",
       textColor: "#FFFFFF",
       isActive: true,

@@ -97,7 +97,9 @@ export class InitiativeService {
       } else if (filters.status === InitiativeStatus.published) {
         where.status = { equals: filters.status };
       } else {
-        where.status = { not: InitiativeStatus.draft };
+        where.status = {
+          notIn: [InitiativeStatus.draft, InitiativeStatus.cancelled],
+        };
       }
 
       // Search filter
@@ -150,7 +152,7 @@ export class InitiativeService {
           {
             AND: [
               { organizerType: "organization" },
-              { organizerOrg: { isVerified: "approved" } },
+              { organizerOrg: { status: "approved" } },
             ],
           },
         ],

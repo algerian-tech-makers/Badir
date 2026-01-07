@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import Link from "next/link";
+import { formatDate } from "@/lib/utils";
 
 export default function ParticipationCard({
   participation,
@@ -32,15 +33,6 @@ export default function ParticipationCard({
     endDate,
     city,
   } = initiative;
-
-  const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    return dateObj.toLocaleDateString("ar-DZ", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
 
   return (
     <Card

@@ -26,7 +26,7 @@ export default async function Page() {
         return <div>منظمتك غير موجودة أو لم يتم إعدادها بشكل صحيح</div>;
       }
 
-      if (organizationData.isVerified === OrganizationStatus.pending) {
+      if (organizationData.status === OrganizationStatus.pending) {
         return (
           <div
             className="bg-neutrals-100 flex min-h-screen items-center justify-center p-6"
@@ -37,7 +37,7 @@ export default async function Page() {
             </p>
           </div>
         );
-      } else if (organizationData.isVerified === OrganizationStatus.rejected) {
+      } else if (organizationData.status === OrganizationStatus.rejected) {
         return (
           <div
             className="bg-neutrals-100 flex min-h-screen items-center justify-center p-6"

@@ -74,7 +74,7 @@ export class AdminService {
 
     // Status filter
     if (filters.status) {
-      where.isVerified = filters.status;
+      where.status = filters.status;
     }
 
     // Search filter
@@ -119,7 +119,7 @@ export class AdminService {
         },
       },
       orderBy: [
-        { isVerified: "asc" }, // Pending first
+        { status: "asc" }, // Pending first
         { createdAt: "desc" },
       ],
       skip,
@@ -248,7 +248,7 @@ export class AdminService {
       const organization = await prisma.organization.update({
         where: { id: organizationId },
         data: {
-          isVerified: status,
+          status: status,
           updatedAt: new Date(),
         },
         include: {
@@ -523,9 +523,9 @@ export class AdminService {
       publishedInitiativesCount,
       cancelledInitiativesCount,
     ] = await Promise.all([
-      prisma.organization.count({ where: { isVerified: "pending" } }),
-      prisma.organization.count({ where: { isVerified: "approved" } }),
-      prisma.organization.count({ where: { isVerified: "rejected" } }),
+      prisma.organization.count({ where: { status: "pending" } }),
+      prisma.organization.count({ where: { status: "approved" } }),
+      prisma.organization.count({ where: { status: "rejected" } }),
       prisma.initiative.count({
         where: {
           status: "draft",
@@ -573,7 +573,7 @@ export class AdminService {
     const skip = (page - 1) * limit;
 
     const where: Prisma.OrganizationWhereInput = {
-      isVerified: "approved",
+      status: "approved",
     };
 
     if (filters.search) {

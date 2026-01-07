@@ -13,12 +13,12 @@ export interface OrganizationCard {
   country?: string | null;
   foundingDate?: Date | string | null;
   membersCount?: number | null;
-  isApproved?: OrganizationStatus | null;
+  status?: OrganizationStatus | null;
 }
 
 export interface OrganizationFilters {
   search?: string;
-  isVerified?: OrganizationStatus;
+  status?: OrganizationStatus;
   isFeaturedPartner?: boolean;
 }
 
@@ -78,8 +78,8 @@ export class OrganizationService {
         { description: { contains: filters.search, mode: "insensitive" } },
       ];
     }
-    if (filters.isVerified) {
-      where.isVerified = filters.isVerified;
+    if (filters.status) {
+      where.status = filters.status;
     }
     if (filters.isFeaturedPartner !== undefined) {
       where.isFeaturedPartner = filters.isFeaturedPartner;
@@ -93,26 +93,10 @@ export class OrganizationService {
       take: limit,
     });
 
-    const data: OrganizationCard[] = await Promise.all(
-      organizations.map(async (org) => ({
-        id: org.id,
-        shortName: org.shortName,
-        name: org.name,
-        logo: org.logo,
-        description: org.description,
-        headquarters: org.headquarters,
-        city: org.city,
-        country: org.country,
-        foundingDate: org.foundingDate,
-        membersCount: org.membersCount,
-        isApproved: org.isVerified,
-      })),
-    );
-
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data,
+      data: organizations,
       pagination: {
         page,
         limit,
@@ -146,7 +130,7 @@ export class OrganizationService {
       const organizations = await prisma.organization.findMany({
         where: {
           userId: userId,
-          isVerified: "approved",
+          status: "approved",
         },
         select: {
           id: true,
@@ -180,7 +164,7 @@ export class OrganizationService {
     const organizations = await prisma.organization.findMany({
       where: {
         isFeaturedPartner: true,
-        isVerified: "approved",
+        status: "approved",
       },
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -197,7 +181,7 @@ export class OrganizationService {
       country: org.country,
       foundingDate: org.foundingDate,
       membersCount: org.membersCount,
-      isApproved: org.isVerified,
+      isApproved: org.status,
     }));
   }
 

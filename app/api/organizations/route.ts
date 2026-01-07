@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { OrganizationService } from "@/services/organizations";
+import { OrganizationStatus } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,7 +9,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "12");
     const search = searchParams.get("search") || "";
 
-    const filters = search ? { search } : {};
+    const filters = search
+      ? { search, status: OrganizationStatus.approved }
+      : { status: OrganizationStatus.approved };
     const result = await OrganizationService.getMany(filters, { page, limit });
 
     return NextResponse.json({ success: true, data: result });

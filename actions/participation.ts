@@ -215,3 +215,58 @@ export async function kickMemberAction(id: string, initiativeId: string) {
   revalidatePath(`/initiatives/${initiativeId}`);
   return { success: true };
 }
+
+export async function cancelParticipationAction(
+  initiativeId: string,
+): Promise<ActionResponse<{ initiativeId: string }, null>> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return {
+        success: false,
+        error: "يجب تسجيل الدخول",
+      };
+    }
+
+    const participation = await ParticipationService.getByIds(
+      session.user.id,
+      initiativeId,
+    );
+
+    if (!participation) {
+      return {
+        success: false,
+        error: "لم يتم العثور على طلب المشاركة",
+      };
+    }
+
+    // Only allow cancellation if status is still registered (pending)
+    if (participation.status !== ParticipationStatus.registered) {
+      return {
+        success: false,
+        error: "لا يمكن إلغاء المشاركة بعد الموافقة عليها أو رفضها",
+      };
+    }
+
+    await prisma.initiativeParticipant.delete({
+      where: { id: participation.id },
+    });
+
+    revalidatePath(`/initiatives/${initiativeId}`);
+
+    return {
+      success: true,
+      message: "تم إلغاء طلب المشاركة بنجاح",
+      data: null,
+    };
+  } catch (error) {
+    console.error("Error cancelling participation:", error);
+    return {
+      success: false,
+      error: "حدث خطأ أثناء إلغاء المشاركة",
+    };
+  }
+}

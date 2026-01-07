@@ -16,13 +16,13 @@ import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { InitiativeService } from "@/services/initiatives";
 import BackButton from "@/components/BackButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// panels
 import PostsPanel from "@/components/pages/initiatives/PostsPanel";
 import MembersPanel from "@/components/pages/initiatives/MembersPanel";
 import RequestsPanel from "@/components/pages/initiatives/RequestsPanel";
 import InitiativeHeader from "@/components/pages/InitiativeHeader";
 import AppButton from "@/components/AppButton";
 import Link from "next/link";
+import CancelParticipationButton from "@/components/pages/initiatives/CancelParticipationButton";
 
 export async function generateMetadata({
   params,
@@ -316,9 +316,15 @@ export default async function InitiativeDetailsPage({
         {/* Already Registered Message */}
         {userParticipation && (
           <div className="bg-neutrals-100 mt-8 rounded-lg p-6">
-            <h2 className="text-primary-600 mb-4 text-xl font-semibold">
-              حالة مشاركتك
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-primary-600 text-xl font-semibold">
+                حالة مشاركتك
+              </h2>
+              {userParticipation.status === ParticipationStatus.registered &&
+                !registrationClosed && (
+                  <CancelParticipationButton initiativeId={initiative.id} />
+                )}
+            </div>
             <div className="border-neutrals-300 rounded-lg border bg-white p-4 shadow-sm">
               <p className="text-neutrals-700 mb-2">
                 أنت مسجل في هذه المبادرة بدور:

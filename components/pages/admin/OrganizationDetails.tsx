@@ -93,7 +93,7 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
           <p className="text-gray-600">تفاصيل المنظمة</p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <AdminOrganizationStatusBadge status={organization.isVerified} />
+          <AdminOrganizationStatusBadge status={organization.status} />
           <Badge
             className={`flex items-center gap-1 text-xs ${organization.owner.isActive ? "bg-secondary-100 text-primary-400" : "bg-neutrals-300 text-neutrals-600"}`}
           >
@@ -328,7 +328,7 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status Actions */}
-          {organization.isVerified === "pending" && (
+          {organization.status === "pending" && (
             <Card>
               <CardHeader>
                 <CardTitle>إجراءات المراجعة</CardTitle>

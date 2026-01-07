@@ -78,7 +78,6 @@ export function useAdminInitiatives(
     [pagination.limit, filters.status, filters.categoryId, debouncedSearch],
   );
 
-  // Fetch when filters change
   useEffect(() => {
     fetchInitiatives(1);
   }, [filters.status, filters.categoryId, debouncedSearch, fetchInitiatives]);

@@ -6,6 +6,7 @@ import { getUserInitiativesAction } from "@/actions/admin";
 import InitiativesManagement from "@/components/pages/admin/InitiativesManagement";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InitiativeStatus } from "@prisma/client";
 
 interface SearchParams {
   page?: string;
@@ -48,7 +49,7 @@ function InitiativesLoading() {
 async function InitiativesContent({ searchParams }: InitiativesPageProps) {
   const { page, status, search, categoryId } = searchParams;
   const filters = {
-    status: status as any,
+    status: status as InitiativeStatus | undefined,
     search: search || "",
     categoryId: categoryId || "",
   };
