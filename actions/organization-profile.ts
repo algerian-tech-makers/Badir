@@ -400,6 +400,8 @@ export async function updateOrganizationProfileAction(
     });
 
     revalidatePath("/profile");
+    revalidatePath("/organizations");
+    revalidatePath("/");
 
     return {
       success: true,

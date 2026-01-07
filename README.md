@@ -152,7 +152,7 @@ erDiagram
         json socialLinks
         string userRole
         array workAreas
-        enum isVerified
+        enum status
     }
 
     UserQualification {

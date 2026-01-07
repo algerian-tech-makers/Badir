@@ -152,7 +152,7 @@ export class InitiativeService {
           {
             AND: [
               { organizerType: "organization" },
-              { organizerOrg: { isVerified: "approved" } },
+              { organizerOrg: { status: "approved" } },
             ],
           },
         ],
