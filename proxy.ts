@@ -2,18 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { AUTHORIZED_REDIRECTION, forMiddleware } from "./data/routes";
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  // Performance issue
-  // const { data: session } = await betterFetch<Session>(
-  //   "/api/auth/get-session",
-  //   {
-  //     baseURL: process.env.BETTER_AUTH_URL,
-  //     headers: {
-  //       cookie: request.headers.get("cookie") || "",
-  //     },
-  //   }
-  // );
+
   const sessionCookie = getSessionCookie(request);
 
   const isExactPublicRoute = forMiddleware.publicRoutes.includes(pathname);
@@ -68,6 +59,6 @@ export default async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next|trpc|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|trpc|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|sitemap)).*)",
   ],
 };

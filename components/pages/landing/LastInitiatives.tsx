@@ -83,6 +83,7 @@ function generateFallbackInitiatives(count: number): InitiativeCardType[] {
     targetAudience: TargetAudience.both,
     status: InitiativeStatus.published,
     registrationDeadline: null,
+    isOnline: false,
     category: init.category,
     organizer: {
       id: `org-${index + 1}`,
