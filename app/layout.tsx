@@ -108,7 +108,7 @@ export default async function RootLayout({
               "@type": "Organization",
               name: "بادر",
               url: "https://badir.space",
-              logo: "https://badir.space/pwa/icons/icon-512.png",
+              logo: "https://badir.space/pwa/icons/icon-192.png",
               description: "منصة تطوعية شبابية لتنظيم العمل التطوعي",
             }),
           }}
