@@ -1,5 +1,5 @@
 import emailConfig from "@/lib/email";
-import { Mail, MapPin, Clock } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 
 export default function ContactInfo() {
   return (
@@ -53,29 +53,6 @@ export default function ContactInfo() {
               </h3>
               <p className="text-neutrals-700 text-paragraph-md font-medium">
                 الجزائر العاصمة - الجزائر
-              </p>
-              <p className="text-neutrals-500 text-paragraph-md mt-1">
-                من السبت إلى الخميس
-              </p>
-            </div>
-          </div>
-
-          {/* Working Hours */}
-          <div className="flex items-start gap-4">
-            <div className="shrink-0">
-              <div className="bg-primary-100 flex h-12 w-12 items-center justify-center rounded-full md:h-14 md:w-14">
-                <Clock className="text-primary-500 h-6 w-6 md:h-7 md:w-7" />
-              </div>
-            </div>
-            <div className="flex-1 text-right">
-              <h3 className="text-neutrals-700 mb-2 text-lg font-semibold">
-                ساعات العمل
-              </h3>
-              <p className="text-neutrals-700 text-paragraph-md font-medium">
-                9:00 صباحا - 15:00 مساء
-              </p>
-              <p className="text-neutrals-500 text-paragraph-md mt-1">
-                من السبت إلى الخميس
               </p>
             </div>
           </div>
