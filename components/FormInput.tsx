@@ -405,7 +405,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
               rows={rows}
               className={cn(
                 baseInputClasses,
-                "scrollbar-rtl resize-none",
+                "scrollbar-rtl resize-none rounded-sm",
                 className,
               )}
               style={{
