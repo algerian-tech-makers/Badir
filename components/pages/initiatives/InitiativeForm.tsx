@@ -7,7 +7,7 @@ import {
   FormFieldType,
   NewInitiativeSchema,
 } from "@/schemas/newInitiativeSchema";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FormFieldCreator from "../FormFieldCreator";

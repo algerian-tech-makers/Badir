@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { loginAction } from "@/actions/login";
 import { loginSchema, type LoginFormData } from "@/schemas/loginSchema";
 import { ChevronLeft, Loader2 } from "lucide-react";

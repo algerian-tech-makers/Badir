@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { OrganizationProfile } from "@/schemas/organizatioProfieSchema";
 import { handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
 import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";

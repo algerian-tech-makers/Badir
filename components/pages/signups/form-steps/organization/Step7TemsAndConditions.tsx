@@ -1,7 +1,7 @@
 "use client";
 
 import { Controller, useFormContext } from "react-hook-form";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { SignupOrgStep6Data } from "@/schemas";
 
 export default function Step7TemsAndConditions() {

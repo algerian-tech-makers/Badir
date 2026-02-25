@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { PlusCircle, X, Trash2 } from "lucide-react";
 import { FormFieldType } from "@/schemas/newInitiativeSchema";
 import { Button } from "@/components/ui/button";

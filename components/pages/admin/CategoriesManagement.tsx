@@ -45,7 +45,7 @@ import { cn, formatDate } from "@/lib/utils";
 import AppButton from "@/components/AppButton";
 import Image from "next/image";
 import ColorPicker from "@/components/color-picker";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { categorySchema, CategoryFormData } from "@/schemas/categorySchema";
 
 const CategoriesManagement = () => {

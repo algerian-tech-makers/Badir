@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupAction } from "@/actions/signup";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import AppButton from "@/components/AppButton";

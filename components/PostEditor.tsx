@@ -31,7 +31,7 @@ import {
 } from "@/actions/posts";
 import { PostType, PostStatus } from "@prisma/client";
 import { toast } from "sonner";
-import FormInput from "./FormInput";
+import FormInput from "./form-input";
 import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import AppButton from "./AppButton";
 import { extractImageSrcsFromHtmlBrowser } from "@/lib/utils";

@@ -1,5 +1,5 @@
 import { OrgRegistrationFormData } from "@/schemas";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { Controller, useFormContext } from "react-hook-form";
 
 export default function Step2SocialLinks() {

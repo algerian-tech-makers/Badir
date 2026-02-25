@@ -1,7 +1,7 @@
 "use client";
 
 import { Controller, useFormContext } from "react-hook-form";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { sexOptions, Step1FormData } from "@/schemas/signupUserSchema";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
