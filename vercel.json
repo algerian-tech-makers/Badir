@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm ci --legacy-peer-deps && npm install --no-save --platform=linuxmusl --arch=x64 lightningcss",
-  "buildCommand": "prisma generate && prisma migrate deploy && npm run build",
+  "installCommand": "pnpm install --frozen-lockfile && pnpm add --no-save lightningcss-linux-x64-musl",
+  "buildCommand": "prisma generate && prisma migrate deploy && pnpm run build",
   "framework": "nextjs",
   "crons": [
     {

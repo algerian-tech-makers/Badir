@@ -1,2 +1,2 @@
-npm install
-npm run db:generate
+pnpm install
+pnpm run db:generate

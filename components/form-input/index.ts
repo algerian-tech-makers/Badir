@@ -7,6 +7,7 @@ export type { FormInputProps, Option } from "./types";
 // Utility functions and constants
 export { generateCountryOptions, priorityCountries } from "./utils";
 
+// Individual input components for direct import if needed
 export { BasicInput } from "./BasicInput";
 export { TelInput } from "./TelInput";
 export { TextareaInput } from "./TextareaInput";
