@@ -14,6 +14,7 @@ import { RadioInput } from "./RadioInput";
 import { SelectInput } from "./SelectInput";
 import { ComboboxInput } from "./ComboboxInput";
 import { FileInput } from "./FileInput";
+import { DateInput } from "./DateInput";
 
 /**
  * A versatile form input component that supports multiple input types with consistent styling and error handling.
@@ -125,11 +126,21 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 
     const renderInput = () => {
       switch (type) {
+        case "date":
+          return (
+            <DateInput
+              type={type}
+              name={name}
+              label={label}
+              error={error}
+              {...props}
+            />
+          );
+
         case "text":
         case "email":
         case "password":
         case "number":
-        case "date":
           return (
             <BasicInput
               ref={ref}

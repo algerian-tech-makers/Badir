@@ -18,3 +18,4 @@ export { RadioInput } from "./RadioInput";
 export { SelectInput } from "./SelectInput";
 export { ComboboxInput } from "./ComboboxInput";
 export { FileInput } from "./FileInput";
+export { DateInput } from "./DateInput";
