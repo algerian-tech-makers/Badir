@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pnpm install --frozen-lockfile && npm install --no-save lightningcss-linux-x64-musl",
+  "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "prisma generate && prisma migrate deploy && pnpm run build",
   "framework": "nextjs",
   "crons": [
