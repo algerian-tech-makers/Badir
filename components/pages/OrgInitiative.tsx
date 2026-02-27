@@ -85,16 +85,18 @@ export default function OrgInitiative({
           </div>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="cursor-pointer">
-                  <Ratings
-                    value={avgRating ?? 0}
-                    readOnly
-                    allowHalf
-                    size="sm"
-                  />
-                </div>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <div className="cursor-pointer">
+                    <Ratings
+                      value={avgRating ?? 0}
+                      readOnly
+                      allowHalf
+                      size="sm"
+                    />
+                  </div>
+                }
+              ></TooltipTrigger>
               <TooltipContent>
                 {avgRating
                   ? `التقييم: ${avgRating} من 5`

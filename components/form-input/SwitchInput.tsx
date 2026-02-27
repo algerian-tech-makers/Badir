@@ -21,7 +21,8 @@ export const SwitchInput = ({
         checked={(value as boolean) || false}
         onCheckedChange={onChange}
         disabled={disabled}
-        className="data-[state=checked]:bg-secondary-500"
+        className="data-checked:bg-secondary-500"
+        dir="rtl"
       />
     </div>
   );

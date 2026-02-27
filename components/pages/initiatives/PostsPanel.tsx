@@ -284,18 +284,20 @@ export default function PostsPanel({
                           open={deleteDialogOpen}
                           onOpenChange={setDeleteDialogOpen}
                         >
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => {
-                                setPostToDelete(post.id);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash className="size-3" />
-                            </Button>
-                          </AlertDialogTrigger>
+                          <AlertDialogTrigger
+                            render={
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  setPostToDelete(post.id);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash className="size-3" />
+                              </Button>
+                            }
+                          ></AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader dir="rtl">
                               <AlertDialogTitle>

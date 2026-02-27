@@ -66,18 +66,20 @@ export const ComboboxInput = ({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(baseInputClasses, "justify-between")}
-          disabled={disabled}
-        >
-          {getDisplayValue()}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn(baseInputClasses, "justify-between")}
+            disabled={disabled}
+          >
+            {getDisplayValue()}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        }
+      ></PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput

@@ -197,6 +197,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
               name={name}
               label={label}
               error={error}
+              placeholder={props.placeholder}
               {...props}
             />
           );

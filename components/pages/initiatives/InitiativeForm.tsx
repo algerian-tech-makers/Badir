@@ -218,7 +218,7 @@ export default function InitiativeForm({
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="w-full"
+          className="w-full flex-col"
           dir="rtl"
         >
           <TabsList className="mb-6 grid w-full grid-cols-3">

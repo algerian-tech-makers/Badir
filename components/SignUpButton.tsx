@@ -5,7 +5,7 @@ import { authRoutes } from "@/data/routes";
 import { useMediaQuery } from "react-responsive";
 import { Dialog } from "./ui/dialog";
 import AuthChoicesDialog from "./AuthChoicesDialog";
-import { DialogTrigger } from "@radix-ui/react-dialog";
+import { DialogTrigger } from "@/components/ui/dialog";
 
 export default function SignUpButton({
   onMenuAction,
@@ -26,16 +26,18 @@ export default function SignUpButton({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <AppButton
-          type="outline"
-          border="rounded"
-          size={buttonSize}
-          onClick={onMenuAction ? onMenuAction : undefined}
-        >
-          {authRoutes.signup.label}
-        </AppButton>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <AppButton
+            type="outline"
+            border="rounded"
+            size={buttonSize}
+            onClick={onMenuAction ? onMenuAction : undefined}
+          >
+            {authRoutes.signup.label}
+          </AppButton>
+        }
+      ></DialogTrigger>
       <AuthChoicesDialog close={() => setIsOpen(false)} />
     </Dialog>
   );

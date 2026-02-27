@@ -19,9 +19,9 @@ export const CheckboxInput = ({
         checked={(value as boolean) || false}
         onCheckedChange={onChange}
         disabled={disabled}
-        className="data-[state=checked]:bg-secondary-500 data-[state=checked]:border-secondary-500 border-neutrals-500"
+        className="data-checked:bg-secondary-500 data-checked:border-secondary-500 border-neutrals-500"
       />
-      <label htmlFor={name} className="text-neutrals-600 cursor-pointer">
+      <label htmlFor={name} className="text-neutrals-600 ms-1 cursor-pointer">
         {placeholder || label}
       </label>
     </div>

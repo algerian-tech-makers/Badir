@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { SEOKeywords } from "@/data/statics";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: {
@@ -71,7 +72,7 @@ export default async function RootLayout({
         <RegisterServiceWorker />
         <Navbar />
         <main>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
           <Analytics />
           <SpeedInsights />
         </main>

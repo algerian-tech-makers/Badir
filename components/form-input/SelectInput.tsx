@@ -23,7 +23,7 @@ export const SelectInput = ({
   return (
     <Select
       value={(value as string) || ""}
-      onValueChange={(selectedValue) => onChange?.(selectedValue)}
+      onValueChange={(selectedValue) => onChange?.(selectedValue || "")}
       disabled={disabled}
     >
       <SelectTrigger
@@ -37,7 +37,10 @@ export const SelectInput = ({
         )}
         dir="rtl"
       >
-        <SelectValue placeholder={placeholder || `اختر ${label}`} />
+        <SelectValue placeholder={placeholder || `اختر ${label}`}>
+          {options.find((opt) => opt.value === value)?.label ||
+            (value as string)}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((option, index) => {
