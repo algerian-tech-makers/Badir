@@ -31,7 +31,7 @@
 
 ### Frontend
 
-- **Next.js 15** - React framework with App Router
+- **Next.js 16** - React framework with App Router
 - **React 19** - UI library
 - **TypeScript** - Type-safe development
 - **Tailwind CSS 4** - Utility-first CSS framework with RTL support
@@ -153,6 +153,7 @@ erDiagram
         string userRole
         array workAreas
         enum status
+        boolean isFeaturedPartner
     }
 
     UserQualification {
@@ -171,7 +172,6 @@ erDiagram
         string nameEn
         string descriptionAr
         string descriptionEn
-        string icon
         string bgColor
         string textColor
         boolean isActive
@@ -317,6 +317,23 @@ erDiagram
         datetime expiresAt
         datetime createdAt
         datetime updatedAt
+    }
+
+    WebhookEvent {
+        string id PK
+        string provider
+        string type
+        json payload
+        datetime createdAt
+    }
+
+    PostEmailQueue {
+        string id PK
+        string userId FK
+        string email
+        string initiativeId FK
+        string postId FK
+        datetime createdAt
     }
 ```
 
@@ -526,4 +543,4 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 # License
 
-<a href="https://github.com/algerian-tech-makers/Badir">Badir</a> © 2025 is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a><br/><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+`<a href="https://github.com/algerian-tech-makers/Badir">`Badir`</a>` © 2025 is licensed under `<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">`Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International`</a><br/>``<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">``<img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">`
