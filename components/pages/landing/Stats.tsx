@@ -3,9 +3,8 @@ import statistics from "@/data/statistics";
 import { InitiativeService } from "@/services/initiatives";
 import { OrganizationService } from "@/services/organizations";
 import { UserService } from "@/services/user";
-import { REVALIDATE_TIME_STATS } from "@/lib/next-configs";
 
-export const revalidate = REVALIDATE_TIME_STATS;
+export const revalidate = 86400; // Revalidate the stats page every 24 hours
 
 async function getStats(): Promise<{
   initiatives: number;
