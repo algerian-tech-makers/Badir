@@ -3,9 +3,8 @@ import statistics from "@/data/statistics";
 import { InitiativeService } from "@/services/initiatives";
 import { OrganizationService } from "@/services/organizations";
 import { UserService } from "@/services/user";
-import React from "react";
 
-export const revalidate = 86400; // revalidate once a day
+export const revalidate = 86400; // Revalidate the stats page every 24 hours
 
 async function getStats(): Promise<{
   initiatives: number;

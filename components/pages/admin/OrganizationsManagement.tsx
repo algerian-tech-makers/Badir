@@ -266,22 +266,19 @@ const OrganizationsManagement = ({
                           open={showDetailsDialog}
                           onOpenChange={setShowDetailsDialog}
                         >
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedOrg(org)}
-                            >
-                              <Eye className="ml-1 h-4 w-4" />
-                              عرض التفاصيل
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent
-                            className="max-h-[80vh] max-w-3xl overflow-y-auto"
-                            onOpenAutoFocus={(e) => {
-                              e.preventDefault();
-                            }}
-                          >
+                          <DialogTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedOrg(org)}
+                              >
+                                <Eye className="ml-1 h-4 w-4" />
+                                عرض التفاصيل
+                              </Button>
+                            }
+                          ></DialogTrigger>
+                          <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>
                                 تفاصيل المنظمة - {selectedOrg?.name}

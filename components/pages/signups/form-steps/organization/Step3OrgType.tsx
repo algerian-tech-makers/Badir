@@ -1,6 +1,6 @@
 "use client";
 import { Controller, useFormContext } from "react-hook-form";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { OrgRegistrationFormData } from "@/schemas/signupOrgSchema";
 import { organizationTypeOptions, workAreaOptions } from "@/types/Profile";
 

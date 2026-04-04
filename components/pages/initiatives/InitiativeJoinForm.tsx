@@ -6,7 +6,7 @@ import { ParticipantRole, TargetAudience, UserType } from "@prisma/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import { joinInitiativeAction } from "@/actions/participation";
 import { FormFieldType } from "@/schemas";
 import AppButton from "@/components/AppButton";

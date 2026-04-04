@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/form-input";
 import AppButton from "@/components/AppButton";
 import {
   PlatformRatingFormData,

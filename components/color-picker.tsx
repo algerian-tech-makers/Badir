@@ -59,22 +59,24 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
         {label && <Label>{label}</Label>}
         <div className="flex gap-2">
           <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={disabled}
-                className={cn(
-                  "h-10 w-12 border-2 p-0",
-                  error && "border-red-500",
-                )}
-                style={{
-                  backgroundColor: isValidHex(value) ? value : "#000000",
-                }}
-              >
-                <span className="sr-only">اختر لون</span>
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={disabled}
+                  className={cn(
+                    "h-10 w-12 border-2 p-0",
+                    error && "border-red-500",
+                  )}
+                  style={{
+                    backgroundColor: isValidHex(value) ? value : "#000000",
+                  }}
+                >
+                  <span className="sr-only">اختر لون</span>
+                </Button>
+              }
+            ></PopoverTrigger>
             <PopoverContent className="w-64">
               <div className="space-y-3">
                 <div>

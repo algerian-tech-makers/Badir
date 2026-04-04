@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "المنظمات المسجلة على منصة بادر",
 };
 
+export const revalidate = 1800; // Revalidate the page every 30 minutes
+
 export default async function Page() {
   const initialData = await OrganizationService.getMany(
     { status: OrganizationStatus.approved },

@@ -58,12 +58,14 @@ export default function ParticipationCard({
           ) : status === ParticipationStatus.registered ? (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge className="bg-state-warning text-neutrals-700 size-7 rounded-full px-2 py-1">
-                    <Clock className="h-6 w-6" />
-                    <span className="sr-only">في انتظار الموافقة</span>
-                  </Badge>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Badge className="bg-state-warning text-neutrals-700 size-7 rounded-full px-2 py-1">
+                      <Clock className="h-6 w-6" />
+                      <span className="sr-only">في انتظار الموافقة</span>
+                    </Badge>
+                  }
+                ></TooltipTrigger>
                 <TooltipContent className="h-max">
                   في انتظار الموافقة
                 </TooltipContent>
@@ -72,24 +74,28 @@ export default function ParticipationCard({
           ) : status === ParticipationStatus.kicked ? (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge className="text-neutrals-300 bg-neutrals-700 size-7 rounded-full px-2 py-1">
-                    <XCircle className="h-6 w-6" />
-                    <span className="sr-only">تم طردك</span>
-                  </Badge>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Badge className="text-neutrals-300 bg-neutrals-700 size-7 rounded-full px-2 py-1">
+                      <XCircle className="h-6 w-6" />
+                      <span className="sr-only">تم طردك</span>
+                    </Badge>
+                  }
+                ></TooltipTrigger>
                 <TooltipContent>تم طردك</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           ) : (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge className="bg-state-error text-neutrals-700 size-7 rounded-full px-2 py-1">
-                    <AlertCircle className="h-6 w-6" />
-                    <span className="sr-only">{status}</span>
-                  </Badge>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Badge className="bg-state-error text-neutrals-700 size-7 rounded-full px-2 py-1">
+                      <AlertCircle className="h-6 w-6" />
+                      <span className="sr-only">{status}</span>
+                    </Badge>
+                  }
+                ></TooltipTrigger>
                 <TooltipContent>{status}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -135,16 +141,18 @@ export default function ParticipationCard({
 
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="cursor-pointer">
-                  <Ratings
-                    value={rating?.rating ? Number(rating.rating) : 0}
-                    readOnly
-                    allowHalf
-                    size="sm"
-                  />
-                </div>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <div className="cursor-pointer">
+                    <Ratings
+                      value={rating?.rating ? Number(rating.rating) : 0}
+                      readOnly
+                      allowHalf
+                      size="sm"
+                    />
+                  </div>
+                }
+              ></TooltipTrigger>
               <TooltipContent>
                 {!isInspecting ? (
                   <>

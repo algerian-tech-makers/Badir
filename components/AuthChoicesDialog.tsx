@@ -1,5 +1,9 @@
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { DialogContent, DialogDescription, DialogHeader } from "./ui/dialog";
+import {
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import Link from "next/link";
 import { ArrowUpLeft, Building, User } from "lucide-react";
 import { authRoutes } from "@/data/routes";

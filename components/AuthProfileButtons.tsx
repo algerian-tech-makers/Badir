@@ -78,31 +78,33 @@ export function AuthProfileButtons({
         {isMobile ? (
           <div className="flex items-center justify-center">
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  className="focus:ring-primary-500 rounded-full focus:ring-2 focus:outline-none"
-                  disabled={isSessionPending}
-                >
-                  <Avatar className="hover:ring-primary-400 aspect-square size-10 cursor-pointer ring-offset-1 transition-all hover:ring-2">
-                    {image && (
-                      <Image
-                        src={image}
-                        alt={session.user.name || "المستخدم"}
-                        fill
-                        className="rounded-full object-cover"
-                      />
-                    )}
-                    <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
-                      <Image
-                        src="/images/icons/user-reverse.svg"
-                        alt="User Icon"
-                        width={24}
-                        height={24}
-                      />
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <button
+                    className="focus:ring-primary-500 rounded-full focus:ring-2 focus:outline-none"
+                    disabled={isSessionPending}
+                  >
+                    <Avatar className="hover:ring-primary-400 aspect-square size-10 cursor-pointer ring-offset-1 transition-all hover:ring-2">
+                      {image && (
+                        <Image
+                          src={image}
+                          alt={session.user.name || "المستخدم"}
+                          fill
+                          className="rounded-full object-cover"
+                        />
+                      )}
+                      <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
+                        <Image
+                          src="/images/icons/user-reverse.svg"
+                          alt="User Icon"
+                          width={24}
+                          height={24}
+                        />
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                }
+              ></PopoverTrigger>
               <PopoverContent
                 className="bg-neutrals-100 border-neutrals-300 w-48 border p-2 shadow-lg"
                 align="end"
@@ -170,29 +172,31 @@ export function AuthProfileButtons({
         ) : (
           <div className="flex items-center">
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  className="focus:ring-secondary-600 rounded-full focus:ring-2 focus:outline-none"
-                  disabled={isSessionPending}
-                  aria-label="Open user menu"
-                >
-                  <Avatar className="hover:ring-primary-400 h-10 w-10 cursor-pointer ring-offset-1 transition-all hover:ring-2 md:h-12 md:w-12">
-                    <AvatarImage
-                      className="object-cover"
-                      src={image || ""}
-                      alt={session.user.name || "المستخدم"}
-                    />
-                    <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
-                      <Image
-                        src="/images/icons/user-reverse.svg"
-                        alt="User Icon"
-                        width={24}
-                        height={24}
+              <PopoverTrigger
+                render={
+                  <button
+                    className="focus:ring-secondary-600 rounded-full focus:ring-2 focus:outline-none"
+                    disabled={isSessionPending}
+                    aria-label="Open user menu"
+                  >
+                    <Avatar className="hover:ring-primary-400 h-10 w-10 cursor-pointer ring-offset-1 transition-all hover:ring-2 md:h-12 md:w-12">
+                      <AvatarImage
+                        className="object-cover"
+                        src={image || ""}
+                        alt={session.user.name || "المستخدم"}
                       />
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </PopoverTrigger>
+                      <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
+                        <Image
+                          src="/images/icons/user-reverse.svg"
+                          alt="User Icon"
+                          width={24}
+                          height={24}
+                        />
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                }
+              ></PopoverTrigger>
               <PopoverContent
                 className="bg-neutrals-100 border-neutrals-300 w-56 border p-2 shadow-lg"
                 align="end"

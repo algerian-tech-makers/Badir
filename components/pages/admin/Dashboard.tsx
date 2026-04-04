@@ -369,16 +369,18 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
 
                         <div className="flex gap-2">
                           <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSelectedOrg(org)}
-                              >
-                                <Eye className="ml-1 h-4 w-4" />
-                                عرض التفاصيل
-                              </Button>
-                            </DialogTrigger>
+                            <DialogTrigger
+                              render={
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSelectedOrg(org)}
+                                >
+                                  <Eye className="ml-1 h-4 w-4" />
+                                  عرض التفاصيل
+                                </Button>
+                              }
+                            ></DialogTrigger>
                             <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>تفاصيل المنظمة</DialogTitle>
@@ -646,18 +648,20 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
 
                         <div className="flex gap-2">
                           <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  setSelectedInitiative(initiative)
-                                }
-                              >
-                                <Eye className="ml-1 h-4 w-4" />
-                                عرض التفاصيل
-                              </Button>
-                            </DialogTrigger>
+                            <DialogTrigger
+                              render={
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    setSelectedInitiative(initiative)
+                                  }
+                                >
+                                  <Eye className="ml-1 h-4 w-4" />
+                                  عرض التفاصيل
+                                </Button>
+                              }
+                            ></DialogTrigger>
                             <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>تفاصيل المبادرة</DialogTitle>
