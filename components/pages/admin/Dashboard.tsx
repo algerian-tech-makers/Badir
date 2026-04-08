@@ -120,7 +120,11 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
         <p className="text-gray-600">إدارة المنظمات والمبادرات</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full flex-col"
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">الإحصائيات</TabsTrigger>
           <TabsTrigger value="organizations">المنظمات</TabsTrigger>
