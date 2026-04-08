@@ -41,7 +41,7 @@ export const CheckboxGroupInput = ({
                 }
               }}
               disabled={disabled}
-              className="data-[state=checked]:bg-secondary-500 data-[state=checked]:border-secondary-500 border-neutrals-500"
+              className="data-checked:bg-secondary-500 data-checked:border-secondary-500 border-neutrals-500"
             />
             <label
               htmlFor={`${name}-${option.value}-${index}`}
