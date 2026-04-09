@@ -135,7 +135,7 @@ export default function CompleteOrganizationForm() {
   const CurrentStepComponent = stepConfig[currentStep - 1].component;
 
   return (
-    <div className="bg-neutrals-100 flex min-h-[600px] w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl lg:flex-row">
+    <div className="bg-neutrals-100 flex min-h-150 w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl lg:flex-row">
       <div className="relative h-64 flex-1 lg:h-auto">
         <Image
           src={currentStep % 2 === 1 ? asideImage2 : asideImage1}
@@ -155,7 +155,7 @@ export default function CompleteOrganizationForm() {
             <CardContent className="px-0 py-0">
               <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="min-h-[400px]">
+                  <div className="min-h-100">
                     <CurrentStepComponent />
                   </div>
 

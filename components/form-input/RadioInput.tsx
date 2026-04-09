@@ -32,7 +32,7 @@ export const RadioInput = ({
           <RadioGroupItem
             value={option.value}
             id={`${name}-${option.value}`}
-            className="border-neutrals-300 data-[state=checked]:border-secondary-500 data-[state=focus]:ring-secondary-600 border-2 bg-transparent data-[state=focus]:bg-transparent data-[state=focus]:ring-2 data-[state=focus]:ring-offset-2"
+            className="border-neutrals-300 data-checked:bg-secondary-500 data-checked:border-secondary-600 data-checked:text-secondary-500 focus-visible:ring-secondary-600 border-2 bg-transparent focus-visible:bg-transparent focus-visible:ring-2 focus-visible:ring-offset-2"
           />
         </div>
       ))}
