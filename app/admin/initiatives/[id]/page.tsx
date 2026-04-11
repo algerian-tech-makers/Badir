@@ -5,7 +5,7 @@ import { getInitiativeDetailsAction } from "@/actions/admin";
 import InitiativeDetails from "@/components/pages/admin/InitiativeDetails";
 
 interface InitiativeDetailsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function InitiativeDetailsPage({
@@ -17,7 +17,8 @@ export default async function InitiativeDetailsPage({
     redirect("/");
   }
 
-  const result = await getInitiativeDetailsAction(params.id);
+  const initiativeId = (await params).id;
+  const result = await getInitiativeDetailsAction(initiativeId);
 
   if (!result.success) {
     if (result.error === "المبادرة غير موجودة") {
