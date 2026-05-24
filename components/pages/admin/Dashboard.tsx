@@ -274,8 +274,8 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
 
         {/* Organizations Tab */}
         <TabsContent value="organizations" className="space-y-6" dir="rtl">
-          <div className="flex-center-column mt-6 mb-6 flex-wrap gap-4 sm:justify-between">
-            <div className="flex-center max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
+          <div className="mt-6 mb-6 flex w-full items-end gap-4">
+            <div className="min-w-0 flex-1">
               <SearchInput
                 value={orgFilters.search}
                 onChange={(value) => handleOrgFilterChange("search", value)}
@@ -284,10 +284,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
               />
             </div>
             {/* Filters */}
-            <div
-              className="grid w-fit grid-cols-1 gap-4 md:grid-cols-2"
-              dir="rtl"
-            >
+            <div className="grid shrink-0 grid-cols-2 gap-4" dir="rtl">
               <FilterSelect
                 value={orgFilters.status}
                 onChange={(value) => handleOrgFilterChange("status", value)}
@@ -556,8 +553,8 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
           </Alert>
 
           {/* Filters */}
-          <div className="flex-center-column mt-6 mb-6 flex-wrap gap-4 sm:justify-between">
-            <div className="flex-center max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
+          <div className="mt-6 mb-6 flex w-full items-end gap-4">
+            <div className="min-w-0 flex-1">
               <SearchInput
                 value={initiativeFilters.search}
                 onChange={(value) =>
@@ -579,7 +576,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                 { value: "cancelled", label: "ملغية" },
               ]}
               placeholder="الحالة"
-              className="w-40"
+              className="w-40 shrink-0"
             />
           </div>
 

@@ -123,8 +123,8 @@ const OrganizationsManagement = ({
         </CardHeader>
         <CardContent>
           {/* Filters */}
-          <div className="flex-center mt-6 mb-6 items-end gap-4">
-            <div className="flex-center w-full gap-4 max-sm:flex-wrap sm:justify-center">
+          <div className="mt-6 mb-6 flex w-full items-end gap-4">
+            <div className="min-w-0 flex-1">
               <SearchInput
                 value={filters.search}
                 onChange={(value) => handleFilterChange("search", value)}
@@ -133,10 +133,7 @@ const OrganizationsManagement = ({
               />
             </div>
             {/* Filters */}
-            <div
-              className="grid w-fit grid-cols-1 gap-4 md:grid-cols-2"
-              dir="rtl"
-            >
+            <div className="grid shrink-0 grid-cols-2 gap-4" dir="rtl">
               <FilterSelect
                 value={filters.status}
                 onChange={(value) => handleFilterChange("status", value)}
@@ -491,33 +488,6 @@ const OrganizationsManagement = ({
                             )}
                           </DialogContent>
                         </Dialog>
-
-                        {org.status === "pending" && (
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleStatusUpdate(org.id, "approved")
-                              }
-                              disabled={isPending}
-                              className="bg-green-600 px-2 text-xs hover:bg-green-700"
-                            >
-                              قبول
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                setSelectedOrg(org);
-                                setShowRejectionDialog(true);
-                              }}
-                              disabled={isPending}
-                              className="px-2 text-xs"
-                            >
-                              رفض
-                            </Button>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </CardContent>
