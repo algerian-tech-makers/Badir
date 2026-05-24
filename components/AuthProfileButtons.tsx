@@ -142,7 +142,7 @@ export function AuthProfileButtons({
                     onClick={handleProfileClick}
                   >
                     <Star className="h-4 w-4" />
-                    التقييم
+                    شاركنا رأيك
                   </Link>
                   <Link
                     href="/profile#newsletter"
@@ -234,7 +234,7 @@ export function AuthProfileButtons({
                     onClick={handleProfileClick}
                   >
                     <Star className="h-4 w-4" />
-                    التقييم
+                    شاركنا رأيك
                   </Link>
                   <Link
                     href="/profile#newsletter"

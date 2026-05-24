@@ -94,9 +94,8 @@ export default function PaginationControls({
                 "cursor-pointer",
                 !hasPrev && "pointer-events-none cursor-not-allowed opacity-50",
               )}
-            >
-              السابق
-            </PaginationPrevious>
+              text="السابق"
+            />
           </PaginationItem>
 
           {/* Page Numbers */}
@@ -124,9 +123,8 @@ export default function PaginationControls({
                 "cursor-pointer",
                 !hasNext && "pointer-events-none cursor-not-allowed opacity-50",
               )}
-            >
-              التالي
-            </PaginationNext>
+              text="التالي"
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

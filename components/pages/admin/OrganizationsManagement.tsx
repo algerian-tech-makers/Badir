@@ -114,7 +114,7 @@ const OrganizationsManagement = ({
         <p className="text-gray-600">مراجعة وموافقة على طلبات المنظمات</p>
       </div>
 
-      <Card className="gap-2 border-none bg-transparent pt-0 shadow-none">
+      <Card className="gap-2 border-none bg-transparent shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
@@ -123,8 +123,8 @@ const OrganizationsManagement = ({
         </CardHeader>
         <CardContent>
           {/* Filters */}
-          <div className="flex-center-column mt-6 mb-6 flex-wrap gap-4 sm:justify-between">
-            <div className="flex-center max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
+          <div className="flex-center mt-6 mb-6 items-end gap-4">
+            <div className="flex-center w-full gap-4 max-sm:flex-wrap sm:justify-center">
               <SearchInput
                 value={filters.search}
                 onChange={(value) => handleFilterChange("search", value)}

@@ -19,7 +19,7 @@ export default function SearchInput({
   className,
   dir = "rtl",
 }: SearchInputProps) {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (typeof onChange === "function") {
       onChange(value);

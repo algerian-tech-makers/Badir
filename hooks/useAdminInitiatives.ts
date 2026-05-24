@@ -39,7 +39,7 @@ export function useAdminInitiatives(
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(filters.search);
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [filters.search]);
