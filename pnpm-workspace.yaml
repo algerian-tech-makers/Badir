@@ -1,0 +1,7 @@
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": false
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: false
