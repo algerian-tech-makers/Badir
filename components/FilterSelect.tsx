@@ -43,13 +43,18 @@ export default function FilterSelect({
 }: FilterSelectProps) {
   return (
     <div
+      dir={dir}
       className={cn(
         "flex-center-column w-full min-w-0 items-start gap-2",
         className,
       )}
     >
       <span className="text-label text-neutrals-600">{placeholder}</span>
-      <Select value={value || ""} onValueChange={onChange} dir={dir}>
+      <Select
+        value={value || ""}
+        onValueChange={(nextValue) => onChange(nextValue || "")}
+        items={options}
+      >
         <SelectTrigger
           className={cn(
             "border-neutrals-300 text-neutrals-700 focus:ring-primary-500 focus:border-primary-500 h-12 w-full rounded-lg border bg-white transition-colors focus:ring-2",
@@ -58,9 +63,13 @@ export default function FilterSelect({
         >
           <SelectValue placeholder={placeholder || "اختر"} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent dir={dir}>
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem
+              key={option.value}
+              value={option.value}
+              label={option.label}
+            >
               {option.label}
             </SelectItem>
           ))}

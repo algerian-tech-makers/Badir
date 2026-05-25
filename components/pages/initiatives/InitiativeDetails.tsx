@@ -35,15 +35,13 @@ export default function InitiativeDetails({
       : initiative.organizerOrg?.name || "منظمة غير معروفة";
 
   useEffect(() => {
-    async function fetchUserImage() {
+    function fetchUserImage() {
       if (initiative.organizerType === "user" && initiative.organizerUser) {
         setOrganizerImage(initiative.organizerUser.image || null);
+      } else if (initiative.organizerOrg) {
+        setOrganizerImage(initiative.organizerOrg.logo || null);
       } else {
-        if (initiative.organizerOrg) {
-          setOrganizerImage(initiative.organizerOrg.logo || null);
-        } else {
-          setOrganizerImage(null);
-        }
+        setOrganizerImage(null);
       }
     }
 
@@ -68,18 +66,6 @@ export default function InitiativeDetails({
   }
   return (
     <>
-      {/* Cover Image */}
-      {initiative.coverImage && (
-        <div className="relative mb-6 h-64 w-full overflow-hidden rounded-lg md:h-80">
-          <Image
-            src={initiative.coverImage}
-            alt={initiative.titleAr}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
       {/* Description */}
       <div className="mb-6">
         <h2 className="text-neutrals-700 mb-2 text-xl font-semibold">

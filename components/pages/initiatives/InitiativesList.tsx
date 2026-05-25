@@ -117,7 +117,7 @@ export default function InitiativesList({
     if (searchTerm.trim() === "") {
       delete newFilters.search;
     } else {
-      newFilters.search = searchTerm.trim();
+      newFilters.search = searchTerm;
     }
 
     setFilters(newFilters);

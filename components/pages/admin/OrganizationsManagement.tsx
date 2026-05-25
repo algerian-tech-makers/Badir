@@ -10,7 +10,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -212,7 +211,7 @@ const OrganizationsManagement = ({
                           {org.contactPhone && (
                             <span className="flex items-center gap-1">
                               <Phone className="h-4 w-4" />
-                              {org.contactPhone}
+                              <span dir="ltr">{org.contactPhone}</span>
                             </span>
                           )}
                           <span className="flex items-center gap-1">
@@ -258,236 +257,17 @@ const OrganizationsManagement = ({
                       </div>
 
                       <div className="flex gap-2">
-                        {/* Details Dialog */}
-                        <Dialog
-                          open={showDetailsDialog}
-                          onOpenChange={setShowDetailsDialog}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOrg(org);
+                            setShowDetailsDialog(true);
+                          }}
                         >
-                          <DialogTrigger
-                            render={
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setSelectedOrg(org)}
-                              >
-                                <Eye className="ml-1 h-4 w-4" />
-                                عرض التفاصيل
-                              </Button>
-                            }
-                          ></DialogTrigger>
-                          <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>
-                                تفاصيل المنظمة - {selectedOrg?.name}
-                              </DialogTitle>
-                              <DialogDescription>
-                                عرض كامل المعلومات والتفاصيل الخاصة بالمنظمة
-                              </DialogDescription>
-                            </DialogHeader>
-                            {selectedOrg && (
-                              <div className="space-y-6" dir="rtl">
-                                {/* Basic Information */}
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      اسم المنظمة:
-                                    </Label>
-                                    <p className="mt-1">{selectedOrg.name}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      الاسم المختصر:
-                                    </Label>
-                                    <p className="mt-1">
-                                      {selectedOrg.shortName || "غير متوفر"}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      نوع المنظمة:
-                                    </Label>
-                                    <p className="mt-1">
-                                      {selectedOrg.organizationType}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      عدد الأعضاء:
-                                    </Label>
-                                    <p className="mt-1">
-                                      {selectedOrg.membersCount || "غير محدد"}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      تاريخ التأسيس:
-                                    </Label>
-                                    <p className="mt-1">
-                                      {selectedOrg.foundingDate
-                                        ? formatDate(selectedOrg.foundingDate)
-                                        : "غير متوفر"}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      المقر الرئيسي:
-                                    </Label>
-                                    <p className="mt-1">
-                                      {selectedOrg.headquarters || "غير متوفر"}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* Description */}
-                                {selectedOrg.description && (
-                                  <div>
-                                    <Label className="font-medium text-gray-700">
-                                      وصف المنظمة:
-                                    </Label>
-                                    <p className="mt-1 rounded-lg bg-gray-50 p-3">
-                                      {selectedOrg.description}
-                                    </p>
-                                  </div>
-                                )}
-
-                                {/* Work Areas */}
-                                <div>
-                                  <Label className="font-medium text-gray-700">
-                                    مجالات العمل:
-                                  </Label>
-                                  <div className="mt-2 flex flex-wrap gap-2">
-                                    {selectedOrg.workAreas.map(
-                                      (area, index) => (
-                                        <Badge key={index} variant="outline">
-                                          {area}
-                                        </Badge>
-                                      ),
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Contact Information */}
-                                <div className="rounded-lg bg-gray-50 p-4">
-                                  <Label className="mb-3 block font-medium text-gray-700">
-                                    معلومات التواصل:
-                                  </Label>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="h-4 w-4 text-gray-500" />
-                                      <span className="text-sm">
-                                        {selectedOrg.contactEmail}
-                                      </span>
-                                    </div>
-                                    {selectedOrg.contactPhone && (
-                                      <div className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-gray-500" />
-                                        <span className="text-sm">
-                                          {selectedOrg.contactPhone}
-                                        </span>
-                                      </div>
-                                    )}
-                                    <div className="flex items-center gap-2">
-                                      <MapPin className="h-4 w-4 text-gray-500" />
-                                      <span className="text-sm">
-                                        {selectedOrg.city}, {selectedOrg.state},{" "}
-                                        {selectedOrg.country}
-                                      </span>
-                                    </div>
-                                    {selectedOrg.website && (
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm">🌐</span>
-                                        <a
-                                          href={selectedOrg.website}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-sm text-blue-600 hover:text-blue-800"
-                                        >
-                                          {selectedOrg.website}
-                                        </a>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Owner Information */}
-                                <div className="rounded-lg bg-blue-50 p-4">
-                                  <Label className="mb-3 block font-medium text-gray-700">
-                                    معلومات المالك:
-                                  </Label>
-                                  <div className="space-y-2">
-                                    <p className="flex items-center gap-2">
-                                      <Users className="h-4 w-4 text-gray-500" />
-                                      <strong>الاسم:</strong>{" "}
-                                      {selectedOrg.owner.name}
-                                    </p>
-                                    <p className="flex items-center gap-2">
-                                      <Mail className="h-4 w-4 text-gray-500" />
-                                      <strong>البريد:</strong>{" "}
-                                      {selectedOrg.owner.email}
-                                    </p>
-                                    {selectedOrg.owner.phone && (
-                                      <p className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-gray-500" />
-                                        <strong>الهاتف:</strong>{" "}
-                                        {selectedOrg.owner.phone}
-                                      </p>
-                                    )}
-                                    <p className="flex items-center gap-2">
-                                      <Calendar className="h-4 w-4 text-gray-500" />
-                                      <strong>تاريخ التسجيل:</strong>{" "}
-                                      {formatDate(selectedOrg.createdAt)}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                {selectedOrg.status === "pending" && (
-                                  <div className="flex justify-center gap-4 border-t pt-4">
-                                    <Button
-                                      onClick={() =>
-                                        handleStatusUpdate(
-                                          selectedOrg.id,
-                                          "approved",
-                                        )
-                                      }
-                                      disabled={isPending}
-                                      className="bg-green-600 hover:bg-green-700"
-                                    >
-                                      <CheckCircle className="ml-1 h-4 w-4" />
-                                      قبول المنظمة
-                                    </Button>
-                                    <Button
-                                      onClick={() => {
-                                        setShowDetailsDialog(false);
-                                        setShowRejectionDialog(true);
-                                      }}
-                                      disabled={isPending}
-                                      variant="destructive"
-                                    >
-                                      <XCircle className="ml-1 h-4 w-4" />
-                                      رفض المنظمة
-                                    </Button>
-                                  </div>
-                                )}
-
-                                {/* Status Info */}
-                                {selectedOrg.status !== "pending" && (
-                                  <div className="border-t py-4 text-center">
-                                    <div className="flex items-center justify-center gap-2">
-                                      <AdminOrganizationStatusBadge
-                                        status={selectedOrg.status}
-                                      />
-                                      <span className="text-sm text-gray-600">
-                                        تم التحديث في{" "}
-                                        {formatDate(selectedOrg.updatedAt)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
+                          <Eye className="ml-1 h-4 w-4" />
+                          عرض التفاصيل
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -509,6 +289,194 @@ const OrganizationsManagement = ({
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>تفاصيل المنظمة - {selectedOrg?.name}</DialogTitle>
+            <DialogDescription>
+              عرض كامل المعلومات والتفاصيل الخاصة بالمنظمة
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrg && (
+            <div className="space-y-6" dir="rtl">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    اسم المنظمة:
+                  </Label>
+                  <p className="mt-1">{selectedOrg.name}</p>
+                </div>
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    الاسم المختصر:
+                  </Label>
+                  <p className="mt-1">{selectedOrg.shortName || "غير متوفر"}</p>
+                </div>
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    نوع المنظمة:
+                  </Label>
+                  <p className="mt-1">{selectedOrg.organizationType}</p>
+                </div>
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    عدد الأعضاء:
+                  </Label>
+                  <p className="mt-1">
+                    {selectedOrg.membersCount || "غير محدد"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    تاريخ التأسيس:
+                  </Label>
+                  <p className="mt-1">
+                    {selectedOrg.foundingDate
+                      ? formatDate(selectedOrg.foundingDate)
+                      : "غير متوفر"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    المقر الرئيسي:
+                  </Label>
+                  <p className="mt-1">
+                    {selectedOrg.headquarters || "غير متوفر"}
+                  </p>
+                </div>
+              </div>
+
+              {selectedOrg.description && (
+                <div>
+                  <Label className="font-medium text-gray-700">
+                    وصف المنظمة:
+                  </Label>
+                  <p className="mt-1 rounded-lg bg-gray-50 p-3">
+                    {selectedOrg.description}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <Label className="font-medium text-gray-700">
+                  مجالات العمل:
+                </Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedOrg.workAreas.map((area, index) => (
+                    <Badge key={index} variant="outline">
+                      {area}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-gray-50 p-4">
+                <Label className="mb-3 block font-medium text-gray-700">
+                  معلومات التواصل:
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">{selectedOrg.contactEmail}</span>
+                </div>
+                {selectedOrg.contactPhone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm" dir="ltr">
+                      {selectedOrg.contactPhone}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">
+                    {selectedOrg.city}, {selectedOrg.state},{" "}
+                    {selectedOrg.country}
+                  </span>
+                </div>
+                {selectedOrg.website && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">🌐</span>
+                    <a
+                      href={selectedOrg.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      {selectedOrg.website}
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-lg bg-blue-50 p-4">
+                <Label className="mb-3 block font-medium text-gray-700">
+                  معلومات المالك:
+                </Label>
+                <div className="space-y-2">
+                  <p className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-gray-500" />
+                    <strong>الاسم:</strong> {selectedOrg.owner.name}
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <strong>البريد:</strong> {selectedOrg.owner.email}
+                  </p>
+                  {selectedOrg.owner.phone && (
+                    <p className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <strong>الهاتف:</strong>{" "}
+                      <span dir="ltr">{selectedOrg.owner.phone}</span>
+                    </p>
+                  )}
+                  <p className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <strong>تاريخ التسجيل:</strong>{" "}
+                    {formatDate(selectedOrg.createdAt)}
+                  </p>
+                </div>
+              </div>
+
+              {selectedOrg.status === "pending" && (
+                <div className="flex justify-center gap-4 border-t pt-4">
+                  <Button
+                    onClick={() =>
+                      handleStatusUpdate(selectedOrg.id, "approved")
+                    }
+                    disabled={isPending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="ml-1 h-4 w-4" />
+                    قبول المنظمة
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowDetailsDialog(false);
+                      setShowRejectionDialog(true);
+                    }}
+                    disabled={isPending}
+                    variant="destructive"
+                  >
+                    <XCircle className="ml-1 h-4 w-4" />
+                    رفض المنظمة
+                  </Button>
+                </div>
+              )}
+
+              {selectedOrg.status !== "pending" && (
+                <div className="border-t py-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <AdminOrganizationStatusBadge status={selectedOrg.status} />
+                    <span className="text-sm text-gray-600">
+                      تم التحديث في {formatDate(selectedOrg.updatedAt)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Rejection Dialog - Separate from Details Dialog */}
       <Dialog open={showRejectionDialog} onOpenChange={setShowRejectionDialog}>
