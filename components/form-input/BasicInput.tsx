@@ -4,6 +4,7 @@ import { forwardRef } from "react";
 import { Input } from "../ui/input";
 import parse from "html-react-parser";
 import { sanitize } from "@/lib/santitize-client";
+import { cn } from "@/lib/utils";
 import { getBaseInputClasses } from "./shared";
 import { FormInputProps } from "./types";
 
@@ -23,6 +24,8 @@ export const BasicInput = forwardRef<HTMLInputElement, FormInputProps>(
     ref,
   ) => {
     const baseInputClasses = getBaseInputClasses(error);
+    const emailInputClasses =
+      type === "email" ? "text-left placeholder:text-right" : "";
 
     return (
       <Input
@@ -40,7 +43,7 @@ export const BasicInput = forwardRef<HTMLInputElement, FormInputProps>(
         }}
         onBlur={onBlur}
         disabled={disabled}
-        className={baseInputClasses}
+        className={cn(baseInputClasses, emailInputClasses)}
         dir={type === "number" || type === "email" ? "ltr" : "rtl"}
         {...props}
       />

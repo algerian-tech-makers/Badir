@@ -47,7 +47,7 @@ export default function CompleteProfileForm() {
   });
   const { handleSubmit, getValues, setError, clearErrors } = methods;
 
-  const validateCurrentStep = async () => {
+  const validateCurrentStep = () => {
     const currentData = getValues();
 
     // Clear previous errors for current step
@@ -71,10 +71,10 @@ export default function CompleteProfileForm() {
     }
   };
 
-  const handleNext = async (e: React.MouseEvent) => {
+  const handleNext = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    const isStepValid = await validateCurrentStep();
+    const isStepValid = validateCurrentStep();
 
     if (isStepValid) {
       setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
@@ -123,7 +123,7 @@ export default function CompleteProfileForm() {
   const CurrentStepComponent = stepConfig[currentStep - 1].component;
 
   return (
-    <div className="bg-neutrals-100 flex min-h-[600px] w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl lg:flex-row">
+    <div className="bg-neutrals-100 flex min-h-150 w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl lg:flex-row">
       <div className="relative h-64 flex-1 lg:h-auto">
         <Image
           src={currentStep % 2 === 0 ? asideImage2 : asideImage1}
@@ -139,11 +139,11 @@ export default function CompleteProfileForm() {
 
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="mx-auto w-full max-w-4xl md:p-6" dir="rtl">
-          <Card className="border-0 bg-transparent shadow-none">
-            <CardContent className="px-0 py-0">
+          <Card className="border-0 bg-transparent shadow-none ring-0">
+            <CardContent className="px-1 py-0">
               <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="min-h-[400px]">
+                  <div className="min-h-100">
                     <CurrentStepComponent />
                   </div>
 
