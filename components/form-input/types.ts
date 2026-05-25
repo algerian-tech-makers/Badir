@@ -38,6 +38,7 @@ export interface FormInputProps {
   options?: Option[]; // For radio, select, combobox
   rows?: number; // For textarea
   rtl?: boolean; // Right-to-left support
+  showYearDropdown?: boolean; // For date input
   multiple?: boolean; // For multi-select combobox
   min?: number; // For number input
   max?: number; // For number input

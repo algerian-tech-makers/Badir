@@ -151,7 +151,7 @@ export default function CompleteOrganizationForm() {
 
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="mx-auto w-full max-w-4xl md:p-6" dir="rtl">
-          <Card className="border-0 bg-transparent shadow-none">
+          <Card className="border-0 bg-transparent shadow-none ring-0">
             <CardContent className="px-0 py-0">
               <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

@@ -39,7 +39,7 @@ export function useAdminInitiatives(
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(filters.search);
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [filters.search]);
@@ -90,7 +90,15 @@ export function useAdminInitiatives(
   );
 
   const handleFilterChange = useCallback(
-    (key: keyof InitiativeFilters, value: string) => {
+    (key: keyof InitiativeFilters, value: string | null) => {
+      if (value === null) {
+        if (key === "search") {
+          setFilters((prev) => ({ ...prev, [key]: "" }));
+          return;
+        }
+        setFilters((prev) => ({ ...prev, [key]: "all" }));
+        return;
+      }
       setFilters((prev) => ({ ...prev, [key]: value }));
     },
     [],

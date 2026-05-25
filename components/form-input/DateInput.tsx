@@ -14,7 +14,9 @@ export const DateInput = ({
   placeholder,
   value,
   onChange,
+  onBlur,
   disabled,
+  showYearDropdown,
   error,
 }: FormInputProps) => {
   const [open, setOpen] = useState(false);
@@ -32,6 +34,7 @@ export const DateInput = ({
       <PopoverTrigger
         id={name}
         disabled={disabled}
+        onBlur={onBlur}
         className={cn(
           "flex w-full items-center justify-start rounded-full border px-4 py-2 text-sm font-normal",
           "focus:ring-1 focus:outline-none",
@@ -55,6 +58,9 @@ export const DateInput = ({
             mode="single"
             locale={ar}
             selected={selected}
+            defaultMonth={selected}
+            captionLayout={showYearDropdown ? "dropdown" : "label"}
+            reverseYears={showYearDropdown}
             onSelect={(date) => {
               onChange?.(date ? format(date, "yyyy-MM-dd") : "");
               setOpen(false);

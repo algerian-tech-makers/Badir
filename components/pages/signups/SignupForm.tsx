@@ -68,7 +68,7 @@ export function SignupForm() {
 
   return (
     <div className="h-full w-full">
-      <Card className="w-full border-none bg-transparent shadow-none">
+      <Card className="w-full border-none bg-transparent shadow-none ring-0">
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">

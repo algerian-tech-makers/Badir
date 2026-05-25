@@ -8,7 +8,7 @@ import { Suspense } from "react";
 export default function LoginPage() {
   return (
     <section className="bg-primary-600 flex min-h-screen w-full items-center justify-center p-4">
-      <div className="bg-neutrals-100 flex min-h-[600px] w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl sm:flex-row">
+      <div className="bg-neutrals-100 flex min-h-150 w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl sm:flex-row">
         {/* Image Section */}
         <div className="relative h-64 flex-1 sm:h-auto">
           <Image
@@ -28,7 +28,7 @@ export default function LoginPage() {
           className="flex flex-1 flex-col items-start justify-center p-6 max-md:justify-start md:p-8 md:px-10"
           dir="rtl"
         >
-          <div className="flex-center-column h-full w-full max-w-md gap-6 md:gap-10">
+          <div className="flex-center-column h-full w-full max-w-full gap-6 md:gap-10">
             {/* Logo */}
             <div className="mb-4 flex justify-start self-start max-md:hidden md:mb-8">
               <Image

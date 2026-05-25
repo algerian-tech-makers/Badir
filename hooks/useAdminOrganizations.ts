@@ -39,7 +39,7 @@ export function useAdminOrganizations(
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(filters.search);
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [filters.search]);
@@ -101,7 +101,15 @@ export function useAdminOrganizations(
   );
 
   const handleFilterChange = useCallback(
-    (key: keyof OrganizationFilters, value: string) => {
+    (key: keyof OrganizationFilters, value: string | null) => {
+      if (value === null) {
+        if (key === "search") {
+          setFilters((prev) => ({ ...prev, [key]: "" }));
+          return;
+        }
+        setFilters((prev) => ({ ...prev, [key]: "all" }));
+        return;
+      }
       setFilters((prev) => ({ ...prev, [key]: value }));
     },
     [],

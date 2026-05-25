@@ -30,19 +30,30 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   const { id } = await params;
-  const initiative = await InitiativeService.getById(id);
+  try {
+    const initiative = await InitiativeService.getById(id);
 
-  if (!initiative) {
+    if (!initiative) {
+      return {
+        title: "المبادرة غير متوفرة - بادر",
+        description: "المبادرة المطلوبة غير موجودة",
+      };
+    }
+
+    return {
+      title: `${initiative.titleAr} - بادر`,
+      description: initiative.shortDescriptionAr || "مبادرة على منصة بادر",
+    };
+  } catch (error) {
+    console.error(
+      "Error generating metadata for initiative details page:",
+      error,
+    );
     return {
       title: "المبادرة غير موجودة - بادر",
-      description: "المبادرة المطلوبة غير موجودة",
+      description: "حدث خطأ أثناء تحميل المبادرة",
     };
   }
-
-  return {
-    title: `${initiative.titleAr} - بادر`,
-    description: initiative.shortDescriptionAr || "مبادرة على منصة بادر",
-  };
 }
 
 export default async function InitiativeDetailsPage({

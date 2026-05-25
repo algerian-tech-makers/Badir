@@ -19,15 +19,15 @@ export default function SearchInput({
   className,
   dir = "rtl",
 }: SearchInputProps) {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (typeof onChange === "function") {
       onChange(value);
     }
   };
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div className={cn("relative", className)} dir={dir}>
+    <form onSubmit={handleSubmit} className="w-full min-w-0">
+      <div className={cn("relative w-full min-w-0", className)} dir={dir}>
         <button
           type="submit"
           className="text-neutrals-400 hover:text-primary-500 absolute top-1/2 left-2 -translate-y-1/2 transform"

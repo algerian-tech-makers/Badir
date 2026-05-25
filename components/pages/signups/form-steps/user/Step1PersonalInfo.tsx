@@ -56,26 +56,16 @@ export default function Step1PersonalInfo() {
           name="dateOfBirth"
           control={control}
           render={({ field: { onChange, value, onBlur } }) => (
-            <div className="space-y-1" dir="rtl">
-              <label className="text-neutrals-600 mb-2 block text-sm font-medium">
-                تاريخ الميلاد
-                <span className="text-state-error ml-1">*</span>
-              </label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={value || ""}
-                onChange={(e) => onChange(e.target.value)}
-                onBlur={onBlur}
-                className="border-neutrals-300 placeholder:text-neutrals-300 text-neutrals-700 focus:border-secondary-600 focus:ring-secondary-600 w-full rounded-full border px-3 py-2 focus:ring-1 focus:outline-none"
-                dir="rtl"
-              />
-              {errors.dateOfBirth && (
-                <p className="text-state-error mt-1 text-sm">
-                  {errors.dateOfBirth.message}
-                </p>
-              )}
-            </div>
+            <FormInput
+              type="date"
+              name="dateOfBirth"
+              label="تاريخ الميلاد"
+              value={value || ""}
+              onChange={onChange}
+              onBlur={onBlur}
+              error={errors.dateOfBirth?.message}
+              showYearDropdown
+            />
           )}
         />
 
@@ -120,6 +110,7 @@ export default function Step1PersonalInfo() {
                   error={errors.phone?.message}
                   countryCode={countryCode}
                   onCountryChange={(code) => setValue("phoneCountryCode", code)}
+                  className="flex-1"
                 />
               );
             }}

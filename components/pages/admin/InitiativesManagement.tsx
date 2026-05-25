@@ -69,7 +69,7 @@ const InitiativesManagement = ({ initialData }: InitiativesManagementProps) => {
         </AlertDescription>
       </Alert>
 
-      <Card className="gap-2 border-none bg-transparent pt-0 shadow-none">
+      <Card className="gap-2 border-none bg-transparent shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -77,11 +77,8 @@ const InitiativesManagement = ({ initialData }: InitiativesManagementProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div
-            className="flex-center-column mt-6 mb-6 flex-wrap gap-4 sm:justify-between"
-            dir="rtl"
-          >
-            <div className="flex-center max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
+          <div className="mt-6 mb-6 flex w-full items-end gap-4" dir="rtl">
+            <div className="min-w-0 flex-1">
               <SearchInput
                 value={filters.search}
                 onChange={(value) => handleFilterChange("search", value)}
@@ -99,7 +96,7 @@ const InitiativesManagement = ({ initialData }: InitiativesManagementProps) => {
                 { value: "cancelled", label: "ملغية" },
               ]}
               placeholder="الحالة"
-              className="w-40"
+              className="w-40 shrink-0"
             />
           </div>
 
