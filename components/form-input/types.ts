@@ -11,6 +11,7 @@ export interface Option {
 export interface FormInputProps {
   type:
     | "text"
+    | "url"
     | "email"
     | "password"
     | "number"

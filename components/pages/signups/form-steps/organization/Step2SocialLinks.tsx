@@ -126,8 +126,8 @@ export default function Step2SocialLinks() {
 
       <div className="bg-primary-50 border-primary-200 mt-6 rounded-md border p-4">
         <p className="text-neutrals-600 text-sm">
-          ملاحظة: تأكد من إدخال الروابط كاملة مع بدايتها بـ https:// للحصول على
-          روابط صحيحة
+          ملاحظة: تأكد من إدخال الروابط كاملة مع بدايتها بـ{" "}
+          <span dir="ltr">https://</span> للحصول على روابط صحيحة
         </p>
       </div>
     </div>

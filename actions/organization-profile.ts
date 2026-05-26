@@ -21,6 +21,7 @@ import { OrganizationProfile, validateOrganizationProfile } from "@/schemas";
 import { getPublicStorageUrl } from "./helpers-sf";
 
 type FileField = "officialLicense" | "logo" | "identificationCard";
+type UploadFileField = Exclude<FileField, "officialLicense">;
 
 /**
  * Completes the organization profile setup after registration.
@@ -69,13 +70,11 @@ export async function completeOrgProfileAction(
     // validate the data on server just in case, the front validation is working
     orgRegistrationSchema.parse(data);
 
-    const uploadPromises: { field: FileField; url: Promise<string | null> }[] =
-      [];
-    const fileFields: FileField[] = [
-      "officialLicense",
-      "logo",
-      "identificationCard",
-    ];
+    const uploadResults: {
+      field: UploadFileField;
+      url: Promise<string | null>;
+    }[] = [];
+    const fileFields: UploadFileField[] = ["logo", "identificationCard"];
 
     for (const field of fileFields) {
       const fileValue = data[field as keyof typeof data];
@@ -95,7 +94,7 @@ export async function completeOrgProfileAction(
         const filePath = `${userId}/${fileName}`;
 
         const storage = new StorageHelpers();
-        const uploadPromise = await storage
+        const uploadResult = await storage
           .uploadFile(bucketName, filePath, fileBuffer, type)
           .then((result) => ({
             field,
@@ -106,26 +105,25 @@ export async function completeOrgProfileAction(
             throw new Error(`Failed to upload ${field}: ${error.message}`);
           });
 
-        uploadPromises.push(uploadPromise);
+        uploadResults.push(uploadResult);
       }
     }
 
-    const uploadResults = await Promise.all(
-      uploadPromises.map((p) => p.url.then((url) => ({ field: p.field, url }))),
-    );
-
-    const uploadedUrls: Record<FileField, string | null> = {
-      officialLicense: null,
+    let uploadedUrls: Partial<Record<FileField, string | null>> = {
       logo: null,
       identificationCard: null,
     };
-    uploadResults.forEach(({ field, url }) => {
-      uploadedUrls[field] = url;
-    });
+
+    uploadedUrls = Object.fromEntries(
+      await Promise.all(
+        uploadResults.map(async (p) => [p.field, await p.url] as const),
+      ),
+    ) as Partial<Record<FileField, string | null>>;
 
     const processedFormData = {
       ...data,
       ...uploadedUrls,
+      officialLicense: data.isLicensed ? data.officialLicense : "",
     };
 
     const formattedPhone = processedFormData.contactPhone
@@ -283,7 +281,10 @@ export async function updateOrganizationProfileAction(
       };
     }
 
-    validateOrganizationProfile(data);
+    const validationResult = validateOrganizationProfile(data);
+    if (!validationResult.success) {
+      throw validationResult.error;
+    }
 
     const userWithOrg = await prisma.user.findUnique({
       where: { id: userId },
@@ -301,8 +302,8 @@ export async function updateOrganizationProfileAction(
     const uploadResults: Record<string, string | null> = {};
 
     // Handle file uploads (logo, ID card). Do I need to add ID card here?
-    // const fileFields = ["logo", "identificationCard"];
-    const fileFields = ["logo"];
+    const fileFields = ["logo", "identificationCard"];
+    // const fileFields = ["logo"];
 
     for (const field of fileFields) {
       const fileValue = data[field as keyof typeof data];
@@ -389,9 +390,7 @@ export async function updateOrganizationProfileAction(
         previousInitiatives: data.previousInitiatives || null,
         userRole: data.userRole || "رئيس المنظمة",
         logo: uploadResults.logo || userWithOrg.organization.logo || undefined,
-        // officialLicense:
-        //   uploadResults.officialLicense ||
-        //   userWithOrg.organization.officialLicense,
+        officialLicense: data.isLicensed ? data.officialLicense || null : null,
         // identificationCard:
         //   uploadResults.identificationCard ||
         //   userWithOrg.organization.identificationCard,

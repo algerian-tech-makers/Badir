@@ -24,8 +24,10 @@ export const BasicInput = forwardRef<HTMLInputElement, FormInputProps>(
     ref,
   ) => {
     const baseInputClasses = getBaseInputClasses(error);
-    const emailInputClasses =
-      type === "email" ? "text-left placeholder:text-right" : "";
+    const ltrInputClasses =
+      type === "email" || type === "url" || type === "number"
+        ? "text-left placeholder:text-right"
+        : "";
 
     return (
       <Input
@@ -43,8 +45,12 @@ export const BasicInput = forwardRef<HTMLInputElement, FormInputProps>(
         }}
         onBlur={onBlur}
         disabled={disabled}
-        className={cn(baseInputClasses, emailInputClasses)}
-        dir={type === "number" || type === "email" ? "ltr" : "rtl"}
+        className={cn(baseInputClasses, ltrInputClasses)}
+        dir={
+          type === "number" || type === "email" || type === "url"
+            ? "ltr"
+            : "rtl"
+        }
         {...props}
       />
     );

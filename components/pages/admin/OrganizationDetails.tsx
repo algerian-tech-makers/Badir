@@ -226,7 +226,7 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
                       <Label className="text-sm font-medium text-gray-700">
                         رقم الهاتف
                       </Label>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900" dir="ltr">
                         {organization.contactPhone}
                       </p>
                     </div>
@@ -302,7 +302,7 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
                       <Label className="text-sm font-medium text-gray-700">
                         رقم الهاتف
                       </Label>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900" dir="ltr">
                         {organization.owner.phone}
                       </p>
                     </div>
@@ -506,24 +506,18 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
                 الترخيص الرسمي
               </Label>
               {organization.officialLicense ? (
-                <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-gray-50">
-                  <Image
-                    src={organization.officialLicense}
-                    alt="الترخيص الرسمي"
-                    fill
-                    className="object-contain p-2"
-                  />
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-gray-50 p-4">
                   <Link
                     href={organization.officialLicense}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute top-2 left-2"
+                    className="flex flex-col items-center gap-3 text-center"
                   >
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="h-8 w-8 p-0"
-                    >
+                    <FileText className="text-primary-500 h-10 w-10" />
+                    <span className="text-primary-500 text-sm font-medium">
+                      فتح رابط الترخيص
+                    </span>
+                    <Button size="sm" variant="secondary">
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </Link>

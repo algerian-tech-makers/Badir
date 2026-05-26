@@ -2,7 +2,9 @@ import { OrganizationService } from "@/services/organizations";
 import { InitiativeService } from "@/services/initiatives";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  AlertTriangle,
   Calendar,
+  CheckCircle,
   Mail,
   MapPin,
   Building,
@@ -76,6 +78,20 @@ export default async function OrganizationProfilePage({
             <h1 className="text-neutrals-700 text-2xl font-bold">
               {orgData.name}
               {orgData.shortName && ` (${orgData.shortName})`}
+              <span
+                className={`text-caption inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium ${
+                  orgData.officialLicense
+                    ? "bg-green-50 text-green-700"
+                    : "bg-yellow-50 text-yellow-700"
+                }`}
+              >
+                {orgData.officialLicense ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4" />
+                )}
+                {orgData.officialLicense ? "منظمة مرخصة" : "غير مرخصة"}
+              </span>
             </h1>
             <p className="text-neutrals-500">{orgData.organizationType}</p>
           </div>
