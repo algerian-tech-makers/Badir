@@ -11,3 +11,4 @@ export * from "./joinInitiativeSchema";
 export * from "./categorySchema";
 export * from "./forgotPasswordSchema";
 export * from "./resetPasswordSchema";
+export * from "./documentLinkSchema";

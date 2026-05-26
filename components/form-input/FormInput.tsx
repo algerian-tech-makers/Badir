@@ -80,7 +80,7 @@ import { DateInput } from "./DateInput";
  * ```
  *
  * @param {FormInputProps} props - The props for the form input component
- * @param {("text" | "email" | "password" | "number" | "tel" | "date" | "checkbox" | "switch" | "textarea" | "radio" | "select" | "combobox")} props.type - The type of input field to render
+ * @param {("text" | "url" | "email" | "password" | "number" | "tel" | "date" | "checkbox" | "switch" | "textarea" | "radio" | "select" | "combobox")} props.type - The type of input field to render
  * @param {string} props.label - The label text displayed for the input field
  * @param {string} props.name - The name attribute for the input field, used for form handling and accessibility
  * @param {string} [props.placeholder] - Placeholder text shown when the input is empty
@@ -122,8 +122,6 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     },
     ref,
   ) => {
-    const isSwitch = type === "switch";
-
     const renderInput = () => {
       switch (type) {
         case "date":
@@ -138,6 +136,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           );
 
         case "text":
+        case "url":
         case "email":
         case "password":
         case "number":
@@ -242,10 +241,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     };
 
     return (
-      <div
-        className={cn("space-y-1", className)}
-        dir={isSwitch ? "ltr" : rtl ? "rtl" : "ltr"}
-      >
+      <div className={cn("space-y-1", className)} dir={rtl ? "rtl" : "ltr"}>
         {type !== "checkbox" &&
           type !== "switch" &&
           renderLabel(name, label, isOptional, optionalText)}

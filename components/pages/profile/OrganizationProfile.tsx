@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import FormInput from "@/components/form-input";
 import { OrganizationProfile } from "@/schemas/organizatioProfieSchema";
-import { handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
+import { cn, handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
 import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import { toast } from "sonner";
 import {
+  AlertTriangle,
   Calendar,
+  CheckCircle,
   Edit2Icon,
   Loader2,
   Mail,
@@ -16,6 +18,7 @@ import {
   Save,
   Building,
   Users,
+  ExternalLink,
 } from "lucide-react";
 import AppButton from "@/components/AppButton";
 import { getOrganizationLogo } from "@/actions/organization-profile";
@@ -48,10 +51,13 @@ export default function OrganizationProfileForm({
   } = useForm<OrganizationProfile>({
     defaultValues: {
       ...defaultValues,
+      isLicensed: Boolean(defaultValues.officialLicense),
       logo: null,
       // identificationCard: null,
     },
   });
+
+  const isLicensed = watch("isLicensed");
 
   const handleFormSubmit = async (data: OrganizationProfile) => {
     try {
@@ -60,6 +66,8 @@ export default function OrganizationProfileForm({
 
       const hasImageChanges = data.logo !== null;
 
+      delete (formData as Partial<OrganizationProfile>).isLicensed;
+      delete originalData.isLicensed;
       delete formData.logo;
 
       const hasFieldChanges = !isEqual(formData, originalData);
@@ -151,7 +159,23 @@ export default function OrganizationProfileForm({
         <div className="flex-center-column items-start gap-2">
           <h2 className="text-neutrals-700 text-2xl font-bold">
             {defaultValues.name || "المنظمة"}
+            <span
+              className={cn(
+                "text-caption inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium",
+                defaultValues.officialLicense
+                  ? "bg-green-50 text-green-700"
+                  : "bg-yellow-50 text-yellow-700",
+              )}
+            >
+              {defaultValues.officialLicense ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <AlertTriangle className="h-4 w-4" />
+              )}
+              {defaultValues.officialLicense ? "منظمة مرخصة" : "غير مرخصة"}
+            </span>
           </h2>
+
           <p className="text-neutrals-500">
             {defaultValues.organizationType || ""}
           </p>
@@ -589,6 +613,64 @@ export default function OrganizationProfileForm({
           </h3>
 
           <div className="grid grid-cols-1 gap-4">
+            {/* Official License */}
+            <Controller
+              name="isLicensed"
+              control={control}
+              render={({ field }) => (
+                <FormInput
+                  type="switch"
+                  label="هل المنظمة مرخصة أو معتمدة رسميا؟"
+                  name={field.name}
+                  value={field.value || false}
+                  onChange={(checked) => {
+                    field.onChange(checked);
+                    if (!checked) {
+                      setValue("officialLicense", "", {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }
+                  }}
+                  disabled={disabled}
+                />
+              )}
+            />
+
+            <Controller
+              name="officialLicense"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-2">
+                  <FormInput
+                    type="url"
+                    label="رابط الترخيص أو الاعتماد الرسمي"
+                    name="officialLicense"
+                    placeholder="ضع رابط معاينة موثوق للترخيص"
+                    error={errors.officialLicense?.message}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    rtl={true}
+                    isOptional={!isLicensed}
+                    disabled={disabled || !isLicensed}
+                  />
+                  {field.value && (
+                    <a
+                      href={field.value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-500 hover:text-primary-400 inline-flex items-center gap-2 text-sm font-medium"
+                      dir="rtl"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      فتح رابط الترخيص
+                    </a>
+                  )}
+                </div>
+              )}
+            />
+
             {/* Logo */}
             <Controller
               name="logo"

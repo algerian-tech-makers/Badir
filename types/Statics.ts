@@ -75,9 +75,6 @@ export const BUCKET_MIME_TYPES = {
     "image/jpeg",
     "image/jpg",
     "image/png",
-
-    // PDFs
-    "application/pdf",
   ],
 
   // POST-IMAGES BUCKET

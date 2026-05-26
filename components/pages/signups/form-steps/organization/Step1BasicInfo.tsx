@@ -99,7 +99,7 @@ export default function Step1BasicInfoForm() {
                 field.onChange(e && typeof e === "string" ? new Date(e) : null)
               }
               error={fieldState.error?.message}
-              rtl={true}
+              showYearDropdown
             />
           )}
         />
@@ -121,7 +121,6 @@ export default function Step1BasicInfoForm() {
                 );
               }}
               error={fieldState.error?.message}
-              rtl={true}
             />
           )}
         />

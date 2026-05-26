@@ -45,7 +45,7 @@ export const CheckboxGroupInput = ({
             />
             <label
               htmlFor={`${name}-${option.value}-${index}`}
-              className="text-neutrals-600 cursor-pointer"
+              className="text-neutrals-600 cursor-pointer px-1"
             >
               {option.label}
             </label>

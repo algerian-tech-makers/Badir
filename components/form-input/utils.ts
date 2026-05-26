@@ -53,12 +53,12 @@ export const generateCountryOptions = () => {
       const aPriority = priorityCountries.indexOf(a.code);
       const bPriority = priorityCountries.indexOf(b.code);
 
-      // If both are priority countries, sort by priority order
+      // If both are prioritized countries, sort by priority order
       if (aPriority !== -1 && bPriority !== -1) {
         return aPriority - bPriority;
       }
 
-      // If only one is priority, priority comes first
+      // If only one is prioritized, prioritized comes first
       if (aPriority !== -1) return -1;
       if (bPriority !== -1) return 1;
     }

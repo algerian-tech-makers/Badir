@@ -1,4 +1,8 @@
 import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
+import {
+  isTrustedDocumentPreviewUrl,
+  trustedDocumentPreviewLinkSchema,
+} from "./documentLinkSchema";
 import { z } from "zod";
 
 // Step 1 Schema - Basic organization information
@@ -106,12 +110,34 @@ export const signupOrgStep4Schema = z.object({
 });
 
 // Step 5 Schema - Document uploads
-export const signupOrgStep5Schema = z.object({
-  // officialLicense: z.string().min(1, "مطلوب تحميل الترخيص الرسمي"),
-  officialLicense: z.string().optional(), //? Make optional temporarily
-  logo: z.string().min(1, "مطلوب تحميل الشعار"),
-  identificationCard: z.string().optional(),
-});
+export const signupOrgStep5Schema = z
+  .object({
+    isLicensed: z.boolean().default(false),
+    officialLicense: trustedDocumentPreviewLinkSchema,
+    logo: z.string().min(1, "مطلوب تحميل الشعار"),
+    identificationCard: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.isLicensed) return;
+
+    if (!data.officialLicense) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["officialLicense"],
+        message: "رابط الترخيص مطلوب عند اختيار أن المنظمة مرخصة",
+      });
+      return;
+    }
+
+    if (!isTrustedDocumentPreviewUrl(data.officialLicense)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["officialLicense"],
+        message:
+          "يرجى إدخال رابط معاينة موثوق مثل Google Drive أو OneDrive أو Dropbox",
+      });
+    }
+  });
 
 // Step 6 Schema - Terms & Conditions
 export const signupOrgStep6Schema = z.object({
@@ -120,33 +146,66 @@ export const signupOrgStep6Schema = z.object({
   }),
 });
 
+const isHttpsUrl = (value: string) => {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const isAllowedDomain = (value: string, allowedDomains: string[]) => {
+  try {
+    const hostname = new URL(value).hostname.toLowerCase();
+    return allowedDomains.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+    );
+  } catch {
+    return false;
+  }
+};
+
+const optionalHttpsUrlSchema = (message: string) =>
+  z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || isHttpsUrl(value), { message });
+
+const optionalSocialUrlSchema = (message: string, allowedDomains: string[]) =>
+  optionalHttpsUrlSchema(message).refine(
+    (value) => !value || isAllowedDomain(value, allowedDomains),
+    { message },
+  );
+
 export const signupOrgStep7Schema = z.object({
-  facebook: z
-    .url("يرجى إدخال رابط صحيح لصفحة الفايسبوك")
-    .optional()
-    .or(z.literal("")),
+  facebook: optionalSocialUrlSchema(
+    "يرجى إدخال رابط HTTPS صحيح لصفحة الفايسبوك",
+    ["facebook.com", "fb.com"],
+  ),
 
-  instagram: z
-    .url("يرجى إدخال رابط صحيح لصفحة الأنستغرام")
-    .optional()
-    .or(z.literal("")),
+  instagram: optionalSocialUrlSchema(
+    "يرجى إدخال رابط HTTPS صحيح لصفحة الأنستغرام",
+    ["instagram.com"],
+  ),
 
-  linkedin: z
-    .url("يرجى إدخال رابط صحيح لصفحة اللينكدين")
-    .optional()
-    .or(z.literal("")),
+  linkedin: optionalSocialUrlSchema(
+    "يرجى إدخال رابط HTTPS صحيح لصفحة اللينكدين",
+    ["linkedin.com"],
+  ),
 
-  twitter: z
-    .url("يرجى إدخال رابط صحيح لحساب تويتر / X")
-    .optional()
-    .or(z.literal("")),
+  twitter: optionalSocialUrlSchema(
+    "يرجى إدخال رابط HTTPS صحيح لحساب تويتر / X",
+    ["twitter.com", "x.com"],
+  ),
 
-  youtube: z
-    .url("يرجى إدخال رابط صحيح لقناة اليوتيوب")
-    .optional()
-    .or(z.literal("")),
+  youtube: optionalSocialUrlSchema(
+    "يرجى إدخال رابط HTTPS صحيح لقناة اليوتيوب",
+    ["youtube.com", "youtu.be"],
+  ),
 
-  other: z.url("يرجى إدخال رابط صحيح").optional().or(z.literal("")),
+  other: optionalHttpsUrlSchema("يرجى إدخال رابط HTTPS صحيح"),
 });
 
 export const orgRegistrationSchema = signupOrgStep1Schema
@@ -237,6 +296,7 @@ export const organizationDefaultValues: OrgRegistrationFormData = {
   contactPhoneCountryCode: "DZ",
 
   // Step 5: Document uploads
+  isLicensed: false,
   officialLicense: "",
   logo: "",
   identificationCard: "",

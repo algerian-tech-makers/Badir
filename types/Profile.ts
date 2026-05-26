@@ -5,6 +5,7 @@ export const ORGANIZATION_TYPES = {
   cultural: "مؤسسة ثقافية / إعلامية",
   health: "مؤسسة صحية",
   religious: "مؤسسة دينية",
+  volunteer: "فريق تطوعي",
   other: "أخرى",
 } as const;
 
@@ -19,7 +20,8 @@ export const workAreaOptions = [
   { value: "humanitarian", label: "الإغاثة والعمل الخيري" },
   { value: "culture", label: "الثقافة والتوعية" },
   { value: "technology", label: "التكنولوجيا والابتكار" },
-  { value: "religion", label: "الدين" },
   { value: "humanRights", label: "حقوق الإنسان والمناصرة" },
+  { value: "sports", label: "الرياضة والنشاطات الشبابية" },
+  { value: "religion", label: "الدين" },
   { value: "other", label: "أخرى" },
 ];

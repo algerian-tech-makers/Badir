@@ -1,9 +1,7 @@
-// components/pages/footer-pages/Terms.tsx
 import { Scale } from "lucide-react";
-import { FooterPageSection } from "@/components/pages/FooterPageSection";
-import { FooterPageItem } from "@/components/pages/FooterPageItem";
 import AppButton from "@/components/AppButton";
 import Link from "next/link";
+import TermsPdfPreview from "@/components/terms/TermsPdfPreview";
 
 export default function Terms() {
   return (
@@ -20,8 +18,12 @@ export default function Terms() {
           اقرأ بعناية وتأكد من استخدام منصتنا وفقًا لشروط استخدامنا
         </p>
       </div>
+      <TermsPdfPreview
+        src="/docs/القانون الداخلي لمنصة بادر.pdf"
+        viewerStyle={{ height: "75vh" }}
+      />
 
-      {/* Introduction Section */}
+      {/* 
       <FooterPageSection title="مقدمة">
         <p className="mb-2">
           يخضع استخدامك لمنصة بادر لهذه الشروط والأحكام، والتي قد تتغير عند
@@ -30,34 +32,29 @@ export default function Terms() {
         <p>استمرارك في الاستخدام يعني اطلاعك على التحديثات وموافقتك عليها.</p>
       </FooterPageSection>
 
-      {/* Accepting Terms Section */}
       <FooterPageSection title="قبول الشروط">
         <FooterPageItem text="بدخولك المنصة، فأنت توافق على الالتزام الكامل بهذه الشروط" />
         <FooterPageItem text="إن لم توافق، نرجو عدم استخدام المنصة" />
       </FooterPageSection>
 
-      {/* Acceptable Use Section */}
       <FooterPageSection title="الاستخدام المقبول">
         <FooterPageItem text="استخدام المنصة لأغراض مشروعة فقط" />
         <FooterPageItem text="احترام الآخرين وعدم الإساءة أو نشر المعلومات المضللة" />
         <FooterPageItem text="عدم انتهاك خصوصية أي مستخدم أو التشهير به" />
       </FooterPageSection>
 
-      {/* Content and IP Section */}
       <FooterPageSection title="الملكية الفكرية">
         <FooterPageItem text="جميع حقوق المنصة محفوظة (التصميم، البرمجيات، المحتوى)" />
         <FooterPageItem text="تبقى حقوق ما تنشره ملكًا لك، مع منح المنصة حق استخدامه لتطوير خدماتها" />
         <FooterPageItem text="يُمنع أي خرق لحقوق الملكية الفكرية الخاصة بالمنصة أو بالغير" />
       </FooterPageSection>
 
-      {/* Responsibility Section */}
       <FooterPageSection title="المسؤولية">
         <FooterPageItem text="المنصة غير مسؤولة عن أي أضرار ناتجة عن سوء الاستخدام أو الأعطال الخارجة عن إرادتها" />
         <FooterPageItem text="حماية معلوماتك الشخصية مسؤوليتك" />
         <FooterPageItem text="يرجى الإبلاغ عن أي خروقات أو مشاكل" />
       </FooterPageSection>
 
-      {/* Account Rules Section */}
       <FooterPageSection title="قواعد الحساب">
         <FooterPageItem text="تقديم معلومات صحيحة عند التسجيل" />
         <FooterPageItem text="الحفاظ على سرية معلومات الدخول" />
@@ -65,7 +62,6 @@ export default function Terms() {
         <FooterPageItem text="يحق للمنصة إيقاف الحساب عند مخالفة السياسات" />
       </FooterPageSection>
 
-      {/* Prohibited Activities Section */}
       <FooterPageSection title="الأنشطة المحظورة">
         <FooterPageItem text="نشر محتوى مخالف للتعاليم ديننا أو يدعو للعنف أو الكراهية أو السياسة" />
         <FooterPageItem text="محاولة اختراق المنصة أو تعطيلها" />
@@ -73,13 +69,12 @@ export default function Terms() {
         <FooterPageItem text="استخدام المنصة تجاريًا دون إذن" />
       </FooterPageSection>
 
-      {/* Service Termination Section */}
       <FooterPageSection title="إنهاء الخدمة">
         <p className="mb-2">
           يحق للمنصة تعليق أو إنهاء الحساب عند الاشتباه في مخالفة الشروط، دون
           تحمل مسؤولية عن أي خسائر قد تنتج عن ذلك.
         </p>
-      </FooterPageSection>
+      </FooterPageSection> */}
 
       {/* Contact Section */}
       <div className="mt-10 mb-6 text-center">

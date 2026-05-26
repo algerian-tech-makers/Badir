@@ -6,7 +6,9 @@ import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import { handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
 
 export default function Step6Documents() {
-  const { control } = useFormContext<OrgRegistrationFormData>();
+  const { control, setValue, watch } =
+    useFormContext<OrgRegistrationFormData>();
+  const isLicensed = watch("isLicensed");
 
   return (
     <div className="space-y-6">
@@ -16,30 +18,46 @@ export default function Step6Documents() {
         </h2>
       </div>
 
-      <Controller
-        name="officialLicense"
-        control={control}
-        render={({ field, fieldState }) => (
-          <FormInput
-            type="file"
-            label="نسخة من الترخيص أو الاعتماد الرسمي"
-            name={field.name}
-            placeholder="اختر ملف PDF"
-            value={field.value || ""}
-            onChange={field.onChange}
-            error={fieldState.error?.message}
-            rtl={true}
-            fileAccept={BUCKET_MIME_TYPES.documents.map(mimeTypeToExtension)}
-            fileMaxSize={BUCKET_SIZE_LIMITS.documents / 1024 / 1024}
-            onFileChange={(file, onChange) =>
-              handleFileUpload(file, BUCKET_SIZE_LIMITS.documents, (value) =>
-                onChange(JSON.stringify(value)),
-              )
-            }
-            isOptional={true} //? Make optional temporarily
-          />
-        )}
-      />
+      <div className="space-y-4">
+        <Controller
+          name="isLicensed"
+          control={control}
+          render={({ field }) => (
+            <FormInput
+              type="switch"
+              label="هل المنظمة مرخصة أو معتمدة رسميا؟"
+              name={field.name}
+              value={field.value || false}
+              onChange={(checked) => {
+                field.onChange(checked);
+                if (!checked) {
+                  setValue("officialLicense", "", { shouldValidate: true });
+                }
+              }}
+              className="justify-start"
+            />
+          )}
+        />
+
+        <Controller
+          name="officialLicense"
+          control={control}
+          render={({ field, fieldState }) => (
+            <FormInput
+              type="url"
+              label="نسخة من الترخيص أو الاعتماد الرسمي"
+              name={field.name}
+              placeholder="ضع رابط معاينة موثوق للترخيص"
+              value={field.value || ""}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              rtl={true}
+              disabled={!isLicensed}
+              isOptional={!isLicensed}
+            />
+          )}
+        />
+      </div>
 
       <Controller
         name="logo"

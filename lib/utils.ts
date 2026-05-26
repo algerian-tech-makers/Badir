@@ -23,8 +23,6 @@ export function cn(...inputs: ClassValue[]) {
 export const mimeTypeToExtension = (mimeType: string): string => {
   if (mimeType.startsWith("image/")) {
     return `.${mimeType.replace("image/", "")} `.toUpperCase();
-  } else if (mimeType.startsWith("application/")) {
-    return `.${mimeType.replace("application/", "")} `.toUpperCase();
   }
   return `.${mimeType.split("/").pop()} `.toUpperCase();
 };

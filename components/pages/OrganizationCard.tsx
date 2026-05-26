@@ -11,7 +11,7 @@ export default function OrganizationCard({
 }) {
   return (
     <div className="bg-neutrals-100 hover:border-primary-300 flex flex-col items-start gap-3 rounded-lg border p-4 shadow transition-colors sm:flex-row sm:items-center">
-      <div className="bg-neutrals-100 relative mx-auto h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border sm:mx-0 sm:h-16 sm:w-16">
+      <div className="bg-neutrals-100 relative mx-auto h-14 w-14 shrink-0 overflow-hidden rounded-full border sm:mx-0 sm:h-16 sm:w-16">
         {org.logo ? (
           <Image
             src={org.logo}
@@ -43,7 +43,7 @@ export default function OrganizationCard({
         <div className="text-neutrals-600 mt-2 grid grid-cols-1 gap-y-1 text-xs">
           {org.membersCount && (
             <div className="flex items-center justify-center gap-1 sm:justify-start">
-              <Users className="h-3 w-3 flex-shrink-0" />
+              <Users className="h-3 w-3 shrink-0" />
               <span className="text-caption">
                 <span className="font-semibold">عدد الأعضاء:</span>{" "}
                 {org.membersCount}
@@ -53,7 +53,7 @@ export default function OrganizationCard({
 
           {(org.headquarters || org.city || org.country) && (
             <div className="flex items-center justify-center gap-1 sm:justify-start">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <MapPin className="h-3 w-3 shrink-0" />
               <span className="text-caption truncate">
                 {[
                   org.headquarters && `المقر: ${org.headquarters}`,
@@ -75,7 +75,7 @@ export default function OrganizationCard({
                   : "col-span-2",
               )}
             >
-              <Calendar className="h-3 w-3 flex-shrink-0" />
+              <Calendar className="h-3 w-3 shrink-0" />
               <span className="text-caption">
                 <span className="font-semibold">تأسست:</span>{" "}
                 {new Date(org.foundingDate).toLocaleDateString("ar-DZ")}
