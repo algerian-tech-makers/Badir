@@ -1,8 +1,7 @@
-"use client";
-
 import { Controller, useFormContext } from "react-hook-form";
 import FormInput from "@/components/form-input";
 import { Step3FormData } from "@/schemas/signupUserSchema";
+import TermsAcceptancePreview from "@/components/terms/TermsAcceptancePreview";
 
 export default function Step3TemsAndConditions() {
   const {
@@ -12,11 +11,17 @@ export default function Step3TemsAndConditions() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <div className="mb-8 text-right">
+      <div className="mb-4 text-right">
         <h2 className="text-primary-sm text-primary-500 mb-2 font-bold">
           3. الموافقة والتعهد
         </h2>
       </div>
+
+      <TermsAcceptancePreview
+        src="/docs/القانون الداخلي لمنصة بادر.pdf"
+        viewerTitle="شروط الاستخدام"
+        toolbar={false}
+      />
 
       <div className="flex items-start gap-3" dir="rtl">
         <Controller
@@ -38,8 +43,8 @@ export default function Step3TemsAndConditions() {
         <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2">
           <p className="text-secondary-md text-neutrals-700 w-full leading-relaxed font-semibold">
             أقر بأن جميع البيانات المقدمة صحيحة، وأتعهد بالالتزام بضوابط العمل
-            التطوعي وقيم منصة بادر، والمحافظة على سمعتها أثناء مشاركتي في
-            أنشطتها.
+            التطوعي واحترام الشروط وقيم منصة بادر، والمحافظة على سمعتها أثناء
+            مشاركتي في أنشطتها.
           </p>
         </div>
       </div>

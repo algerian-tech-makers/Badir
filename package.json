@@ -99,6 +99,7 @@
     "react-dom": "19.1.1",
     "react-email": "^5.1.0",
     "react-hook-form": "^7.63.0",
+    "react-pdf": "^10.4.1",
     "react-responsive": "^10.0.1",
     "reactjs-tiptap-editor": "^0.3.31",
     "resend": "^6.6.0",
