@@ -115,6 +115,7 @@ export default async function LastInitiatives() {
         {threeInitiatives.map((initiative) => (
           <InitiativeCard
             key={initiative.id}
+            mode="browse"
             initiative={initiative}
             className="sm:col-span-2 lg:col-span-1"
           />

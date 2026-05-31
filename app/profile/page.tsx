@@ -1,4 +1,4 @@
-import ParticipationCard from "@/components/pages/ParticipationCard";
+import InitiativeCard from "@/components/pages/InitiativeCard";
 import UserProfileForm from "@/components/pages/profile/UserProfile";
 import OrganizationProfileForm from "@/components/pages/profile/OrganizationProfile";
 import NewsletterSubscription from "@/components/pages/NewsletterSubscription";
@@ -123,8 +123,9 @@ export default async function Page() {
                 <h2 className="mb-4 text-2xl font-semibold">مشاركاتي</h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {participations.map((participation) => (
-                    <ParticipationCard
+                    <InitiativeCard
                       key={participation.initiative.id}
+                      mode="participation"
                       participation={participation}
                     />
                   ))}

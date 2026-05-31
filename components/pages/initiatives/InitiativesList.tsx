@@ -248,7 +248,11 @@ export default function InitiativesList({
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {initiatives.data.map((initiative) => (
             <div key={initiative.id} className="h-full">
-              <InitiativeCard initiative={initiative} userId={userId} />
+              <InitiativeCard
+                mode="browse"
+                initiative={initiative}
+                userId={userId}
+              />
             </div>
           ))}
         </div>
