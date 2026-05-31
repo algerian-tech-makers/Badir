@@ -94,7 +94,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                     href="mailto:support@badir.sa"
                     className="text-primary-500 hover:text-primary-400"
                   >
-                    contact@updates.badir.space
+                    help.badir@gmail.com
                   </a>
                 </p>
                 <p className="text-neutrals-400">

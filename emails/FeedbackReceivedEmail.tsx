@@ -186,8 +186,8 @@ export default function FeedbackReceivedEmail({
             </Text>
             <Text style={footerText}>
               للمساعدة، تواصل معنا على:{" "}
-              <a href="mailto:contact@updates.badir.space" style={link}>
-                contact@updates.badir.space
+              <a href="mailto:help.badir@gmail.com" style={link}>
+                help.badir@gmail.com
               </a>
             </Text>
           </Section>
