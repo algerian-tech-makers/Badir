@@ -12,7 +12,7 @@ import {
 import { ParticipationService } from "@/services/participations";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import ParticipationCard from "@/components/pages/ParticipationCard";
+import InitiativeCard from "@/components/pages/InitiativeCard";
 
 export async function generateMetadata({
   params,
@@ -155,8 +155,9 @@ export default async function UserProfilePage({
             <h2 className="mb-4 text-xl font-semibold">المشاركات</h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {participations.map((participation) => (
-                <ParticipationCard
+                <InitiativeCard
                   key={participation.initiative.id}
+                  mode="participation"
                   participation={participation}
                   isInspecting={true}
                 />
