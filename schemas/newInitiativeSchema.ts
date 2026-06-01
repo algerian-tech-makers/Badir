@@ -153,7 +153,6 @@ export type NewInitiativeFormData = z.infer<typeof NewInitiativeSchema>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateNewInitiativeData(data: any) {
-  console.log("Validating data:", data);
   const result = NewInitiativeSchema.safeParse(data);
   return result;
 }
