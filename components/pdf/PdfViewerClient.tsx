@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export interface TermsPdfViewerClientProps {
+export interface PdfViewerClientProps {
   src: string;
   className?: string;
   style?: CSSProperties;
@@ -21,13 +21,13 @@ export interface TermsPdfViewerClientProps {
   children?: React.ReactNode;
 }
 
-export default function TermsPdfViewerClient({
+export default function PdfViewerClient({
   src,
   className,
   style,
   toolbar = true,
   children,
-}: TermsPdfViewerClientProps) {
+}: PdfViewerClientProps) {
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);

@@ -9,40 +9,43 @@ datasource db {
 }
 
 model User {
-  id                     String                  @id @default(cuid())
-  name                   String
-  image                  String?
-  email                  String                  @unique
-  emailVerified          Boolean
-  firstName              String                  @map("first_name") @db.VarChar(100)
-  lastName               String                  @map("last_name") @db.VarChar(100)
-  phone                  String?                 @db.VarChar(20)
-  dateOfBirth            DateTime?               @map("date_of_birth") @db.Date
-  sex                    Sex                     @default(male)
-  bio                    String?
-  userType               UserType                @map("user_type")
-  latitude               Decimal?                @db.Decimal(10, 8)
-  longitude              Decimal?                @db.Decimal(11, 8)
-  city                   String?                 @db.VarChar(100)
-  state                  String?                 @db.VarChar(100)
-  country                String?                 @default("Algeria") @db.VarChar(100)
-  isActive               Boolean                 @default(true) @map("is_active")
-  createdAt              DateTime                @default(now()) @map("created_at")
-  updatedAt              DateTime                @default(now()) @updatedAt @map("updated_at")
-  profileCompleted       Boolean                 @default(false) @map("profile_completed")
-  mailerLiteId           String?                 @map("mailerlite_id") @db.VarChar(100)
-  newsletterSubscribed   Boolean                 @default(false) @map("newsletter_subscribed")
-  newsletterSubscribedAt DateTime?               @map("newsletter_subscribed_at")
-  role                   UserRole                @default(USER)
-  accounts               Account[]
-  participations         InitiativeParticipant[]
-  posts                  InitiativePost[]
-  organizedInitiatives   Initiative[]            @relation("UserOrganizedInitiatives")
-  organization           Organization?
-  platformRatings        PlatformRating[]
-  sessions               Session[]
-  ratings                UserInitiativeRating[]
-  qualifications         UserQualification[]     @relation("UserQualifications")
+  id                       String                  @id @default(cuid())
+  name                     String
+  image                    String?
+  email                    String                  @unique
+  emailVerified            Boolean
+  firstName                String                  @map("first_name") @db.VarChar(100)
+  lastName                 String                  @map("last_name") @db.VarChar(100)
+  phone                    String?                 @db.VarChar(20)
+  dateOfBirth              DateTime?               @map("date_of_birth") @db.Date
+  sex                      Sex                     @default(male)
+  bio                      String?
+  userType                 UserType                @map("user_type")
+  geohash                  String?                 @map("geohash") @db.VarChar(12)
+  city                     String?                 @db.VarChar(100)
+  state                    String?                 @db.VarChar(100)
+  country                  String?                 @default("Algeria") @db.VarChar(100)
+  isActive                 Boolean                 @default(true) @map("is_active")
+  createdAt                DateTime                @default(now()) @map("created_at")
+  updatedAt                DateTime                @default(now()) @updatedAt @map("updated_at")
+  profileCompleted         Boolean                 @default(false) @map("profile_completed")
+  mailerLiteId             String?                 @map("mailerlite_id") @db.VarChar(100)
+  newsletterSubscribed     Boolean                 @default(false) @map("newsletter_subscribed")
+  newsletterSubscribedAt   DateTime?               @map("newsletter_subscribed_at")
+  nwesletterUnsubscribedAt DateTime?               @map("newsletter_unsubscribed_at")
+  consentGiven             Boolean                 @default(false) @map("consent_given")
+  consentGivenAt           DateTime?               @map("consent_given_at")
+  consentVersion           String?                 @map("consent_version") // e.g. "v1.0" "v1.1"
+  role                     UserRole                @default(USER)
+  accounts                 Account[]
+  participations           InitiativeParticipant[]
+  posts                    InitiativePost[]
+  organizedInitiatives     Initiative[]            @relation("UserOrganizedInitiatives")
+  organization             Organization?
+  platformRatings          PlatformRating[]
+  sessions                 Session[]
+  ratings                  UserInitiativeRating[]
+  qualifications           UserQualification[]     @relation("UserQualifications")
 
   @@index([email])
   @@index([createdAt])
@@ -337,11 +340,6 @@ enum UserRole {
 enum Sex {
   male
   female
-}
-
-enum CertificateType {
-  pdf
-  image
 }
 
 enum OrganizerType {
