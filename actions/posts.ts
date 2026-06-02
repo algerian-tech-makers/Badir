@@ -32,6 +32,15 @@ export async function createPostAction(
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
 
+  // Completed initiatives are read-only: no new posts allowed
+  const initiativeStatus = await InitiativeService.getStatus(initiativeId);
+  if (initiativeStatus === "completed") {
+    return {
+      success: false,
+      error: "لا يمكن النشر في مبادرة منتهية",
+    };
+  }
+
   // Rate limit post creation (only if publishing)
   if (status === "published") {
     const { success: rateLimitSuccess } = await postCreationRateLimiter.limit(
@@ -128,6 +137,15 @@ export async function updatePostAction(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
+
+  // Completed initiatives are read-only: no edits allowed
+  const initiativeStatus = await InitiativeService.getStatus(initiativeId);
+  if (initiativeStatus === "completed") {
+    return {
+      success: false,
+      error: "لا يمكن تعديل منشورات مبادرة منتهية",
+    };
+  }
 
   // Get current post status to check if we're transitioning to published
   const existingPost = await InitiativePostsService.getById(postId);
