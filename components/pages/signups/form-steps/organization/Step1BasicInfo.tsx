@@ -217,6 +217,7 @@ export default function Step1BasicInfoForm() {
             onCountryChange={(code) => {
               control._formValues.contactPhoneCountryCode = code;
             }}
+            isOptional
           />
         )}
       />

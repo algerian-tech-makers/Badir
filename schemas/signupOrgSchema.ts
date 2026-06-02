@@ -52,9 +52,13 @@ export const signupOrgStep1Schema = z.object({
     .max(100, "اسم الدولة طويل جدًا")
     .default("Algeria"),
 
-  contactPhoneOrg: z
-    .string()
-    .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)"),
+  contactPhoneOrg: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z
+      .string()
+      .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
+      .optional(),
+  ),
 
   contactPhoneOrgCountryCode: z.string().default("DZ"),
 });
@@ -101,10 +105,13 @@ export const signupOrgStep4Schema = z.object({
     .max(100, "اسم الدور طويل جدًا")
     .trim(),
 
-  contactPhone: z
-    .string()
-    .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
-    .optional(),
+  contactPhone: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z
+      .string()
+      .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
+      .optional(),
+  ),
 
   contactPhoneCountryCode: z.string().default("DZ"),
 });

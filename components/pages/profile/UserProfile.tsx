@@ -308,6 +308,7 @@ export default function UserProfileForm({
                       onCountryChange={(code) =>
                         setValue("phoneCountryCode", code)
                       }
+                      isOptional
                       disabled={disabled}
                       className="w-full"
                     />

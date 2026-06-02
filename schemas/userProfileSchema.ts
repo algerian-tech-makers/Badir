@@ -10,10 +10,13 @@ const UserProfileSchema = z.object({
     .string()
     .min(2, "الاسم الأخير يجب أن يكون على الأقل 2 حرف")
     .max(100, "الاسم الأخير يجب أن يكون أقل من 100 حرف"),
-  phone: z
-    .string()
-    .min(1, "رقم الهاتف مطلوب")
-    .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)"),
+  phone: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z
+      .string()
+      .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
+      .optional(),
+  ),
   phoneCountryCode: z.string(),
   city: z.string().max(100, "المدينة يجب أن تكون أقل من 100 حرف").optional(),
   state: z

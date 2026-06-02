@@ -3,7 +3,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
-import { Decimal } from "@prisma/client/runtime/library";
 import z from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { revalidatePath } from "next/cache";
@@ -19,6 +18,7 @@ import { UserService } from "@/services/user";
 import { ActionResponse } from "@/types/Statics";
 import { getPublicStorageUrl } from "./helpers-sf";
 import { AUTHORIZED_REDIRECTION } from "@/data/routes";
+import { encodeGeohash } from "@/lib/geohash";
 
 export async function updateUserProfileAction(
   data: UserProfile,
@@ -93,20 +93,24 @@ export async function updateUserProfileAction(
         : "+213 " + data.phone
       : undefined;
 
+    const geohash =
+      data.latitude !== undefined && data.longitude !== undefined
+        ? encodeGeohash(data.latitude, data.longitude)
+        : undefined;
+
     // Update user record
     await prisma.user.update({
       where: { id: userId },
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
-        phone: formattedPhone,
+        phone: formattedPhone ?? null,
         city: data.city,
         state: data.state,
         country: data.country,
         bio: data.bio || null,
         image: imageUrl || undefined,
-        latitude: data.latitude ? new Decimal(data.latitude) : null,
-        longitude: data.longitude ? new Decimal(data.longitude) : null,
+        geohash: geohash ?? undefined,
         updatedAt: new Date(),
       },
     });
@@ -208,22 +212,26 @@ export async function completeProfileAction(
         ? validatedData.customEducationalLevel
         : validatedData.educationalLevel;
 
+    const normalizedSex =
+      validatedData.sex === "unspecified" ? null : validatedData.sex;
+
+    const geohash =
+      validatedData.latitude !== undefined &&
+      validatedData.longitude !== undefined
+        ? encodeGeohash(validatedData.latitude, validatedData.longitude)
+        : null;
+
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
         // Personal Information (Step 1)
         dateOfBirth: new Date(validatedData.dateOfBirth),
-        sex: validatedData.sex,
-        phone: validatedData.phone,
+        sex: normalizedSex,
+        phone: validatedData.phone ?? null,
         city: validatedData.city,
         state: validatedData.state,
         country: validatedData.country,
-        latitude: validatedData.latitude
-          ? new Decimal(validatedData.latitude)
-          : null,
-        longitude: validatedData.longitude
-          ? new Decimal(validatedData.longitude)
-          : null,
+        geohash,
 
         // Bio and user type
         bio: validatedData.bio,

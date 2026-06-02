@@ -58,9 +58,13 @@ const OrganizationProfileSchema = z
       .max(100, "اسم الدولة طويل جدًا")
       .default("Algeria"),
 
-    contactPhone: z
-      .string()
-      .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)"),
+    contactPhone: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z
+        .string()
+        .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
+        .optional(),
+    ),
 
     contactPhoneCountryCode: z.string().default("DZ"),
 
