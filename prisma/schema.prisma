@@ -18,7 +18,7 @@ model User {
   lastName                 String                  @map("last_name") @db.VarChar(100)
   phone                    String?                 @db.VarChar(20)
   dateOfBirth              DateTime?               @map("date_of_birth") @db.Date
-  sex                      Sex                     @default(male)
+  sex                      Sex
   bio                      String?
   userType                 UserType                @map("user_type")
   geohash                  String?                 @map("geohash") @db.VarChar(12)
@@ -32,7 +32,7 @@ model User {
   mailerLiteId             String?                 @map("mailerlite_id") @db.VarChar(100)
   newsletterSubscribed     Boolean                 @default(false) @map("newsletter_subscribed")
   newsletterSubscribedAt   DateTime?               @map("newsletter_subscribed_at")
-  nwesletterUnsubscribedAt DateTime?               @map("newsletter_unsubscribed_at")
+  newsletterUnsubscribedAt DateTime?               @map("newsletter_unsubscribed_at")
   consentGiven             Boolean                 @default(false) @map("consent_given")
   consentGivenAt           DateTime?               @map("consent_given_at")
   consentVersion           String?                 @map("consent_version") // e.g. "v1.0" "v1.1"
