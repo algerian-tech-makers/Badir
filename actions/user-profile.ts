@@ -93,6 +93,9 @@ export async function updateUserProfileAction(
         : "+213 " + data.phone
       : undefined;
 
+    const normalizedSex =
+      data.sex === "unspecified" || !data.sex ? null : data.sex;
+
     const geohash =
       data.latitude !== undefined && data.longitude !== undefined
         ? encodeGeohash(data.latitude, data.longitude)
@@ -104,6 +107,7 @@ export async function updateUserProfileAction(
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
+        sex: normalizedSex,
         phone: formattedPhone ?? null,
         city: data.city,
         state: data.state,

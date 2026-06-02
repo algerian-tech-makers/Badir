@@ -59,7 +59,7 @@ const OrganizationProfileSchema = z
       .default("Algeria"),
 
     contactPhone: z.preprocess(
-      (val) => (val === "" ? undefined : val),
+      (val) => (val === "" || val === null ? undefined : val),
       z
         .string()
         .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
