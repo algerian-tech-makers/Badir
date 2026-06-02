@@ -18,7 +18,7 @@ model User {
   lastName                 String                  @map("last_name") @db.VarChar(100)
   phone                    String?                 @db.VarChar(20)
   dateOfBirth              DateTime?               @map("date_of_birth") @db.Date
-  sex                      Sex
+  sex                      Sex?
   bio                      String?
   userType                 UserType                @map("user_type")
   geohash                  String?                 @map("geohash") @db.VarChar(12)

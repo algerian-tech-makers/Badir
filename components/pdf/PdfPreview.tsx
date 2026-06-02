@@ -16,6 +16,7 @@ interface PdfPreviewProps {
   viewerClassName?: string;
   viewerStyle?: CSSProperties;
   toolbar?: boolean;
+  onScrolledToEnd?: () => void;
 }
 
 export default function PdfPreview({
@@ -26,11 +27,12 @@ export default function PdfPreview({
   viewerClassName,
   viewerStyle,
   toolbar,
+  onScrolledToEnd,
 }: PdfPreviewProps) {
   return (
     <section className={cn("space-y-4", className)}>
       {title ? (
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <h2 className="mb-1 text-lg font-semibold text-gray-900">{title}</h2>
       ) : null}
       {description ? (
         <p className="text-sm text-gray-600">{description}</p>
@@ -40,6 +42,7 @@ export default function PdfPreview({
         className={viewerClassName}
         style={viewerStyle}
         toolbar={toolbar}
+        onScrolledToEnd={onScrolledToEnd}
       />
     </section>
   );

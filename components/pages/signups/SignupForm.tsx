@@ -13,8 +13,22 @@ import { usePathname, useRouter } from "next/navigation";
 import { initialSignupSchema, type InitialSignupFormData } from "@/schemas";
 import { UserType } from "@prisma/client";
 import { useSession } from "@/lib/auth-client";
+import {
+  CONSENT_PERSISTENCE_ERROR,
+  CONSENT_REQUIRED_ERROR,
+} from "@/lib/signup-consent-config";
 
-export function SignupForm() {
+interface SignupFormProps {
+  consentVersion: string;
+  consentDocumentPath: string;
+  onExpiredConsent: () => void;
+}
+
+export function SignupForm({
+  consentVersion,
+  consentDocumentPath,
+  onExpiredConsent,
+}: SignupFormProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isUserSigningUp = pathname.includes("user");
@@ -45,12 +59,20 @@ export function SignupForm() {
         Object.entries(data).forEach(([key, value]) => {
           formData.append(key, String(value));
         });
+        formData.append("consentVersion", consentVersion);
+        formData.append("consentDocumentPath", consentDocumentPath);
 
         const result = await signupAction(null, formData);
 
         if (result.error) {
           setIsRegisterSuccessful(false);
           toast.error(result.error);
+          if (
+            result.error === CONSENT_REQUIRED_ERROR ||
+            result.error === CONSENT_PERSISTENCE_ERROR
+          ) {
+            onExpiredConsent();
+          }
         } else if (result.success && result.redirectTo) {
           setIsRegisterSuccessful(true);
           if (result.message) {

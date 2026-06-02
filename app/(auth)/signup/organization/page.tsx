@@ -1,6 +1,4 @@
-"use client";
-
-import { SignupForm } from "@/components/pages/signups/SignupForm";
+import SignupConsentFlow from "@/components/pages/signups/SignupConsentFlow";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -51,7 +49,7 @@ export default function UserSignupPage() {
                 </p>
               </div>
 
-              <SignupForm />
+              <SignupConsentFlow kind="organization" />
 
               <div className="text-center text-sm text-gray-600">
                 <p>
