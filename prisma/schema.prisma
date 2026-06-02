@@ -224,9 +224,12 @@ model UserInitiativeRating {
   initiativeId String     @map("initiative_id") @db.VarChar(255)
   rating       Decimal?   @db.Decimal(3, 1)
   comment      String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at")
   initiative   Initiative @relation(fields: [initiativeId], references: [id])
   user         User       @relation(fields: [userId], references: [id])
 
+  @@unique([userId, initiativeId])
   @@map("user_initiative_ratings")
 }
 
@@ -353,6 +356,7 @@ enum InitiativeStatus {
   published
   draft
   cancelled
+  completed
 }
 
 enum PostStatus {
