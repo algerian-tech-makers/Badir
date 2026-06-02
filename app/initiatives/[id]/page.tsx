@@ -19,6 +19,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostsPanel from "@/components/pages/initiatives/PostsPanel";
 import MembersPanel from "@/components/pages/initiatives/MembersPanel";
 import RequestsPanel from "@/components/pages/initiatives/RequestsPanel";
+import InitiativeReviewsPanel from "@/components/pages/initiatives/InitiativeReviewsPanel";
+import InitiativeRatingForm from "@/components/pages/initiatives/InitiativeRatingForm";
 import InitiativeHeader from "@/components/pages/InitiativeHeader";
 import AppButton from "@/components/AppButton";
 import Link from "next/link";
@@ -115,6 +117,26 @@ export default async function InitiativeDetailsPage({
   const canViewPosts = isManager || isApprovedParticipant;
   const canWritePosts = isManager || isHelperApproved;
 
+  // Ratings: an initiative becomes ratable once it is marked completed.
+  const isClosedForRating = initiative.status === InitiativeStatus.completed;
+  const canRate = isClosedForRating && isApprovedParticipant;
+
+  const reviews = isManager
+    ? (await InitiativeService.getInitiativeRatings(initiative.id)).map(
+        (r) => ({
+          id: r.id,
+          rating: r.rating !== null ? Number(r.rating) : null,
+          comment: r.comment,
+          user: r.user,
+        }),
+      )
+    : [];
+
+  const existingRating =
+    canRate && session?.user?.id
+      ? await InitiativeService.getUserRating(session.user.id, initiative.id)
+      : null;
+
   const formQuestions = initiative.participationQstForm
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (initiative.participationQstForm as any[]).map((q) => ({
@@ -180,6 +202,9 @@ export default async function InitiativeDetailsPage({
               <TabsTrigger value="posts">المنشورات</TabsTrigger>
               {isManager && <TabsTrigger value="members">الأعضاء</TabsTrigger>}
               {isManager && <TabsTrigger value="requests">الطلبات</TabsTrigger>}
+              {isManager && (
+                <TabsTrigger value="reviews">التقييمات</TabsTrigger>
+              )}
               {!isManager && canWritePosts && (
                 <TabsTrigger value="your-posts">منشوراتك</TabsTrigger>
               )}
@@ -209,6 +234,12 @@ export default async function InitiativeDetailsPage({
               </TabsContent>
             )}
 
+            {isManager && (
+              <TabsContent value="reviews">
+                <InitiativeReviewsPanel reviews={reviews} />
+              </TabsContent>
+            )}
+
             {!isManager && canWritePosts && (
               <TabsContent value="your-posts">
                 <PostsPanel
@@ -222,6 +253,25 @@ export default async function InitiativeDetailsPage({
               </TabsContent>
             )}
           </Tabs>
+
+          {canRate && (
+            <div className="mt-8">
+              <InitiativeRatingForm
+                initiativeId={initiative.id}
+                initialRating={
+                  existingRating
+                    ? {
+                        rating:
+                          existingRating.rating !== null
+                            ? Number(existingRating.rating)
+                            : null,
+                        comment: existingRating.comment,
+                      }
+                    : null
+                }
+              />
+            </div>
+          )}
         </div>
       </div>
     );
