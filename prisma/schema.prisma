@@ -46,9 +46,11 @@ model User {
   sessions                 Session[]
   ratings                  UserInitiativeRating[]
   qualifications           UserQualification[]     @relation("UserQualifications")
+  lastActiveAt             DateTime?               @map("last_active_at")
 
   @@index([email])
   @@index([createdAt])
+  @@index([lastActiveAt])
   @@map("users")
 }
 
