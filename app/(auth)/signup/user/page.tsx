@@ -1,13 +1,11 @@
-"use client";
-
-import { SignupForm } from "@/components/pages/signups/SignupForm";
+import SignupConsentFlow from "@/components/pages/signups/SignupConsentFlow";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function UserSignupPage() {
   return (
     <section className="bg-primary-600 flex min-h-screen w-full items-center justify-center p-4">
-      <div className="bg-neutrals-100 flex min-h-[600px] w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl lg:flex-row">
+      <div className="bg-neutrals-100 flex min-h-150 w-full max-w-7xl flex-col overflow-hidden rounded-xl shadow-2xl lg:flex-row">
         {/* Image Section */}
         <div className="relative h-64 flex-1 lg:h-auto">
           <Image
@@ -51,7 +49,7 @@ export default function UserSignupPage() {
                 </p>
               </div>
 
-              <SignupForm />
+              <SignupConsentFlow kind="user" />
 
               <div className="text-center text-sm text-gray-600">
                 <p>

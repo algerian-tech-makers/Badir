@@ -52,6 +52,7 @@ export default function Step5PersonalContact() {
                 onCountryChange={(code) => {
                   setValue("contactPhoneCountryCode", code);
                 }}
+                isOptional
               />
             );
           }}

@@ -8,7 +8,6 @@ import { ParticipationService } from "@/services/participations";
 import { UserService } from "@/services/user";
 import { OrganizationService } from "@/services/organizations";
 import { OrganizationStatus, UserType } from "@prisma/client";
-import React from "react";
 import { InitiativeService } from "@/services/initiatives";
 import OrgInitiative from "@/components/pages/OrgInitiative";
 

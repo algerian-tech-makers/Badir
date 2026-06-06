@@ -13,29 +13,64 @@ import { cn } from "@/lib/utils";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export interface TermsPdfViewerClientProps {
+export interface PdfViewerClientProps {
   src: string;
   className?: string;
   style?: CSSProperties;
   toolbar?: boolean;
+  onScrolledToEnd?: () => void;
+  scrollEndThreshold?: number;
   children?: React.ReactNode;
 }
 
-export default function TermsPdfViewerClient({
+export default function PdfViewerClient({
   src,
   className,
   style,
   toolbar = true,
+  onScrolledToEnd,
+  scrollEndThreshold = 24,
   children,
-}: TermsPdfViewerClientProps) {
+}: PdfViewerClientProps) {
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const [numPages, setNumPages] = useState(0);
+  const [renderedPages, setRenderedPages] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const layoutStyle = style ?? { height: "70vh", width: "100%" };
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
+  const hasScrolledToEndRef = useRef(false);
+  const renderedPageNumbersRef = useRef(new Set<number>());
+
+  const checkScrolledToEnd = useCallback(() => {
+    const node = containerRef.current;
+
+    if (
+      !node ||
+      hasScrolledToEndRef.current ||
+      numPages === 0 ||
+      renderedPages < numPages
+    ) {
+      return;
+    }
+
+    const hasScrollableContent =
+      node.scrollHeight > node.clientHeight + scrollEndThreshold;
+
+    if (!hasScrollableContent) {
+      hasScrolledToEndRef.current = true;
+      onScrolledToEnd?.();
+      return;
+    }
+
+    const remaining = node.scrollHeight - node.scrollTop - node.clientHeight;
+    if (remaining <= scrollEndThreshold) {
+      hasScrolledToEndRef.current = true;
+      onScrolledToEnd?.();
+    }
+  }, [numPages, onScrolledToEnd, renderedPages, scrollEndThreshold]);
 
   const measuredRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
@@ -69,6 +104,11 @@ export default function TermsPdfViewerClient({
       observerRef.current?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const animationFrame = window.requestAnimationFrame(checkScrolledToEnd);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [checkScrolledToEnd, containerWidth, numPages, renderedPages]);
 
   const fileName = useMemo(() => {
     const rawName = src.split("/").pop() || "document.pdf";
@@ -109,6 +149,7 @@ export default function TermsPdfViewerClient({
         className={cn("w-full overflow-y-auto", className)}
         style={layoutStyle}
         dir="ltr"
+        onScroll={checkScrolledToEnd}
       >
         {children}
 
@@ -126,6 +167,9 @@ export default function TermsPdfViewerClient({
           }
           onLoadSuccess={({ numPages: nextNumPages }) => {
             setNumPages(nextNumPages);
+            setRenderedPages(0);
+            renderedPageNumbersRef.current.clear();
+            hasScrolledToEndRef.current = false;
             setLoadError(null);
           }}
           onLoadError={(error) => {
@@ -155,6 +199,10 @@ export default function TermsPdfViewerClient({
                       }
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
+                      onRenderSuccess={() => {
+                        renderedPageNumbersRef.current.add(pageNumber);
+                        setRenderedPages(renderedPageNumbersRef.current.size);
+                      }}
                     />
                   </div>
                 ),

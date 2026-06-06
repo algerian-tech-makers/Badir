@@ -1,6 +1,6 @@
 "use client";
 
-import TermsPdfPreview from "@/components/terms/TermsPdfPreview";
+import PdfPreview from "@/components/pdf/PdfPreview";
 
 interface TermsAcceptancePreviewProps {
   src: string;
@@ -17,7 +17,7 @@ export default function TermsAcceptancePreview({
 }: TermsAcceptancePreviewProps) {
   return (
     <div className="space-y-6" dir="rtl">
-      <TermsPdfPreview
+      <PdfPreview
         src={src}
         title={viewerTitle}
         description={viewerDescription}

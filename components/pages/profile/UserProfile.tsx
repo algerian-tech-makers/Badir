@@ -7,6 +7,7 @@ import { UserProfile } from "@/schemas/userProfileSchema";
 import { handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
 import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import { educationalLevelOptions } from "@/schemas";
+import { sexOptions } from "@/schemas/signupUserSchema";
 import { toast } from "sonner";
 import {
   Calendar,
@@ -48,6 +49,7 @@ export default function UserProfileForm({
     // resolver: zodResolver(UserProfileSchema),
     defaultValues: {
       ...defaultValues,
+      sex: defaultValues.sex ?? "unspecified",
       image: null,
     },
   });
@@ -281,6 +283,25 @@ export default function UserProfileForm({
                 />
               )}
             />
+
+            <Controller
+              name="sex"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <FormInput
+                  type="radio"
+                  name="sex"
+                  className="md:col-span-2"
+                  label="الجنس"
+                  placeholder="اختر الجنس"
+                  value={value}
+                  onChange={onChange}
+                  options={sexOptions}
+                  error={errors.sex?.message}
+                  disabled={disabled}
+                />
+              )}
+            />
             {/* Phone */}
             <div className="flex w-full gap-4">
               <Controller
@@ -308,6 +329,7 @@ export default function UserProfileForm({
                       onCountryChange={(code) =>
                         setValue("phoneCountryCode", code)
                       }
+                      isOptional
                       disabled={disabled}
                       className="w-full"
                     />
