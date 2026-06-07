@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { nextCookies } from "better-auth/next-js";
 import PasswordResetEmail from "@/emails/PasswordResetEmail";
 import { Resend } from "resend";
-import { render } from "@react-email/components";
+import { render } from "react-email";
 import { waitUntil } from "@vercel/functions";
 import { createAuthMiddleware } from "better-auth/api";
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { render } from "@react-email/components";
+import { render } from "react-email";
 import { prisma } from "@/lib/db";
 import { PostEmailQueueService } from "@/services/post-email-queue";
 import InitiativePostNotificationEmail from "@/emails/InitiativePostNotificationEmail";

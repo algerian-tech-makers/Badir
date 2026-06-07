@@ -19,6 +19,7 @@ import { ActionResponse } from "@/types/Statics";
 import { getPublicStorageUrl } from "./helpers-sf";
 import { AUTHORIZED_REDIRECTION } from "@/data/routes";
 import { encodeGeohash } from "@/lib/geohash";
+import { SIGNUP_CONSENT_VERSION } from "@/lib/signup-consent-config";
 
 export async function updateUserProfileAction(
   data: UserProfile,
@@ -334,5 +335,42 @@ export async function getUserImage(id?: string): Promise<string | null> {
   } catch (error) {
     console.error("Failed to fetch user image:", error);
     return null;
+  }
+}
+
+export async function privacyPolicyConsentAction(): Promise<
+  ActionResponse<null, {}>
+> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || !session.user) {
+      return {
+        success: false,
+        error: "يجب تسجيل الدخول أولاً",
+      };
+    }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        consentGiven: true,
+        consentGivenAt: new Date(),
+        consentVersion: SIGNUP_CONSENT_VERSION,
+      },
+    });
+
+    return {
+      success: true,
+      message: "تم تسجيل موافقتك على سياسة الخصوصية بنجاح",
+    };
+  } catch (error) {
+    console.error("Error recording privacy policy consent:", error);
+    return {
+      success: false,
+      error: "حدث خطأ أثناء تسجيل موافقتك. يرجى المحاولة مرة أخرى",
+    };
   }
 }
