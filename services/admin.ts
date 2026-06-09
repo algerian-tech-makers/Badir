@@ -9,7 +9,7 @@ import {
   Prisma,
 } from "@prisma/client";
 import { Resend } from "resend";
-import { render } from "@react-email/components";
+import { render } from "react-email";
 import OrganizationStatusEmail from "@/emails/OrganizationStatusEmail";
 import InitiativeStatusEmail from "@/emails/InitiativeStatusEmail";
 

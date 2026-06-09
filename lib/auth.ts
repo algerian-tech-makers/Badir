@@ -4,12 +4,18 @@ import { prisma } from "@/lib/db";
 import { nextCookies } from "better-auth/next-js";
 import PasswordResetEmail from "@/emails/PasswordResetEmail";
 import { Resend } from "resend";
-import { render } from "@react-email/components";
+import { render } from "react-email";
 import { waitUntil } from "@vercel/functions";
+import { createAuthMiddleware } from "better-auth/api";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const PASSWORD_RESET_EXPIRY_MINUTES = 15;
+
+const ACTIVE_PATHS = [
+  "/sign-in/email",
+  "/get-session", // session refresh / tab re-focus
+];
 
 export const auth = betterAuth({
   user: {
@@ -36,6 +42,12 @@ export const auth = betterAuth({
         type: "boolean",
         required: false,
         defaultValue: false,
+      },
+      lastActiveAt: {
+        type: "date",
+        required: false,
+        input: false,
+        defaultValue: new Date(),
       },
     },
   },
@@ -91,6 +103,32 @@ export const auth = betterAuth({
   }),
   session: {
     expiresIn: 60 * 60 * 24 * 7,
+  },
+
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      if (!ACTIVE_PATHS.some((p) => ctx.path.startsWith(p))) return;
+
+      const session = ctx.context.newSession ?? ctx.context.session;
+      if (!session?.user?.id) return;
+
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      if (session.user.lastActiveAt > oneHourAgo) return;
+
+      // non-blocking
+      await ctx.context.runInBackgroundOrAwait(
+        prisma.user.update({
+          where: { id: session.user.id },
+          data: { lastActiveAt: new Date() },
+        }),
+      );
+    }),
+  },
+
+  advanced: {
+    backgroundTasks: {
+      handler: waitUntil,
+    },
   },
 
   plugins: [nextCookies()],

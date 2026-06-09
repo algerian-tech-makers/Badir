@@ -1,4 +1,3 @@
-import React from "react";
 import { redirect, notFound } from "next/navigation";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { getOrganizationDetailsAction } from "@/actions/admin";

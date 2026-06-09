@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { AUTHORIZED_REDIRECTION, forMiddleware } from "./data/routes";
+import { prisma } from "./lib/db";
+import { auth } from "./lib/auth";
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -42,6 +44,18 @@ export default async function proxy(request: NextRequest) {
     //   return NextResponse.redirect(new URL("/complete-profile", request.url));
     // } ---> Moved it to component level validation
     if (sessionCookie) {
+      const session = await auth.api.getSession({ headers: request.headers });
+      const user = await prisma.user.findUnique({
+        where: { id: session?.user?.id },
+        select: { consentGiven: true },
+      });
+      if (
+        user &&
+        !user.consentGiven &&
+        !request.nextUrl.pathname.startsWith("/consent")
+      ) {
+        return NextResponse.redirect(new URL("/consent", request.url));
+      }
       return NextResponse.redirect(
         new URL(AUTHORIZED_REDIRECTION, request.url),
       );

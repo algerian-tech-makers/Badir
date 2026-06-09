@@ -46,9 +46,11 @@ model User {
   sessions                 Session[]
   ratings                  UserInitiativeRating[]
   qualifications           UserQualification[]     @relation("UserQualifications")
+  lastActiveAt             DateTime?               @map("last_active_at")
 
   @@index([email])
   @@index([createdAt])
+  @@index([lastActiveAt])
   @@map("users")
 }
 
@@ -148,8 +150,8 @@ model Initiative {
   participants           InitiativeParticipant[]
   posts                  InitiativePost[]
   category               InitiativeCategory      @relation(fields: [categoryId], references: [id])
-  organizerOrg           Organization?           @relation("OrganizationInitiatives", fields: [organizerOrgId], references: [id], onDelete: Cascade)
-  organizerUser          User?                   @relation("UserOrganizedInitiatives", fields: [organizerUserId], references: [id], onDelete: Cascade)
+  organizerOrg           Organization?           @relation("OrganizationInitiatives", fields: [organizerOrgId], references: [id], onDelete: SetNull)
+  organizerUser          User?                   @relation("UserOrganizedInitiatives", fields: [organizerUserId], references: [id], onDelete: SetNull)
   ratings                UserInitiativeRating[]
 
   @@index([status])
@@ -179,7 +181,7 @@ model InitiativeParticipant {
 model InitiativePost {
   id           String           @id @default(cuid())
   initiativeId String           @map("initiative_id") @db.VarChar(255)
-  authorId     String           @map("author_id")
+  authorId     String?          @map("author_id")
   title        String?          @db.VarChar(200)
   content      String
   postType     PostType         @default(announcement) @map("post_type")
@@ -187,7 +189,7 @@ model InitiativePost {
   status       PostStatus       @default(published)
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @default(now()) @updatedAt @map("updated_at")
-  author       User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author       User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
   initiative   Initiative       @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
   attachments  PostAttachment[]
 
@@ -223,19 +225,19 @@ model SupportRequest {
 
 model UserInitiativeRating {
   id           Int        @id @default(autoincrement())
-  userId       String     @map("user_id")
+  userId       String?    @map("user_id")
   initiativeId String     @map("initiative_id") @db.VarChar(255)
   rating       Decimal?   @db.Decimal(3, 1)
   comment      String?
   initiative   Initiative @relation(fields: [initiativeId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("user_initiative_ratings")
 }
 
 model PlatformRating {
   id                      String   @id @default(cuid())
-  userId                  String   @map("user_id")
+  userId                  String?  @map("user_id")
   easeOfUse               String   @map("ease_of_use")
   informationClarity      String   @map("information_clarity")
   contentDiversity        String   @map("content_diversity")
@@ -249,7 +251,7 @@ model PlatformRating {
   appRating               String   @map("app_rating")
   createdAt               DateTime @default(now()) @map("created_at")
   updatedAt               DateTime @updatedAt @map("updated_at")
-  user                    User     @relation(fields: [userId], references: [id])
+  user                    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([createdAt])

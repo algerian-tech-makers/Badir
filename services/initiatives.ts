@@ -266,7 +266,7 @@ export class InitiativeService {
           name:
             initiative.organizerUser?.name ||
             initiative.organizerOrg?.name ||
-            "غير محدد",
+            "مستخدم_محذوف",
           image:
             initiative.organizerUser?.image || initiative.organizerOrg?.logo,
         },
