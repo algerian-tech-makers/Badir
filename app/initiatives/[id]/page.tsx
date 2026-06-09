@@ -175,7 +175,7 @@ export default async function InitiativeDetailsPage({
           coverImage={initiative.coverImage}
         />
         <div className="p-6">
-          <Tabs defaultValue="posts" className="w-full">
+          <Tabs defaultValue="posts" className="w-full flex-col" dir="rtl">
             <TabsList className="mb-4">
               <TabsTrigger value="posts">المنشورات</TabsTrigger>
               {isManager && <TabsTrigger value="members">الأعضاء</TabsTrigger>}

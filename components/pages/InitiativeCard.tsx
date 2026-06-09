@@ -315,11 +315,16 @@ export default function InitiativeCard(props: InitiativeCardProps) {
             <span className="text-neutrals-600 hover:text-primary-500 font-medium hover:underline">
               <Link
                 href={
-                  organizer.id
+                  organizer.id && organizer.id !== "unknown"
                     ? organizer.type === OrganizerType.organization
                       ? `/organizations/${organizer.id}`
                       : `/profile/${organizer.id}`
                     : ``
+                }
+                className={
+                  organizer.id && organizer.id !== "unknown"
+                    ? ""
+                    : "pointer-events-none no-underline hover:no-underline"
                 }
               >
                 {organizer.name}

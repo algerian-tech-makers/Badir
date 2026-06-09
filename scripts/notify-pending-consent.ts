@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const CONSENT_PAGE_URL = "https://badir.space/consent";
-const BATCH_SIZE = 50; // resend batch limit is 100
+const BATCH_SIZE = 80; // resend batch limit is 100
 
 async function main() {
   const users = await prisma.user.findMany({
@@ -42,43 +42,51 @@ async function main() {
   // send in batches
   let sent = 0;
   let failed = 0;
+  const numberBatches = Math.ceil(users.length / BATCH_SIZE);
 
-  for (let i = 0; i < users.length; i += BATCH_SIZE) {
-    const batch = users.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < numberBatches; i++) {
+    const batchUsers = users.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
 
-    const emails = await Promise.allSettled(
-      batch.map(async (user) =>
-        resend.emails.send({
-          from: emailConfig.fromEmail,
-          to: user.email,
-          subject: "نطلب منك الموافقة على سياسة الخصوصية",
-          html: await render(
-            ConsentRequestEmail({
-              firstName: user.firstName,
-              consentPageUrl: CONSENT_PAGE_URL,
-              consentVersion: SIGNUP_CONSENT_VERSION,
-            }),
-          ),
-        }),
-      ),
+    const batch = await Promise.all(
+      batchUsers.map(async (user) => ({
+        from: emailConfig.fromEmail,
+        to: user.email,
+        subject: "نطلب منك الموافقة على سياسة الخصوصية",
+        html: await render(
+          ConsentRequestEmail({
+            firstName: user.firstName,
+            consentPageUrl: CONSENT_PAGE_URL,
+            consentVersion: SIGNUP_CONSENT_VERSION,
+          }),
+        ),
+      })),
     );
 
-    emails.forEach((result, index) => {
-      if (result.status === "fulfilled") {
-        sent++;
-      } else {
-        failed++;
-        console.error(
-          `Failed to send to ${batch[index].email}:`,
-          result.reason,
-        );
-      }
-    });
+    const { data, error } = await resend.batch.send(
+      batch.map((email) => {
+        return {
+          ...email,
+          tags: [{ name: "category", value: "consent-request" }],
+        };
+      }),
+    );
 
-    console.log(`Batch ${Math.floor(i / BATCH_SIZE) + 1} done.`);
+    if (error) {
+      console.error(`Batch ${i + 1} failed entirely:`, error);
+      failed += batchUsers.length;
+    } else {
+      data.data?.forEach((result, index) => {
+        if (result.id) {
+          sent++;
+        } else {
+          failed++;
+          console.error(`Failed to send to ${batchUsers[index].email}`);
+        }
+      });
+      console.log(`Batch ${i + 1} done.`);
+    }
 
-    // small delay between batches to avoid rate limiting
-    if (i + BATCH_SIZE < users.length) {
+    if (i + 1 < numberBatches) {
       await new Promise((r) => setTimeout(r, 1000));
     }
   }

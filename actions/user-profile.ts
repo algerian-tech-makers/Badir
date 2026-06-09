@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
 import z from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { revalidatePath } from "next/cache";
+import { refresh, revalidatePath } from "next/cache";
 import {
   registrationSchema,
   type RegistrationFormData,
@@ -20,6 +20,8 @@ import { getPublicStorageUrl } from "./helpers-sf";
 import { AUTHORIZED_REDIRECTION } from "@/data/routes";
 import { encodeGeohash } from "@/lib/geohash";
 import { SIGNUP_CONSENT_VERSION } from "@/lib/signup-consent-config";
+import { redirect } from "next/navigation";
+import { logoutAction } from "./logout";
 
 export async function updateUserProfileAction(
   data: UserProfile,
@@ -371,6 +373,36 @@ export async function privacyPolicyConsentAction(): Promise<
     return {
       success: false,
       error: "حدث خطأ أثناء تسجيل موافقتك. يرجى المحاولة مرة أخرى",
+    };
+  }
+}
+
+export async function deleteUserAccountAction(): Promise<
+  ActionResponse<null, {}>
+> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session || !session.user) {
+    return {
+      success: false,
+      error: "يجب تسجيل الدخول لتحديث بياناتك الشخصية",
+    };
+  }
+
+  await logoutAction();
+
+  try {
+    await UserService.deleteUser(session.user.id);
+    return {
+      success: true,
+      message: "تم حذف حسابك بنجاح",
+    };
+  } catch (error) {
+    console.error("Error deleting user account:", error);
+    return {
+      success: false,
+      error: "حدث خطأ أثناء حذف حسابك. يرجى المحاولة مرة أخرى",
     };
   }
 }

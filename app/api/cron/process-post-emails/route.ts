@@ -32,7 +32,7 @@ interface PostDetails {
   title: string | null;
   content: string;
   author: {
-    name: string;
+    name?: string;
   };
   initiative: {
     id: string;
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
             initiativeName: postDetails.initiative.titleAr,
             postTitle: postDetails.title || undefined,
             postContent: postDetails.content,
-            authorName: postDetails.author.name,
+            authorName: postDetails.author.name || "مستخدم_محذوف",
             postUrl: `${process.env.NEXT_PUBLIC_APP_URL}/initiatives/${postDetails.initiative.id}`,
           }),
         );

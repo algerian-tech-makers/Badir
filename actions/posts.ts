@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, updateTag, unstable_cache } from "next/cache";
 import { InitiativeService } from "@/services/initiatives";
 import { InitiativePostsService } from "@/services/posts";
 import { StorageHelpers } from "@/services/supabase-storage";
@@ -95,7 +95,7 @@ export async function createPostAction(
   }
 
   revalidatePath(`/initiatives/${initiativeId}`);
-  revalidateTag(`initiative-${initiativeId}-posts`);
+  updateTag(`initiative-${initiativeId}-posts`);
   return { success: true, message: "تم نشر المنشور" };
 }
 
@@ -224,7 +224,7 @@ export async function updatePostAction(
   }
 
   revalidatePath(`/initiatives/${initiativeId}`);
-  revalidateTag(`initiative-${initiativeId}-posts`);
+  updateTag(`initiative-${initiativeId}-posts`);
   return { success: true, message: "تم تحديث المنشور" };
 }
 
@@ -248,7 +248,7 @@ export async function deletePostAction(postId: string, initiativeId: string) {
 
   await InitiativePostsService.delete(postId, session.user.id, !!isManager);
   revalidatePath(`/initiatives/${initiativeId}`);
-  revalidateTag(`initiative-${initiativeId}-posts`);
+  updateTag(`initiative-${initiativeId}-posts`);
   return { success: true, message: "تم حذف المنشور" };
 }
 
@@ -278,7 +278,7 @@ export async function pinPostAction(
 
   await InitiativePostsService.pin(postId, pin);
   revalidatePath(`/initiatives/${initiativeId}`);
-  revalidateTag(`initiative-${initiativeId}-posts`);
+  updateTag(`initiative-${initiativeId}-posts`);
   return { success: true, message: pin ? "تم التثبيت" : "تم إلغاء التثبيت" };
 }
 
@@ -442,7 +442,7 @@ export async function updatePostStatusAction(
     !!isManager,
   );
   revalidatePath(`/initiatives/${initiativeId}`);
-  revalidateTag(`initiative-${initiativeId}-posts`);
+  updateTag(`initiative-${initiativeId}-posts`);
 
   const statusLabels = {
     published: "منشور",
