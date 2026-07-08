@@ -1,5 +1,11 @@
 const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
-
+/**
+ * Encodes a latitude and longitude into a geohash string with the specified precision.
+ * @param latitude
+ * @param longitude
+ * @param precision - The desired length of the geohash string (default is 8).
+ * @returns geohash string or null if the input is invalid
+ */
 export function encodeGeohash(
   latitude: number,
   longitude: number,
