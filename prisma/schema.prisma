@@ -235,6 +235,7 @@ model UserInitiativeRating {
   user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([userId, initiativeId])
+  @@index([initiativeId])
   @@map("user_initiative_ratings")
 }
 

@@ -6,7 +6,7 @@ import { revalidatePath, updateTag, unstable_cache } from "next/cache";
 import { InitiativeService } from "@/services/initiatives";
 import { InitiativePostsService } from "@/services/posts";
 import { StorageHelpers } from "@/services/supabase-storage";
-import { PostType, PostStatus } from "@prisma/client";
+import { PostType, PostStatus, InitiativeStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { extractImageSrcsFromHtml } from "@/lib/utils";
 import { ALLOWED_INITIATIVE_IMAGES } from "@/types/Statics";
@@ -33,8 +33,8 @@ export async function createPostAction(
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
 
   // Completed initiatives are read-only: no new posts allowed
-  const initiativeStatus = await InitiativeService.getStatus(initiativeId);
-  if (initiativeStatus === "completed") {
+  const initiativeState = await InitiativeService.getStatus(initiativeId);
+  if (initiativeState === InitiativeStatus.completed) {
     return {
       success: false,
       error: "لا يمكن النشر في مبادرة منتهية",
@@ -139,8 +139,8 @@ export async function updatePostAction(
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
 
   // Completed initiatives are read-only: no edits allowed
-  const initiativeStatus = await InitiativeService.getStatus(initiativeId);
-  if (initiativeStatus === "completed") {
+  const initiativeState = await InitiativeService.getStatus(initiativeId);
+  if (initiativeState === InitiativeStatus.completed) {
     return {
       success: false,
       error: "لا يمكن تعديل منشورات مبادرة منتهية",
