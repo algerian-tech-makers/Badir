@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/process-post-emails",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/keep-alive",
+      "schedule": "0 0 */6 * *"
     }
   ]
 }
