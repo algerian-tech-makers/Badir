@@ -6,7 +6,7 @@ import { revalidatePath, updateTag, unstable_cache } from "next/cache";
 import { InitiativeService } from "@/services/initiatives";
 import { InitiativePostsService } from "@/services/posts";
 import { StorageHelpers } from "@/services/supabase-storage";
-import { PostType, PostStatus } from "@prisma/client";
+import { PostType, PostStatus, InitiativeStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { extractImageSrcsFromHtml } from "@/lib/utils";
 import { ALLOWED_INITIATIVE_IMAGES } from "@/types/Statics";
@@ -31,6 +31,15 @@ export async function createPostAction(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
+
+  // Completed initiatives are read-only: no new posts allowed
+  const initiativeState = await InitiativeService.getStatus(initiativeId);
+  if (initiativeState === InitiativeStatus.completed) {
+    return {
+      success: false,
+      error: "لا يمكن النشر في مبادرة منتهية",
+    };
+  }
 
   // Rate limit post creation (only if publishing)
   if (status === "published") {
@@ -128,6 +137,15 @@ export async function updatePostAction(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
+
+  // Completed initiatives are read-only: no edits allowed
+  const initiativeState = await InitiativeService.getStatus(initiativeId);
+  if (initiativeState === InitiativeStatus.completed) {
+    return {
+      success: false,
+      error: "لا يمكن تعديل منشورات مبادرة منتهية",
+    };
+  }
 
   // Get current post status to check if we're transitioning to published
   const existingPost = await InitiativePostsService.getById(postId);

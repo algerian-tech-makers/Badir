@@ -5,6 +5,7 @@ export * from "./signupOrgSchema";
 export * from "./userProfileSchema";
 export * from "./organizatioProfieSchema";
 export * from "./platformRatingSchema";
+export * from "./initiativeRatingSchema";
 export * from "./contactSchema";
 export * from "./newInitiativeSchema";
 export * from "./joinInitiativeSchema";

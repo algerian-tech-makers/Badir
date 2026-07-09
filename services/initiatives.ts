@@ -34,6 +34,7 @@ export interface InitiativeCard {
     image?: string | null;
   };
   isOnline: boolean;
+  avgRating?: number | null;
 }
 
 export interface InitiativeFilters {
@@ -235,6 +236,13 @@ export class InitiativeService {
         take: limit,
       });
 
+      const initiativeIds = initiatives.map((i) => i.id);
+      const ratingAverages = await prisma.userInitiativeRating.groupBy({
+        by: ["initiativeId"],
+        _avg: { rating: true },
+        where: { initiativeId: { in: initiativeIds } },
+      });
+
       // Transform to InitiativeCard format
       const data: InitiativeCard[] = initiatives.map((initiative) => ({
         id: initiative.id.toString(),
@@ -271,6 +279,11 @@ export class InitiativeService {
             initiative.organizerUser?.image || initiative.organizerOrg?.logo,
         },
         isOnline: initiative.isOnline,
+        avgRating:
+          Number(
+            ratingAverages.find((r) => r.initiativeId === initiative.id)?._avg
+              .rating,
+          ) || null,
       }));
 
       const totalPages = Math.ceil(total / limit);
@@ -454,5 +467,104 @@ export class InitiativeService {
 
   static async getInitiativesCount() {
     return await prisma.initiative.count();
+  }
+
+  /**
+   * Get only the status of an initiative (lightweight lookup).
+   * @param id Initiative ID
+   */
+  static async getStatus(id: string): Promise<InitiativeStatus | null> {
+    const initiative = await prisma.initiative.findUnique({
+      where: { id },
+      select: { status: true },
+    });
+    return initiative?.status ?? null;
+  }
+
+  /**
+   * Mark published initiatives whose end date has passed as completed.
+   * Intended to be called from the daily cron worker.
+   * @returns The number of initiatives that were closed
+   */
+  static async closeEndedInitiatives(): Promise<number> {
+    try {
+      const result = await prisma.initiative.updateMany({
+        where: {
+          status: InitiativeStatus.published,
+          endDate: { lt: new Date() },
+        },
+        data: { status: InitiativeStatus.completed },
+      });
+      return result.count;
+    } catch (error) {
+      console.error("Error closing ended initiatives:", error);
+      throw new Error("Failed to close ended initiatives");
+    }
+  }
+
+  /**
+   * Create or update the current user's rating for an initiative.
+   * Each user can rate an initiative once; submitting again updates it.
+   * @param userId Rater user ID
+   * @param initiativeId Initiative ID
+   * @param rating Star rating (0.5 - 5)
+   * @param comment Optional comment
+   */
+  static async upsertInitiativeRating(
+    userId: string,
+    initiativeId: string,
+    rating: number,
+    comment?: string,
+  ) {
+    try {
+      const [savedRating] = await prisma.$queryRaw<
+        Prisma.UserInitiativeRatingGetPayload<object>[]
+      >`
+        INSERT INTO "user_initiative_ratings" (user_id, initiative_id, rating, comment)
+        VALUES (${userId}, ${initiativeId}, ${rating}, ${comment ?? null})
+        ON CONFLICT (user_id, initiative_id) WHERE user_id IS NOT NULL
+        DO UPDATE SET
+          rating = EXCLUDED.rating,
+          comment = EXCLUDED.comment,
+          updated_at = NOW()
+        RETURNING *
+      `;
+
+      return savedRating;
+    } catch (error) {
+      console.error("Error saving initiative rating:", error);
+      throw new Error("Failed to save initiative rating");
+    }
+  }
+
+  /**
+   * Get the current user's existing rating for an initiative, if any.
+   */
+  static async getUserRating(userId: string, initiativeId: string) {
+    return await prisma.userInitiativeRating.findUnique({
+      where: { userId_initiativeId: { userId, initiativeId } },
+    });
+  }
+
+  /**
+   * Get all ratings (with rater info) for an initiative, newest first.
+   * Used by the owner-only reviews tab.
+   * @param initiativeId Initiative ID
+   */
+  static async getInitiativeRatings(initiativeId: string) {
+    try {
+      return await prisma.userInitiativeRating.findMany({
+        where: { initiativeId },
+        include: {
+          user: {
+            select: { id: true, name: true, image: true },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+    } catch (error) {
+      console.error("Error fetching initiative ratings:", error);
+      throw new Error("Failed to fetch initiative ratings");
+    }
   }
 }

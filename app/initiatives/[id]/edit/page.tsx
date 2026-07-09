@@ -3,6 +3,7 @@ import { InitiativeService } from "@/services/initiatives";
 import { CategoryService } from "@/services/categories";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { notFound, redirect } from "next/navigation";
+import { InitiativeStatus } from "@prisma/client";
 import BackButton from "@/components/BackButton";
 
 export default async function EditInitiativePage({
@@ -23,6 +24,11 @@ export default async function EditInitiativePage({
     session.user.id === initiative.organizerUserId ||
     session.user.id === initiative.organizerOrg?.userId;
   if (!isManager) notFound();
+
+  // a completed initiative is read-only: it can be visited but not edited
+  if (initiative.status === InitiativeStatus.completed) {
+    redirect(`/initiatives/${id}`);
+  }
 
   const categories = await CategoryService.getAll();
   const categoryOptions = categories.map((category) => ({
