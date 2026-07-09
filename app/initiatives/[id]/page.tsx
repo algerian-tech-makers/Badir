@@ -148,7 +148,10 @@ export default async function InitiativeDetailsPage({
       }))
     : [];
 
-  if (initiative.status !== InitiativeStatus.published) {
+  if (
+    initiative.status !== InitiativeStatus.published &&
+    initiative.status !== InitiativeStatus.completed
+  ) {
     if (!isManager) {
       notFound(); // Non-creators cannot access at all
     }
@@ -182,6 +185,10 @@ export default async function InitiativeDetailsPage({
         </div>
       );
     }
+  }
+
+  if (isClosedForRating && !isManager && !isApprovedParticipant) {
+    notFound();
   }
 
   if (canViewPosts) {

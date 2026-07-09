@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import {
+  InitiativeStatus,
   OrganizerType,
   ParticipantRole,
   ParticipationStatus,
@@ -234,6 +235,7 @@ export default function InitiativeCard(props: InitiativeCardProps) {
       organizer,
       registrationDeadline,
       isOnline,
+      avgRating,
     } = initiative;
 
     const now = new Date();
@@ -309,6 +311,15 @@ export default function InitiativeCard(props: InitiativeCardProps) {
             maxParticipants={maxParticipants}
           />
 
+          {initiative.status === InitiativeStatus.completed && (
+            <Ratings
+              value={avgRating != null ? Number(avgRating) : 0}
+              readOnly
+              allowHalf
+              size="sm"
+            />
+          )}
+
           {/* Organizer */}
           <div className="text-neutrals-500 text-sm md:text-base">
             نُظِّمت بواسطة:{" "}
@@ -376,6 +387,12 @@ export default function InitiativeCard(props: InitiativeCardProps) {
   const organizerName = organizerOrg
     ? organizerOrg.name
     : `${organizerUser?.firstName ?? ""} ${organizerUser?.lastName ?? ""}`.trim();
+  const isCompleted = initiative.status === InitiativeStatus.completed;
+  const displayedRating = isInspecting
+    ? (avgRating ?? 0)
+    : rating?.rating
+      ? Number(rating.rating)
+      : 0;
 
   return (
     <Card
@@ -423,29 +440,31 @@ export default function InitiativeCard(props: InitiativeCardProps) {
             </div>
           )}
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="cursor-pointer">
-                  <Ratings
-                    value={rating?.rating ? Number(rating.rating) : 0}
-                    readOnly
-                    allowHalf
-                    size="sm"
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {!isInspecting
-                  ? rating?.rating
-                    ? `تقييمك: ${rating.rating} من 5`
-                    : "لم تقم بتقييم هذه المبادرة بعد"
-                  : avgRating
-                    ? `تقييم: ${avgRating} من 5`
-                    : "لم يقم أحد بتقييم هذه المبادرة بعد"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {isCompleted && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="cursor-pointer">
+                    <Ratings
+                      value={displayedRating}
+                      readOnly
+                      allowHalf
+                      size="sm"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {!isInspecting
+                    ? rating?.rating
+                      ? `تقييمك: ${rating.rating} من 5`
+                      : "لم تقم بتقييم هذه المبادرة بعد"
+                    : avgRating
+                      ? `تقييم: ${avgRating} من 5`
+                      : "لم يقم أحد بتقييم هذه المبادرة بعد"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       </CardContent>
     </Card>

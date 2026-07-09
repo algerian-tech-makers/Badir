@@ -34,6 +34,7 @@ export interface InitiativeCard {
     image?: string | null;
   };
   isOnline: boolean;
+  avgRating?: number | null;
 }
 
 export interface InitiativeFilters {
@@ -235,6 +236,13 @@ export class InitiativeService {
         take: limit,
       });
 
+      const initiativeIds = initiatives.map((i) => i.id);
+      const ratingAverages = await prisma.userInitiativeRating.groupBy({
+        by: ["initiativeId"],
+        _avg: { rating: true },
+        where: { initiativeId: { in: initiativeIds } },
+      });
+
       // Transform to InitiativeCard format
       const data: InitiativeCard[] = initiatives.map((initiative) => ({
         id: initiative.id.toString(),
@@ -271,6 +279,11 @@ export class InitiativeService {
             initiative.organizerUser?.image || initiative.organizerOrg?.logo,
         },
         isOnline: initiative.isOnline,
+        avgRating:
+          Number(
+            ratingAverages.find((r) => r.initiativeId === initiative.id)?._avg
+              .rating,
+          ) || null,
       }));
 
       const totalPages = Math.ceil(total / limit);
@@ -504,21 +517,20 @@ export class InitiativeService {
     comment?: string,
   ) {
     try {
-      return await prisma.userInitiativeRating.upsert({
-        where: {
-          userId_initiativeId: { userId, initiativeId },
-        },
-        create: {
-          userId,
-          initiativeId,
-          rating,
-          comment: comment ?? null,
-        },
-        update: {
-          rating,
-          comment: comment ?? null,
-        },
-      });
+      const [savedRating] = await prisma.$queryRaw<
+        Prisma.UserInitiativeRatingGetPayload<object>[]
+      >`
+        INSERT INTO "user_initiative_ratings" (user_id, initiative_id, rating, comment)
+        VALUES (${userId}, ${initiativeId}, ${rating}, ${comment ?? null})
+        ON CONFLICT (user_id, initiative_id) WHERE user_id IS NOT NULL
+        DO UPDATE SET
+          rating = EXCLUDED.rating,
+          comment = EXCLUDED.comment,
+          updated_at = NOW()
+        RETURNING *
+      `;
+
+      return savedRating;
     } catch (error) {
       console.error("Error saving initiative rating:", error);
       throw new Error("Failed to save initiative rating");

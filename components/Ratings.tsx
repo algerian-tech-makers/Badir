@@ -66,11 +66,36 @@ export default function Ratings({
 
   const activeRating = hoverValue !== null ? hoverValue : value;
 
-  const handleStarClick = (newValue: number) => {
+  const getStarValueFromPointer = (
+    event: React.MouseEvent<HTMLDivElement>,
+    starIndex: number,
+  ) => {
+    if (!allowHalf) return starIndex + 1;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const position = isRTL
+      ? (rect.right - event.clientX) / rect.width
+      : (event.clientX - rect.left) / rect.width;
+
+    let starValue = starIndex + 1;
+
+    if (position <= 0.5) {
+      starValue -= isRTL ? 0.5 : 0;
+    } else {
+      starValue -= isRTL ? 0 : 0.5;
+    }
+
+    return starValue;
+  };
+
+  const handleStarClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+    starIndex: number,
+  ) => {
     if (readOnly) return;
 
     if (onChange) {
-      onChange(newValue);
+      onChange(getStarValueFromPointer(event, starIndex));
     }
   };
 
@@ -80,23 +105,7 @@ export default function Ratings({
   ) => {
     if (readOnly || !allowHalf) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-
-    // Calculate the position in the star (0-1)
-    const position = isRTL
-      ? (rect.right - event.clientX) / rect.width
-      : (event.clientX - rect.left) / rect.width;
-
-    let starValue = starIndex + 1;
-
-    // Handle half stars
-    if (position <= 0.5) {
-      starValue -= isRTL ? 0 : 0.5;
-    } else {
-      starValue -= isRTL ? 0.5 : 0;
-    }
-
-    setHoverValue(starValue);
+    setHoverValue(getStarValueFromPointer(event, starIndex));
   };
 
   const renderStar = (starIndex: number) => {
@@ -117,7 +126,7 @@ export default function Ratings({
           isHalfFilled && "text-amber-400",
           !isFilled && !isHalfFilled && "text-neutrals-300",
         )}
-        onClick={() => handleStarClick(starValue)}
+        onClick={(e) => handleStarClick(e, starIndex)}
         onMouseMove={(e) => handleMouseMove(e, starIndex)}
         onMouseDown={() => setIsDragging(true)}
         onMouseUp={() => setIsDragging(false)}

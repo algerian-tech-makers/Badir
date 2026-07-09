@@ -9,7 +9,7 @@ export interface InitiativeReview {
     id: string;
     name: string | null;
     image: string | null;
-  };
+  } | null;
 }
 
 interface InitiativeReviewsPanelProps {
@@ -54,18 +54,18 @@ export default function InitiativeReviewsPanel({
           >
             <div className="mb-2 flex items-center gap-3">
               <Avatar>
-                {review.user.image && (
+                {review.user?.image && (
                   <AvatarImage
                     src={review.user.image}
-                    alt={review.user.name ?? "مستخدم"}
+                    alt={review.user.name ?? "مستخدم_محذوف"}
                   />
                 )}
                 <AvatarFallback>
-                  {(review.user.name ?? "؟").charAt(0)}
+                  {(review.user?.name ?? "؟").charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <span className="text-neutrals-800 font-medium">
-                {review.user.name ?? "مستخدم"}
+                {review.user?.name ?? "مستخدم_محذوف"}
               </span>
               <Ratings
                 value={review.rating ?? 0}
