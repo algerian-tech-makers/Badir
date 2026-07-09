@@ -24,12 +24,22 @@ function getSecret() {
   return secret;
 }
 
+/**
+ * Signs the encoded payload using HMAC-SHA256 with a secret key.
+ * @param encodedPayload
+ * @returns The base64url-encoded signature of the payload
+ */
 function signPayload(encodedPayload: string) {
   return createHmac("sha256", getSecret())
     .update(encodedPayload)
     .digest("base64url");
 }
 
+/**
+ * Creates a signup consent token for the specified kind of consent.
+ * @param kind - user type
+ * @returns The signed signup consent token
+ */
 export function createSignupConsentToken(kind: SignupConsentKind) {
   const now = Date.now();
   const payload: SignupConsentPayload = {
@@ -45,6 +55,11 @@ export function createSignupConsentToken(kind: SignupConsentKind) {
   return `${encodedPayload}.${signPayload(encodedPayload)}`;
 }
 
+/**
+ * Verifies the signup consent token and returns the payload if valid.
+ * @param token
+ * @returns The verified signup consent payload or null if invalid.
+ */
 export function verifySignupConsentToken(token: string | undefined) {
   if (!token) return null;
 

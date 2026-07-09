@@ -13,6 +13,10 @@
       "schedule": "0 13 * * *"
     },
     {
+      "path": "/api/cron/inactive-users",
+      "schedule": "0 9 * * 1"
+    },
+    {
       "path": "/api/cron/keep-alive",
       "schedule": "0 0 */6 * *"
     }

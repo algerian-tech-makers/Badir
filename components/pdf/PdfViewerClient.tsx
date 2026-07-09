@@ -14,15 +14,29 @@ import { cn } from "@/lib/utils";
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export interface PdfViewerClientProps {
+  /**URL or path to the PDF file to display. */
   src: string;
+  /**optional container className. */
   className?: string;
+  /**optional container CSS styles. */
   style?: CSSProperties;
+  /**whether to show top toolbar with filename and open link (default: true). */
   toolbar?: boolean;
+  /**callback fired once when the viewer is scrolled to the end. */
   onScrolledToEnd?: () => void;
+  /**pixel threshold from the bottom to consider "scrolled to end" (default: 24). */
   scrollEndThreshold?: number;
+  /**optional elements rendered above the PDF document. */
   children?: React.ReactNode;
 }
 
+/**
+ * PdfViewerClient
+ *
+ * A client-side PDF viewer based on react-pdf. It auto-measures its container
+ * to set page width, renders all pages, and invokes onScrolledToEnd once when
+ * the user reaches the bottom (or when content is not scrollable).
+ */
 export default function PdfViewerClient({
   src,
   className,
