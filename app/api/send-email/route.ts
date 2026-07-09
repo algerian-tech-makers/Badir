@@ -4,7 +4,7 @@ import PostNotificationEmail from "@/emails/PostNotificationEmail";
 import FeedbackReceivedEmail from "@/emails/FeedbackReceivedEmail";
 import ContactMessageEmail from "@/emails/ContactMessageEmail";
 import emailConfig from "@/lib/email";
-import { render } from "@react-email/components";
+import { render } from "react-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

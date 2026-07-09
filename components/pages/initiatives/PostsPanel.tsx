@@ -203,9 +203,10 @@ export default function PostsPanel({
       ) : (
         <div className="space-y-4">
           {posts.map((post) => {
-            const canEdit = isManager || post.author.id === currentUserId;
+            const canEdit =
+              post.author && (isManager || post.author.id === currentUserId);
             const isPinned = post.isPinned;
-            const isAuthorManager = post.author.organization?.id === managerId;
+            const isAuthorManager = post.author?.organization?.id === managerId;
 
             // const isAuthorHelper =
             //   post.author.participations[0]?.participantRole === "helper";
@@ -333,20 +334,24 @@ export default function PostsPanel({
                       <Calendar className="h-4 w-4" />
                       <span>{formatDate(post.createdAt)}</span>
                       <span>•</span>
-                      <Link
-                        href={
-                          post.author.organization
-                            ? `/organizations/${post.author.organization.id}`
-                            : `/profile/${post.author.id}`
-                        }
-                        className="text-neutrals-700 hover:text-primary-600 hover:underline"
-                      >
-                        <span>
-                          {post.author.organization
-                            ? post.author.organization.name
-                            : post.author.name}
-                        </span>
-                      </Link>
+                      {post.author ? (
+                        <Link
+                          href={
+                            post.author.organization
+                              ? `/organizations/${post.author.organization.id}`
+                              : `/profile/${post.author.id}`
+                          }
+                          className="text-neutrals-700 hover:text-primary-600 hover:underline"
+                        >
+                          <span>
+                            {post.author.organization
+                              ? post.author.organization.name
+                              : post.author.name}
+                          </span>
+                        </Link>
+                      ) : (
+                        <span className="text-neutrals-500">مستخدم_محذوف</span>
+                      )}
                       <Badge
                         className={cn(
                           "rounded-full text-sm font-medium",
@@ -355,11 +360,17 @@ export default function PostsPanel({
                             : "bg-state-success/80 text-secondary-700/80",
                         )}
                       >
-                        {isAuthorManager
-                          ? "مدير المبادرة"
-                          : post.author.id === currentUserId
-                            ? "أنت"
-                            : "مساعد"}
+                        {post.author ? (
+                          <>
+                            {isAuthorManager
+                              ? "مدير المبادرة"
+                              : post.author.id === currentUserId
+                                ? "أنت"
+                                : "مساعد"}
+                          </>
+                        ) : (
+                          "مستخدم_محذوف"
+                        )}
                       </Badge>
                     </div>
                   </div>

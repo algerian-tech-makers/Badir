@@ -13,29 +13,78 @@ import { cn } from "@/lib/utils";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export interface TermsPdfViewerClientProps {
+export interface PdfViewerClientProps {
+  /**URL or path to the PDF file to display. */
   src: string;
+  /**optional container className. */
   className?: string;
+  /**optional container CSS styles. */
   style?: CSSProperties;
+  /**whether to show top toolbar with filename and open link (default: true). */
   toolbar?: boolean;
+  /**callback fired once when the viewer is scrolled to the end. */
+  onScrolledToEnd?: () => void;
+  /**pixel threshold from the bottom to consider "scrolled to end" (default: 24). */
+  scrollEndThreshold?: number;
+  /**optional elements rendered above the PDF document. */
   children?: React.ReactNode;
 }
 
-export default function TermsPdfViewerClient({
+/**
+ * PdfViewerClient
+ *
+ * A client-side PDF viewer based on react-pdf. It auto-measures its container
+ * to set page width, renders all pages, and invokes onScrolledToEnd once when
+ * the user reaches the bottom (or when content is not scrollable).
+ */
+export default function PdfViewerClient({
   src,
   className,
   style,
   toolbar = true,
+  onScrolledToEnd,
+  scrollEndThreshold = 24,
   children,
-}: TermsPdfViewerClientProps) {
+}: PdfViewerClientProps) {
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const [numPages, setNumPages] = useState(0);
+  const [renderedPages, setRenderedPages] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const layoutStyle = style ?? { height: "70vh", width: "100%" };
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
+  const hasScrolledToEndRef = useRef(false);
+  const renderedPageNumbersRef = useRef(new Set<number>());
+
+  const checkScrolledToEnd = useCallback(() => {
+    const node = containerRef.current;
+
+    if (
+      !node ||
+      hasScrolledToEndRef.current ||
+      numPages === 0 ||
+      renderedPages < numPages
+    ) {
+      return;
+    }
+
+    const hasScrollableContent =
+      node.scrollHeight > node.clientHeight + scrollEndThreshold;
+
+    if (!hasScrollableContent) {
+      hasScrolledToEndRef.current = true;
+      onScrolledToEnd?.();
+      return;
+    }
+
+    const remaining = node.scrollHeight - node.scrollTop - node.clientHeight;
+    if (remaining <= scrollEndThreshold) {
+      hasScrolledToEndRef.current = true;
+      onScrolledToEnd?.();
+    }
+  }, [numPages, onScrolledToEnd, renderedPages, scrollEndThreshold]);
 
   const measuredRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
@@ -69,6 +118,11 @@ export default function TermsPdfViewerClient({
       observerRef.current?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const animationFrame = window.requestAnimationFrame(checkScrolledToEnd);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [checkScrolledToEnd, containerWidth, numPages, renderedPages]);
 
   const fileName = useMemo(() => {
     const rawName = src.split("/").pop() || "document.pdf";
@@ -109,6 +163,7 @@ export default function TermsPdfViewerClient({
         className={cn("w-full overflow-y-auto", className)}
         style={layoutStyle}
         dir="ltr"
+        onScroll={checkScrolledToEnd}
       >
         {children}
 
@@ -126,6 +181,9 @@ export default function TermsPdfViewerClient({
           }
           onLoadSuccess={({ numPages: nextNumPages }) => {
             setNumPages(nextNumPages);
+            setRenderedPages(0);
+            renderedPageNumbersRef.current.clear();
+            hasScrolledToEndRef.current = false;
             setLoadError(null);
           }}
           onLoadError={(error) => {
@@ -155,6 +213,10 @@ export default function TermsPdfViewerClient({
                       }
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
+                      onRenderSuccess={() => {
+                        renderedPageNumbersRef.current.add(pageNumber);
+                        setRenderedPages(renderedPageNumbersRef.current.size);
+                      }}
                     />
                   </div>
                 ),

@@ -1,7 +1,7 @@
 import { Scale } from "lucide-react";
 import AppButton from "@/components/AppButton";
 import Link from "next/link";
-import TermsPdfPreview from "@/components/terms/TermsPdfPreview";
+import PdfPreview from "@/components/pdf/PdfPreview";
 
 export default function Terms() {
   return (
@@ -18,7 +18,7 @@ export default function Terms() {
           اقرأ بعناية وتأكد من استخدام منصتنا وفقًا لشروط استخدامنا
         </p>
       </div>
-      <TermsPdfPreview
+      <PdfPreview
         src="/docs/القانون الداخلي لمنصة بادر.pdf"
         viewerStyle={{ height: "75vh" }}
       />

@@ -18,9 +18,17 @@ export class UserService {
     });
   }
 
-  static async deleteUser(userId?: string, email?: string) {
-    return await prisma.user.delete({
-      where: { id: userId, email },
+  static async deleteUser(userId: string): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      // 1. Remove from email queue so they get no future emails
+      await tx.postEmailQueue.deleteMany({ where: { userId } });
+
+      // 2. Remove user
+      await tx.user.delete({
+        where: { id: userId },
+      });
+
+      // the rest is onCasecade or SetNull
     });
   }
 

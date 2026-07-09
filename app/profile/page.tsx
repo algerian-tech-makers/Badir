@@ -8,9 +8,9 @@ import { ParticipationService } from "@/services/participations";
 import { UserService } from "@/services/user";
 import { OrganizationService } from "@/services/organizations";
 import { OrganizationStatus, UserType } from "@prisma/client";
-import React from "react";
 import { InitiativeService } from "@/services/initiatives";
 import OrgInitiative from "@/components/pages/OrgInitiative";
+import DeleteAccount from "@/components/pages/profile/DeleteAccount";
 
 export default async function Page() {
   const session = await getSessionWithCheckProfile();
@@ -86,6 +86,12 @@ export default async function Page() {
               </div>
             )}
           </div>
+          <div className="border-neutrals-300 mx-auto mt-6 max-w-5xl rounded-lg bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-2xl font-semibold text-red-600">
+              منطقة خطرة
+            </h2>
+            <DeleteAccount />
+          </div>
         </div>
       );
     } else {
@@ -132,6 +138,12 @@ export default async function Page() {
                 </div>
               </div>
             )}
+          </div>
+          <div className="border-neutrals-300 mx-auto mt-6 max-w-5xl rounded-lg bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-2xl font-semibold text-red-600">
+              منطقة خطرة
+            </h2>
+            <DeleteAccount />
           </div>
         </div>
       );

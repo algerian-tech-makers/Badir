@@ -9,43 +9,48 @@ datasource db {
 }
 
 model User {
-  id                     String                  @id @default(cuid())
-  name                   String
-  image                  String?
-  email                  String                  @unique
-  emailVerified          Boolean
-  firstName              String                  @map("first_name") @db.VarChar(100)
-  lastName               String                  @map("last_name") @db.VarChar(100)
-  phone                  String?                 @db.VarChar(20)
-  dateOfBirth            DateTime?               @map("date_of_birth") @db.Date
-  sex                    Sex                     @default(male)
-  bio                    String?
-  userType               UserType                @map("user_type")
-  latitude               Decimal?                @db.Decimal(10, 8)
-  longitude              Decimal?                @db.Decimal(11, 8)
-  city                   String?                 @db.VarChar(100)
-  state                  String?                 @db.VarChar(100)
-  country                String?                 @default("Algeria") @db.VarChar(100)
-  isActive               Boolean                 @default(true) @map("is_active")
-  createdAt              DateTime                @default(now()) @map("created_at")
-  updatedAt              DateTime                @default(now()) @updatedAt @map("updated_at")
-  profileCompleted       Boolean                 @default(false) @map("profile_completed")
-  mailerLiteId           String?                 @map("mailerlite_id") @db.VarChar(100)
-  newsletterSubscribed   Boolean                 @default(false) @map("newsletter_subscribed")
-  newsletterSubscribedAt DateTime?               @map("newsletter_subscribed_at")
-  role                   UserRole                @default(USER)
-  accounts               Account[]
-  participations         InitiativeParticipant[]
-  posts                  InitiativePost[]
-  organizedInitiatives   Initiative[]            @relation("UserOrganizedInitiatives")
-  organization           Organization?
-  platformRatings        PlatformRating[]
-  sessions               Session[]
-  ratings                UserInitiativeRating[]
-  qualifications         UserQualification[]     @relation("UserQualifications")
+  id                       String                  @id @default(cuid())
+  name                     String
+  image                    String?
+  email                    String                  @unique
+  emailVerified            Boolean
+  firstName                String                  @map("first_name") @db.VarChar(100)
+  lastName                 String                  @map("last_name") @db.VarChar(100)
+  phone                    String?                 @db.VarChar(20)
+  dateOfBirth              DateTime?               @map("date_of_birth") @db.Date
+  sex                      Sex?
+  bio                      String?
+  userType                 UserType                @map("user_type")
+  geohash                  String?                 @map("geohash") @db.VarChar(12)
+  city                     String?                 @db.VarChar(100)
+  state                    String?                 @db.VarChar(100)
+  country                  String?                 @default("Algeria") @db.VarChar(100)
+  isActive                 Boolean                 @default(true) @map("is_active")
+  createdAt                DateTime                @default(now()) @map("created_at")
+  updatedAt                DateTime                @default(now()) @updatedAt @map("updated_at")
+  profileCompleted         Boolean                 @default(false) @map("profile_completed")
+  mailerLiteId             String?                 @map("mailerlite_id") @db.VarChar(100)
+  newsletterSubscribed     Boolean                 @default(false) @map("newsletter_subscribed")
+  newsletterSubscribedAt   DateTime?               @map("newsletter_subscribed_at")
+  newsletterUnsubscribedAt DateTime?               @map("newsletter_unsubscribed_at")
+  consentGiven             Boolean                 @default(false) @map("consent_given")
+  consentGivenAt           DateTime?               @map("consent_given_at")
+  consentVersion           String?                 @map("consent_version") // e.g. "v1.0" "v1.1"
+  role                     UserRole                @default(USER)
+  accounts                 Account[]
+  participations           InitiativeParticipant[]
+  posts                    InitiativePost[]
+  organizedInitiatives     Initiative[]            @relation("UserOrganizedInitiatives")
+  organization             Organization?
+  platformRatings          PlatformRating[]
+  sessions                 Session[]
+  ratings                  UserInitiativeRating[]
+  qualifications           UserQualification[]     @relation("UserQualifications")
+  lastActiveAt             DateTime?               @map("last_active_at")
 
   @@index([email])
   @@index([createdAt])
+  @@index([lastActiveAt])
   @@map("users")
 }
 
@@ -145,8 +150,8 @@ model Initiative {
   participants           InitiativeParticipant[]
   posts                  InitiativePost[]
   category               InitiativeCategory      @relation(fields: [categoryId], references: [id])
-  organizerOrg           Organization?           @relation("OrganizationInitiatives", fields: [organizerOrgId], references: [id], onDelete: Cascade)
-  organizerUser          User?                   @relation("UserOrganizedInitiatives", fields: [organizerUserId], references: [id], onDelete: Cascade)
+  organizerOrg           Organization?           @relation("OrganizationInitiatives", fields: [organizerOrgId], references: [id], onDelete: SetNull)
+  organizerUser          User?                   @relation("UserOrganizedInitiatives", fields: [organizerUserId], references: [id], onDelete: SetNull)
   ratings                UserInitiativeRating[]
 
   @@index([status])
@@ -176,7 +181,7 @@ model InitiativeParticipant {
 model InitiativePost {
   id           String           @id @default(cuid())
   initiativeId String           @map("initiative_id") @db.VarChar(255)
-  authorId     String           @map("author_id")
+  authorId     String?          @map("author_id")
   title        String?          @db.VarChar(200)
   content      String
   postType     PostType         @default(announcement) @map("post_type")
@@ -184,7 +189,7 @@ model InitiativePost {
   status       PostStatus       @default(published)
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @default(now()) @updatedAt @map("updated_at")
-  author       User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author       User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
   initiative   Initiative       @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
   attachments  PostAttachment[]
 
@@ -220,19 +225,23 @@ model SupportRequest {
 
 model UserInitiativeRating {
   id           Int        @id @default(autoincrement())
-  userId       String     @map("user_id")
+  userId       String?    @map("user_id")
   initiativeId String     @map("initiative_id") @db.VarChar(255)
   rating       Decimal?   @db.Decimal(3, 1)
   comment      String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at")
   initiative   Initiative @relation(fields: [initiativeId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@unique([userId, initiativeId])
+  @@index([initiativeId])
   @@map("user_initiative_ratings")
 }
 
 model PlatformRating {
   id                      String   @id @default(cuid())
-  userId                  String   @map("user_id")
+  userId                  String?  @map("user_id")
   easeOfUse               String   @map("ease_of_use")
   informationClarity      String   @map("information_clarity")
   contentDiversity        String   @map("content_diversity")
@@ -246,7 +255,7 @@ model PlatformRating {
   appRating               String   @map("app_rating")
   createdAt               DateTime @default(now()) @map("created_at")
   updatedAt               DateTime @updatedAt @map("updated_at")
-  user                    User     @relation(fields: [userId], references: [id])
+  user                    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([createdAt])
@@ -339,11 +348,6 @@ enum Sex {
   female
 }
 
-enum CertificateType {
-  pdf
-  image
-}
-
 enum OrganizerType {
   user
   organization
@@ -353,6 +357,7 @@ enum InitiativeStatus {
   published
   draft
   cancelled
+  completed
 }
 
 enum PostStatus {

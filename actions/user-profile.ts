@@ -3,10 +3,9 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
-import { Decimal } from "@prisma/client/runtime/library";
 import z from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { revalidatePath } from "next/cache";
+import { refresh, revalidatePath } from "next/cache";
 import {
   registrationSchema,
   type RegistrationFormData,
@@ -19,6 +18,10 @@ import { UserService } from "@/services/user";
 import { ActionResponse } from "@/types/Statics";
 import { getPublicStorageUrl } from "./helpers-sf";
 import { AUTHORIZED_REDIRECTION } from "@/data/routes";
+import { encodeGeohash } from "@/lib/geohash";
+import { SIGNUP_CONSENT_VERSION } from "@/lib/signup-consent-config";
+import { redirect } from "next/navigation";
+import { logoutAction } from "./logout";
 
 export async function updateUserProfileAction(
   data: UserProfile,
@@ -93,20 +96,28 @@ export async function updateUserProfileAction(
         : "+213 " + data.phone
       : undefined;
 
+    const normalizedSex =
+      data.sex === "unspecified" || !data.sex ? null : data.sex;
+
+    const geohash =
+      data.latitude !== undefined && data.longitude !== undefined
+        ? encodeGeohash(data.latitude, data.longitude)
+        : undefined;
+
     // Update user record
     await prisma.user.update({
       where: { id: userId },
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
-        phone: formattedPhone,
+        sex: normalizedSex,
+        phone: formattedPhone ?? null,
         city: data.city,
         state: data.state,
         country: data.country,
         bio: data.bio || null,
         image: imageUrl || undefined,
-        latitude: data.latitude ? new Decimal(data.latitude) : null,
-        longitude: data.longitude ? new Decimal(data.longitude) : null,
+        geohash: geohash ?? undefined,
         updatedAt: new Date(),
       },
     });
@@ -208,22 +219,26 @@ export async function completeProfileAction(
         ? validatedData.customEducationalLevel
         : validatedData.educationalLevel;
 
+    const normalizedSex =
+      validatedData.sex === "unspecified" ? null : validatedData.sex;
+
+    const geohash =
+      validatedData.latitude !== undefined &&
+      validatedData.longitude !== undefined
+        ? encodeGeohash(validatedData.latitude, validatedData.longitude)
+        : null;
+
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
         // Personal Information (Step 1)
         dateOfBirth: new Date(validatedData.dateOfBirth),
-        sex: validatedData.sex,
-        phone: validatedData.phone,
+        sex: normalizedSex,
+        phone: validatedData.phone ?? null,
         city: validatedData.city,
         state: validatedData.state,
         country: validatedData.country,
-        latitude: validatedData.latitude
-          ? new Decimal(validatedData.latitude)
-          : null,
-        longitude: validatedData.longitude
-          ? new Decimal(validatedData.longitude)
-          : null,
+        geohash,
 
         // Bio and user type
         bio: validatedData.bio,
@@ -322,5 +337,72 @@ export async function getUserImage(id?: string): Promise<string | null> {
   } catch (error) {
     console.error("Failed to fetch user image:", error);
     return null;
+  }
+}
+
+export async function privacyPolicyConsentAction(): Promise<
+  ActionResponse<null, {}>
+> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || !session.user) {
+      return {
+        success: false,
+        error: "يجب تسجيل الدخول أولاً",
+      };
+    }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        consentGiven: true,
+        consentGivenAt: new Date(),
+        consentVersion: SIGNUP_CONSENT_VERSION,
+      },
+    });
+
+    return {
+      success: true,
+      message: "تم تسجيل موافقتك على سياسة الخصوصية بنجاح",
+    };
+  } catch (error) {
+    console.error("Error recording privacy policy consent:", error);
+    return {
+      success: false,
+      error: "حدث خطأ أثناء تسجيل موافقتك. يرجى المحاولة مرة أخرى",
+    };
+  }
+}
+
+export async function deleteUserAccountAction(): Promise<
+  ActionResponse<null, {}>
+> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session || !session.user) {
+    return {
+      success: false,
+      error: "يجب تسجيل الدخول لتحديث بياناتك الشخصية",
+    };
+  }
+
+  await logoutAction();
+
+  try {
+    await UserService.deleteUser(session.user.id);
+    return {
+      success: true,
+      message: "تم حذف حسابك بنجاح",
+    };
+  } catch (error) {
+    console.error("Error deleting user account:", error);
+    return {
+      success: false,
+      error: "حدث خطأ أثناء حذف حسابك. يرجى المحاولة مرة أخرى",
+    };
   }
 }

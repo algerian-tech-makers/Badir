@@ -253,7 +253,7 @@ export default function PostEditor({
         <div className="space-y-2">
           <Label>المحتوى</Label>
 
-          <div className="min-h-[300px] p-3">
+          <div className="min-h-75 p-3">
             <RichTextEditor
               output="html"
               content={content}

@@ -4,11 +4,11 @@ import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 
-const TermsPdfViewerClient = dynamic(() => import("./TermsPdfViewerClient"), {
+const PdfViewerClient = dynamic(() => import("./PdfViewerClient"), {
   ssr: false,
 });
 
-interface TermsPdfPreviewProps {
+interface PdfPreviewProps {
   src: string;
   title?: string;
   description?: string;
@@ -16,9 +16,10 @@ interface TermsPdfPreviewProps {
   viewerClassName?: string;
   viewerStyle?: CSSProperties;
   toolbar?: boolean;
+  onScrolledToEnd?: () => void;
 }
 
-export default function TermsPdfPreview({
+export default function PdfPreview({
   src,
   title,
   description,
@@ -26,20 +27,22 @@ export default function TermsPdfPreview({
   viewerClassName,
   viewerStyle,
   toolbar,
-}: TermsPdfPreviewProps) {
+  onScrolledToEnd,
+}: PdfPreviewProps) {
   return (
     <section className={cn("space-y-4", className)}>
       {title ? (
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <h2 className="mb-1 text-lg font-semibold text-gray-900">{title}</h2>
       ) : null}
       {description ? (
         <p className="text-sm text-gray-600">{description}</p>
       ) : null}
-      <TermsPdfViewerClient
+      <PdfViewerClient
         src={src}
         className={viewerClassName}
         style={viewerStyle}
         toolbar={toolbar}
+        onScrolledToEnd={onScrolledToEnd}
       />
     </section>
   );

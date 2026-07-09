@@ -10,13 +10,16 @@ export const step1Schema = z.object({
       const age = today.getFullYear() - birthDate.getFullYear();
       return age >= 13;
     }, "يجب أن تكون 13 سنة على الأقل"),
-  sex: z.enum(["male", "female"], {
+  sex: z.enum(["male", "female", "unspecified"], {
     error: "الجنس مطلوب",
   }),
-  phone: z
-    .string()
-    .min(1, "رقم الهاتف مطلوب")
-    .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)"),
+  phone: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z
+      .string()
+      .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
+      .optional(),
+  ),
   phoneCountryCode: z.string().default("DZ").optional(),
   city: z.string().max(100, "المدينة يجب أن تكون أقل من 100 حرف").optional(),
   state: z
@@ -94,6 +97,7 @@ export type RegistrationFormData = z.infer<typeof registrationSchema>;
 export const sexOptions = [
   { value: "male", label: "ذكر" },
   { value: "female", label: "أنثى" },
+  { value: "unspecified", label: "أفضل عدم الإجابة" },
 ];
 
 export const educationalLevelOptions = [
@@ -125,7 +129,7 @@ export const validateStep = (step: number, data: any) => {
 
 export const profileDefaultValues: RegistrationFormData = {
   dateOfBirth: "",
-  sex: "male",
+  sex: "unspecified",
   phone: "",
   phoneCountryCode: "DZ",
   city: "",

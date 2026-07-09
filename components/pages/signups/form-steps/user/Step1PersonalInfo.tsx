@@ -110,6 +110,7 @@ export default function Step1PersonalInfo() {
                   error={errors.phone?.message}
                   countryCode={countryCode}
                   onCountryChange={(code) => setValue("phoneCountryCode", code)}
+                  isOptional
                   className="flex-1"
                 />
               );

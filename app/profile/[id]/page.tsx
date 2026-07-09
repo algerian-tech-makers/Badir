@@ -108,6 +108,22 @@ export default async function UserProfilePage({
           </p>
         </div>
 
+        {/* Sex */}
+        {user.sex && (
+          <div className="bg-neutrals-100 mb-6 rounded-lg p-6">
+            <h2 className="text-neutrals-700 mb-4 text-lg font-semibold">
+              الجنس
+            </h2>
+            <p className="text-neutrals-600">
+              {userData.sex === "male"
+                ? "ذكر"
+                : userData.sex === "female"
+                  ? "أنثى"
+                  : "غير محدد"}
+            </p>
+          </div>
+        )}
+
         {/* Education and Professional Information */}
         <div className="bg-neutrals-100 mb-6 rounded-lg p-6">
           <h2 className="text-neutrals-700 mb-4 text-lg font-semibold">
