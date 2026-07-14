@@ -5,7 +5,10 @@ import { headers } from "next/headers";
 import { revalidatePath, updateTag, unstable_cache } from "next/cache";
 import { InitiativeService } from "@/services/initiatives";
 import { InitiativePostsService } from "@/services/posts";
-import { StorageHelpers } from "@/services/supabase-storage";
+import {
+  StorageHelpers,
+  extractStoragePath,
+} from "@/services/supabase-storage";
 import { PostType, PostStatus, InitiativeStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { extractImageSrcsFromHtml } from "@/lib/utils";
@@ -198,26 +201,19 @@ export async function updatePostAction(
       try {
         await InitiativePostsService.removeAttachment(imageUrl);
 
-        const idx = imageUrl.indexOf("/post-images/");
-        if (idx !== -1) {
-          const path = imageUrl.substring(idx + "/post-images/".length);
+        const pathToDelete = extractStoragePath(imageUrl);
+        if (pathToDelete) {
           try {
-            await storage.deleteFile("post-images", path);
+            await storage.deleteFile("post-images", pathToDelete);
           } catch (e) {
-            console.warn("Failed to delete file from storage:", path, e);
+            console.warn(
+              "Failed to delete file from storage:",
+              pathToDelete,
+              e,
+            );
           }
         } else {
-          // fallback: try to parse pathname (may include bucket in path)
-          try {
-            const u = new URL(imageUrl);
-            const parts = u.pathname.split("/post-images/");
-            console.log("Derived storage path parts:", parts);
-            if (parts[1]) {
-              await storage.deleteFile("post-images", parts[1]);
-            }
-          } catch {
-            console.warn("Could not derive storage path for:", imageUrl);
-          }
+          console.warn("Could not derive storage path for:", imageUrl);
         }
       } catch (err) {
         console.error(
@@ -345,7 +341,10 @@ export async function deletePostImageAction(imageUrl: string) {
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
   try {
     const storage = new StorageHelpers();
-    await storage.deleteFile("post-images", imageUrl);
+    const pathToDelete = extractStoragePath(imageUrl);
+    if (pathToDelete) {
+      await storage.deleteFile("post-images", pathToDelete);
+    }
     return { success: true };
   } catch {
     return { success: false, error: "فشل حذف الصورة" };

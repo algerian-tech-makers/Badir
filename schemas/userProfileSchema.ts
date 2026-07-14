@@ -14,13 +14,13 @@ const UserProfileSchema = z.object({
     (val) => (val === "" || val === null ? undefined : val),
     z.enum(["male", "female", "unspecified"]).optional(),
   ),
-  phone: z.preprocess(
-    (val) => (val === "" || val === null ? undefined : val),
-    z
-      .string()
-      .regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)")
-      .optional(),
-  ),
+  phone: z
+    .union([
+      z.string().regex(/^\d{6,14}$/, "الرجاء إدخال رقم هاتف صحيح (أرقام فقط)"),
+      z.literal(""),
+      z.null(), // this is for when
+    ])
+    .optional(),
   phoneCountryCode: z.string(),
   city: z.string().max(100, "المدينة يجب أن تكون أقل من 100 حرف").optional(),
   state: z
@@ -66,8 +66,6 @@ const UserProfileSchema = z.object({
       "النبذة الشخصية يجب أن تكون أقل من 1000 حرف",
     )
     .nullable(),
-
-  image: z.string().nullable().optional(),
 });
 
 export default UserProfileSchema;

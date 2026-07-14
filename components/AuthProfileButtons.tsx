@@ -28,7 +28,6 @@ export function AuthProfileButtons({
   const { data: session, isPending: isSessionPending } = useSession();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
-  const [hasLoadedImage, setHasLoadedImage] = useState(false);
 
   const fetchUserImage = useCallback(async () => {
     const imagePath = await getUserImage();
@@ -49,16 +48,28 @@ export function AuthProfileButtons({
   }, []);
 
   useEffect(() => {
-    if (!session?.user || hasLoadedImage) return;
+    if (!session?.user) return;
 
-    if (session.user.userType !== UserType.organization) {
-      fetchUserImage();
-    } else {
-      fetchOrganizationLogo();
-    }
+    const fetchImage = () => {
+      if (session.user.userType !== UserType.organization) {
+        fetchUserImage();
+      } else {
+        fetchOrganizationLogo();
+      }
+    };
 
-    setHasLoadedImage(true);
-  }, [session?.user.id, hasLoadedImage, fetchUserImage, fetchOrganizationLogo]);
+    fetchImage();
+
+    window.addEventListener("profile-image-updated", fetchImage);
+    return () => {
+      window.removeEventListener("profile-image-updated", fetchImage);
+    };
+  }, [
+    session?.user.id,
+    session?.user.userType,
+    fetchUserImage,
+    fetchOrganizationLogo,
+  ]);
 
   const handleProfileClick = () => {
     setIsPopoverOpen(false);
@@ -180,11 +191,13 @@ export function AuthProfileButtons({
                     aria-label="Open user menu"
                   >
                     <Avatar className="hover:ring-primary-400 h-10 w-10 cursor-pointer ring-offset-1 transition-all hover:ring-2 md:h-12 md:w-12">
-                      <AvatarImage
-                        className="object-cover"
-                        src={image || ""}
-                        alt={session.user.name || "المستخدم"}
-                      />
+                      {image && (
+                        <AvatarImage
+                          className="object-cover"
+                          src={image || ""}
+                          alt={session.user.name || "المستخدم"}
+                        />
+                      )}
                       <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
                         <Image
                           src="/images/icons/user-reverse.svg"

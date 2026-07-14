@@ -10,7 +10,10 @@ import {
   registrationSchema,
   type RegistrationFormData,
 } from "@/schemas/signupUserSchema";
-import { StorageHelpers } from "@/services/supabase-storage";
+import {
+  StorageHelpers,
+  extractStoragePath,
+} from "@/services/supabase-storage";
 import { getCallingCodeFromCountry, mimeTypeToExtension } from "@/lib/utils";
 import path from "path";
 import { UserProfile, validateUserProfile } from "@/schemas";
@@ -38,63 +41,19 @@ export async function updateUserProfileAction(
       };
     }
 
-    validateUserProfile(data);
-
     const userId = session.user.id;
-    let imageUrl: string | null = null;
 
-    // Handle image upload if provided
-    if (data.image && typeof data.image === "string" && data.image.length > 0) {
-      try {
-        const { base64, name, type } = JSON.parse(data.image);
-
-        const currentImage = await UserService.getUserImage(userId);
-
-        const fileBuffer = Buffer.from(base64, "base64");
-        let ext = path.extname(name);
-        if (!ext && type) {
-          ext = mimeTypeToExtension(type) || ".bin";
-        }
-
-        const fileName = `${uuidv4()}.${name
-          .replace(/\s+/g, "-")
-          .replace(ext, "")}${ext}`;
-
-        const filePath = `${userId}/${fileName}`;
-        const storage = new StorageHelpers();
-
-        const result = await storage.uploadFile(
-          "avatars",
-          filePath,
-          fileBuffer,
-          type,
-        );
-
-        if (result.path && currentImage && currentImage.image) {
-          try {
-            await storage.deleteFile("avatars", currentImage.image);
-          } catch (deleteError) {
-            console.error("Failed to delete old profile image:", deleteError);
-          }
-        }
-
-        // I added this here because I think setting users image to url directly is way more efficient
-        // than fetching it every time from storage bucket
-        imageUrl = await getPublicStorageUrl("avatars", result.path);
-      } catch (error) {
-        console.error("Error uploading profile image:", error);
-        return {
-          success: false,
-          error: "حدث خطأ أثناء رفع الصورة الشخصية، يرجى المحاولة مرة أخرى",
-        };
-      }
-    }
+    // Fetch current data for dirty check
+    const currentUser = await prisma.user.findUnique({ where: { id: userId } });
+    const currentQualification = await prisma.userQualification.findFirst({
+      where: { userId },
+    });
 
     const formattedPhone = data.phone
       ? data.phoneCountryCode
         ? `+${getCallingCodeFromCountry(data.phoneCountryCode)} ${data.phone}`
         : "+213 " + data.phone
-      : undefined;
+      : null;
 
     const normalizedSex =
       data.sex === "unspecified" || !data.sex ? null : data.sex;
@@ -102,8 +61,36 @@ export async function updateUserProfileAction(
     const geohash =
       data.latitude !== undefined && data.longitude !== undefined
         ? encodeGeohash(data.latitude, data.longitude)
-        : undefined;
+        : null;
 
+    const hasUserChanged =
+      currentUser?.firstName !== data.firstName ||
+      currentUser?.lastName !== data.lastName ||
+      currentUser?.sex !== normalizedSex ||
+      currentUser?.phone !== formattedPhone ||
+      (currentUser?.city || null) !== (data.city || null) ||
+      currentUser?.state !== data.state ||
+      currentUser?.country !== data.country ||
+      (currentUser?.bio || null) !== (data.bio || null) ||
+      (currentUser?.geohash || null) !== geohash;
+
+    const hasQualsChanged = data.qualifications
+      ? currentQualification?.specification !==
+          data.qualifications.specification ||
+        currentQualification?.educationalLevel !==
+          data.qualifications.educationalLevel ||
+        (currentQualification?.currentJob || "") !==
+          (data.qualifications.currentJob || "")
+      : false;
+
+    if (!hasUserChanged && !hasQualsChanged) {
+      return {
+        success: true,
+        message: "تم تحديث البيانات الشخصية بنجاح",
+      };
+    }
+
+    validateUserProfile(data);
     // Update user record
     await prisma.user.update({
       where: { id: userId },
@@ -116,7 +103,6 @@ export async function updateUserProfileAction(
         state: data.state,
         country: data.country,
         bio: data.bio || null,
-        image: imageUrl || undefined,
         geohash: geohash ?? undefined,
         updatedAt: new Date(),
       },

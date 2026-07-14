@@ -25,6 +25,7 @@ import { handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InitiativeService } from "@/services/initiatives";
 import { sanitize } from "@/lib/santitize-client";
+import ImageManager from "@/components/ImageManager";
 
 type CategoryOption = {
   value: string;
@@ -35,6 +36,7 @@ interface InitiativeFormProps {
   categories: CategoryOption[];
   initialData?: Awaited<ReturnType<typeof InitiativeService.getById>>;
   isOrganization?: boolean;
+  onDeleteCoverImage?: () => Promise<void>;
 }
 
 function parseParticipationQstForm(input: unknown): FormFieldType[] {
@@ -78,6 +80,7 @@ export default function InitiativeForm({
   categories,
   initialData,
   isOrganization,
+  onDeleteCoverImage,
 }: InitiativeFormProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("basic-info");
@@ -88,6 +91,10 @@ export default function InitiativeForm({
     initialData?.participationQstForm
       ? parseParticipationQstForm(initialData?.participationQstForm)
       : [],
+  );
+
+  const [localCoverImage, setLocalCoverImage] = useState<string | null>(
+    initialData?.coverImage || null,
   );
 
   const {
@@ -584,31 +591,36 @@ export default function InitiativeForm({
                 name="coverImage"
                 control={control}
                 render={({ field }) => (
-                  <FormInput
-                    type="file"
-                    label="صورة الغلاف"
-                    name="coverImage"
-                    placeholder="اختر صورة الغلاف"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.coverImage?.message}
-                    isOptional
-                    rtl={true}
-                    fileAccept={BUCKET_MIME_TYPES["post-images"].map(
-                      mimeTypeToExtension,
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      صورة الغلاف
+                    </label>
+                    <ImageManager
+                      shape="square"
+                      currentImageUrl={localCoverImage}
+                      onUpload={async (file) => {
+                        const objectUrl = URL.createObjectURL(file);
+                        setLocalCoverImage(objectUrl);
+                        handleFileUpload(
+                          file,
+                          BUCKET_SIZE_LIMITS["post-images"],
+                          (value) => field.onChange(JSON.stringify(value)),
+                        );
+                      }}
+                      onDelete={async () => {
+                        if (onDeleteCoverImage && initialData?.coverImage) {
+                          await onDeleteCoverImage();
+                        }
+                        setLocalCoverImage(null);
+                        field.onChange(null);
+                      }}
+                    />
+                    {errors.coverImage && (
+                      <p className="text-sm text-red-500">
+                        {errors.coverImage.message}
+                      </p>
                     )}
-                    fileMaxSize={
-                      BUCKET_SIZE_LIMITS["post-images"] / 1024 / 1024
-                    }
-                    onFileChange={(file, onChange) =>
-                      handleFileUpload(
-                        file,
-                        BUCKET_SIZE_LIMITS["post-images"],
-                        (value) => onChange(JSON.stringify(value)),
-                      )
-                    }
-                  />
+                  </div>
                 )}
               />
             </div>
