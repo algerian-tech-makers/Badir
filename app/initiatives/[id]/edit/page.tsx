@@ -46,6 +46,7 @@ export default async function EditInitiativePage({
       </h1>
       <InitiativeForm
         categories={categoryOptions}
+        submitText="تعديل المبادرة"
         initialData={initiative}
         isOrganization={session.user.userType === "organization"}
       />

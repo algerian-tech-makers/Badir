@@ -221,6 +221,15 @@ export async function updateInitiativeAction(
       }
     }
 
+    if (data.coverImage === null && initiative.coverImage) {
+      const storage = new StorageHelpers();
+      await storage.deleteFile(
+        "post-images",
+        extractStoragePath(initiative.coverImage) || "",
+      );
+      coverImagePath = null;
+    }
+
     const updateData = await prisma.initiative.update({
       where: { id: initiativeId },
       data: {
@@ -251,7 +260,7 @@ export async function updateInitiativeAction(
             ? data.status
             : InitiativeStatus.draft,
         updatedAt: new Date(),
-        coverImage: coverImagePath || initiative.coverImage,
+        coverImage: coverImagePath,
       },
     });
 

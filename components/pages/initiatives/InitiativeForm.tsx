@@ -34,6 +34,7 @@ type CategoryOption = {
 
 interface InitiativeFormProps {
   categories: CategoryOption[];
+  submitText?: string;
   initialData?: Awaited<ReturnType<typeof InitiativeService.getById>>;
   isOrganization?: boolean;
   onDeleteCoverImage?: () => Promise<void>;
@@ -78,6 +79,7 @@ function parseParticipationQstForm(input: unknown): FormFieldType[] {
 
 export default function InitiativeForm({
   categories,
+  submitText = "نشر المبادرة",
   initialData,
   isOrganization,
   onDeleteCoverImage,
@@ -592,10 +594,8 @@ export default function InitiativeForm({
                 control={control}
                 render={({ field }) => (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      صورة الغلاف
-                    </label>
                     <ImageManager
+                      note={`* لا تتجاوز ${BUCKET_SIZE_LIMITS["post-images"] / 1024 / 1024} ميغابايت`}
                       shape="square"
                       currentImageUrl={localCoverImage}
                       onUpload={async (file) => {
@@ -812,7 +812,7 @@ export default function InitiativeForm({
                       size="sm"
                       border="default"
                     >
-                      نشر المبادرة
+                      {submitText}
                     </AppButton>
                   </>
                 )}
@@ -871,7 +871,7 @@ export default function InitiativeForm({
                     isPending && <Loader2 className="h-4 w-4 animate-spin" />
                   }
                 >
-                  نشر المبادرة
+                  {submitText}
                 </AppButton>
               </div>
             </div>

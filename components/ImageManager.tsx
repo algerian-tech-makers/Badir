@@ -11,6 +11,7 @@ interface ImageManagerProps {
   onUpload: (file: File) => Promise<void>;
   onDelete?: () => Promise<void> | void;
   shape?: "circle" | "square";
+  note?: string;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ export default function ImageManager({
   onUpload,
   onDelete,
   shape = "circle",
+  note,
   className,
 }: ImageManagerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +107,8 @@ export default function ImageManager({
           <Trash2 className="h-5 w-5" />
         </AppButton>
       )}
+
+      {note && <p className="mt-2 text-end text-xs text-gray-500">{note}</p>}
     </div>
   );
 }

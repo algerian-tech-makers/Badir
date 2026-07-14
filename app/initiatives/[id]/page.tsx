@@ -298,6 +298,7 @@ export default async function InitiativeDetailsPage({
                 src={initiative.coverImage || ""}
                 alt={initiative.titleAr}
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />

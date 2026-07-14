@@ -65,6 +65,11 @@ export async function checkAdminPermission() {
   return session.user.id;
 }
 
+/**
+ * Upload user profile image from Form Data
+ * @param formData Form Data containing the file
+ * @returns ActionResponse `Promise` with success status and optional error message
+ */
 export async function uploadUserProfileImage(
   formData: FormData,
 ): Promise<ActionResponse<any, any>> {
@@ -117,6 +122,11 @@ export async function uploadUserProfileImage(
   }
 }
 
+/**
+ * Upload organization logo from Form Data
+ * @param formData Form Data containing the file
+ * @returns ActionResponse `Promise` with success status and optional error message
+ */
 export async function uploadOrganizationLogo(
   formData: FormData,
 ): Promise<ActionResponse<any, any>> {
@@ -178,6 +188,10 @@ export async function uploadOrganizationLogo(
   }
 }
 
+/**
+ * Delete user profile image
+ * @returns ActionResponse `Promise` with success status and optional error message
+ */
 export async function deleteUserProfileImage(): Promise<
   ActionResponse<any, any>
 > {
@@ -205,6 +219,10 @@ export async function deleteUserProfileImage(): Promise<
   }
 }
 
+/**
+ * Delete organization logo
+ * @returns ActionResponse `Promise` with success status and optional error message
+ */
 export async function deleteOrganizationLogo(): Promise<
   ActionResponse<any, any>
 > {
@@ -241,6 +259,11 @@ export async function deleteOrganizationLogo(): Promise<
   }
 }
 
+/**
+ * Delete initiative cover image
+ * @param initiativeId Initiative ID
+ * @returns ActionResponse `Promise` with success status and optional error message
+ */
 export async function deleteInitiativeCoverImage(
   initiativeId: string,
 ): Promise<ActionResponse<any, any>> {

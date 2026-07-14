@@ -92,10 +92,8 @@ export default function UserProfileForm({
       const formData = { ...data };
       const originalData = { ...defaultValues };
 
-      const hasImageChanges = false; // no longer managed by form
-
       const hasFieldChanges = !isEqual(formData, originalData);
-      if (!hasFieldChanges && !hasImageChanges) {
+      if (!hasFieldChanges) {
         toast.warning("لم يتم إجراء أي تغييرات للحفظ");
         setIsUpdating(false);
         return;
