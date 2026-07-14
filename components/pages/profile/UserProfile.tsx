@@ -19,10 +19,15 @@ import {
   User,
 } from "lucide-react";
 import AppButton from "@/components/AppButton";
+import {
+  uploadUserProfileImage,
+  deleteUserProfileImage,
+} from "@/actions/helpers-sf";
 import { getUserImage, updateUserProfileAction } from "@/actions/user-profile";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { isEqual } from "lodash";
 import { countryList } from "@/data/statics";
+import ImageManager from "@/components/ImageManager";
+import { useRouter } from "next/navigation";
 
 interface UserProfileFormProps {
   defaultValues: Partial<UserProfile> & { createdAt?: Date | string };
@@ -50,21 +55,45 @@ export default function UserProfileForm({
     defaultValues: {
       ...defaultValues,
       sex: defaultValues.sex ?? "unspecified",
-      image: null,
     },
   });
+
+  const router = useRouter();
+
+  const handleUploadImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await uploadUserProfileImage(formData);
+    if (result.success) {
+      toast.success("تم تحديث الصورة بنجاح");
+      router.refresh();
+      const newImg = await getUserImage();
+      if (newImg) setUserImage(newImg);
+      window.dispatchEvent(new Event("profile-image-updated"));
+    } else {
+      toast.error(result.error || "حدث خطأ أثناء رفع الصورة");
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    const result = await deleteUserProfileImage();
+    if (result.success) {
+      toast.success("تم حذف الصورة بنجاح");
+      setUserImage(null);
+      router.refresh();
+      window.dispatchEvent(new Event("profile-image-updated"));
+    } else {
+      toast.error(result.error || "حدث خطأ أثناء حذف الصورة");
+    }
+  };
 
   const handleFormSubmit = async (data: UserProfile) => {
     try {
       const formData = { ...data };
       const originalData = { ...defaultValues };
 
-      const hasImageChanges = data.image !== null;
-
-      delete formData.image;
-
       const hasFieldChanges = !isEqual(formData, originalData);
-      if (!hasFieldChanges && !hasImageChanges) {
+      if (!hasFieldChanges) {
         toast.warning("لم يتم إجراء أي تغييرات للحفظ");
         setIsUpdating(false);
         return;
@@ -138,12 +167,12 @@ export default function UserProfileForm({
   return (
     <>
       <div className="flex-center mb-4 gap-4">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src={userImage || ""} alt={"المستخدم"} />
-          <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
-            <User className="h-5 w-5" />
-          </AvatarFallback>
-        </Avatar>
+        <ImageManager
+          currentImageUrl={userImage || null}
+          onUpload={handleUploadImage}
+          onDelete={handleDeleteImage}
+          shape="circle"
+        />
         <div className="flex-center-column items-start gap-2">
           <h2 className="text-neutrals-700 text-2xl font-bold">
             {defaultValues.firstName || "المستخدم"}{" "}
@@ -487,41 +516,6 @@ export default function UserProfileForm({
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   error={errors.qualifications?.currentJob?.message}
-                  isOptional
-                  disabled={disabled}
-                />
-              )}
-            />
-          </div>
-        </div>
-        {/* Profile Image and Bio */}
-        <div className="bg-neutrals-100 rounded-lg p-6">
-          <div className="space-y-4">
-            {/* Profile Image */}
-            <Controller
-              name="image"
-              control={control}
-              render={({ field }) => (
-                <FormInput
-                  type="file"
-                  label="الصورة الشخصية"
-                  name="image"
-                  placeholder="اختر صورة شخصية"
-                  error={errors.image?.message}
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  rtl={true}
-                  fileAccept={BUCKET_MIME_TYPES.avatars.map(
-                    mimeTypeToExtension,
-                  )}
-                  fileMaxSize={BUCKET_SIZE_LIMITS.avatars / 1024 / 1024}
-                  onFileChange={(file, onChange) =>
-                    handleFileUpload(
-                      file,
-                      BUCKET_SIZE_LIMITS.avatars,
-                      (value) => onChange(JSON.stringify(value)),
-                    )
-                  }
                   isOptional
                   disabled={disabled}
                 />

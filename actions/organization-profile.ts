@@ -12,7 +12,10 @@ import {
 } from "@/schemas/signupOrgSchema";
 import { AUTHORIZED_REDIRECTION } from "@/data/routes";
 import { OrganizationStatus, UserType } from "@prisma/client";
-import { StorageHelpers } from "@/services/supabase-storage";
+import {
+  StorageHelpers,
+  extractStoragePath,
+} from "@/services/supabase-storage";
 import { ActionResponse, BUCKETS } from "@/types/Statics";
 import { OrganizationService } from "@/services/organizations";
 import { getCallingCodeFromCountry, mimeTypeToExtension } from "@/lib/utils";
@@ -341,7 +344,10 @@ export async function updateOrganizationProfileAction(
 
           if (result.path && orgLogo && orgLogo) {
             try {
-              await storage.deleteFile("avatars", orgLogo);
+              const pathToDelete = extractStoragePath(orgLogo);
+              if (pathToDelete) {
+                await storage.deleteFile("avatars", pathToDelete);
+              }
             } catch (deleteError) {
               console.error("Failed to delete old profile image:", deleteError);
             }

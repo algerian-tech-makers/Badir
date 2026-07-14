@@ -1,6 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { BUCKETS } from "@/types/Statics";
 
+/**
+ * Extract storage path from a public URL
+ * @param url The public URL
+ * @returns The storage path
+ */
+export function extractStoragePath(url: string | null): string | null {
+  if (!url) return null;
+  const match = url.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
+  return match ? match[1] : url;
+}
+
 export class StorageHelpers {
   private supabase: ReturnType<typeof createClient>;
 

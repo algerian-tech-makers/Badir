@@ -21,12 +21,19 @@ import {
   ExternalLink,
 } from "lucide-react";
 import AppButton from "@/components/AppButton";
-import { getOrganizationLogo } from "@/actions/organization-profile";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { updateOrganizationProfileAction } from "@/actions/organization-profile";
+import {
+  uploadOrganizationLogo,
+  deleteOrganizationLogo,
+} from "@/actions/helpers-sf";
+import {
+  updateOrganizationProfileAction,
+  getOrganizationLogo,
+} from "@/actions/organization-profile";
 import { organizationTypeOptions, workAreaOptions } from "@/types/Profile";
 import { isEqual } from "lodash";
 import { countryList } from "@/data/statics";
+import ImageManager from "@/components/ImageManager";
+import { useRouter } from "next/navigation";
 
 interface OrganizationProfileFormProps {
   defaultValues: Partial<OrganizationProfile> & { createdAt?: Date | string };
@@ -40,6 +47,8 @@ export default function OrganizationProfileForm({
   const [isPending, startTransition] = useTransition();
   const [orgLogo, setOrgLogo] = useState<string | null>(null);
 
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
@@ -52,26 +61,49 @@ export default function OrganizationProfileForm({
     defaultValues: {
       ...defaultValues,
       isLicensed: Boolean(defaultValues.officialLicense),
-      logo: null,
       // identificationCard: null,
     },
   });
 
   const isLicensed = watch("isLicensed");
 
+  const handleUploadLogo = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await uploadOrganizationLogo(formData);
+    if (result.success) {
+      toast.success("تم تحديث الشعار بنجاح");
+      router.refresh();
+      const newLogo = await getOrganizationLogo();
+      if (newLogo) setOrgLogo(newLogo);
+      window.dispatchEvent(new Event("profile-image-updated"));
+    } else {
+      toast.error(result.error || "حدث خطأ أثناء رفع الشعار");
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    const result = await deleteOrganizationLogo();
+    if (result.success) {
+      toast.success("تم حذف الشعار بنجاح");
+      setOrgLogo(null);
+      router.refresh();
+      window.dispatchEvent(new Event("profile-image-updated"));
+    } else {
+      toast.error(result.error || "حدث خطأ أثناء حذف الشعار");
+    }
+  };
+
   const handleFormSubmit = async (data: OrganizationProfile) => {
     try {
       const formData = { ...data };
       const originalData = { ...defaultValues };
 
-      const hasImageChanges = data.logo !== null;
-
       delete (formData as Partial<OrganizationProfile>).isLicensed;
       delete originalData.isLicensed;
-      delete formData.logo;
 
       const hasFieldChanges = !isEqual(formData, originalData);
-      if (!hasFieldChanges && !hasImageChanges) {
+      if (!hasFieldChanges) {
         toast.warning("لم يتم إجراء أي تغييرات للحفظ");
         setIsUpdating(false);
         return;
@@ -83,7 +115,6 @@ export default function OrganizationProfileForm({
         if (result.success) {
           toast.success(result.message || "تم حفظ التغييرات بنجاح");
           setIsUpdating(false);
-          setValue("logo", null);
         } else {
           if (result.errors) {
             // Handle field errors
@@ -146,16 +177,12 @@ export default function OrganizationProfileForm({
   return (
     <>
       <div className="flex-center mb-4 gap-4">
-        <Avatar className="h-24 w-24">
-          <AvatarImage
-            className="object-cover"
-            src={orgLogo || ""}
-            alt={defaultValues.name}
-          />
-          <AvatarFallback className="border-primary-500 text-primary-500 border-2 font-semibold">
-            <Building className="h-5 w-5" />
-          </AvatarFallback>
-        </Avatar>
+        <ImageManager
+          currentImageUrl={orgLogo || null}
+          onUpload={handleUploadLogo}
+          onDelete={handleDeleteLogo}
+          shape="circle"
+        />
         <div className="flex-center-column items-start gap-2">
           <h2 className="text-neutrals-700 text-2xl font-bold">
             {defaultValues.name || "المنظمة"}
@@ -668,37 +695,6 @@ export default function OrganizationProfileForm({
                     </a>
                   )}
                 </div>
-              )}
-            />
-
-            {/* Logo */}
-            <Controller
-              name="logo"
-              control={control}
-              render={({ field }) => (
-                <FormInput
-                  type="file"
-                  label="شعار المنظمة"
-                  name="logo"
-                  placeholder="اختر شعار المنظمة"
-                  error={errors.logo?.message}
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  rtl={true}
-                  fileAccept={BUCKET_MIME_TYPES.avatars.map(
-                    mimeTypeToExtension,
-                  )}
-                  fileMaxSize={BUCKET_SIZE_LIMITS.avatars / 1024 / 1024}
-                  onFileChange={(file, onChange) =>
-                    handleFileUpload(
-                      file,
-                      BUCKET_SIZE_LIMITS.avatars,
-                      (value) => onChange(JSON.stringify(value)),
-                    )
-                  }
-                  isOptional
-                  disabled={disabled}
-                />
               )}
             />
 
