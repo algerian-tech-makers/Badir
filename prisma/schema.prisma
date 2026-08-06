@@ -47,6 +47,7 @@ model User {
   ratings                  UserInitiativeRating[]
   qualifications           UserQualification[]     @relation("UserQualifications")
   lastActiveAt             DateTime?               @map("last_active_at")
+  auditLogs                AuditLog[]
 
   @@index([email])
   @@index([createdAt])
@@ -331,6 +332,21 @@ model PostEmailQueue {
   @@map("post_email_queue")
 }
 
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String   @map("actor_id") @db.VarChar(255)
+  action    String   @db.VarChar(100) // matches AdminAction keys from PDP
+  targetId  String?  @map("target_id") @db.VarChar(255) // org/initiative/user id
+  createdAt DateTime @default(now()) @map("created_at")
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
+
 enum UserType {
   helper
   participant
@@ -340,6 +356,7 @@ enum UserType {
 
 enum UserRole {
   USER
+  MANAGER
   ADMIN
 }
 

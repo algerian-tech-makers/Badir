@@ -9,6 +9,11 @@ import { OrganizationStatus, InitiativeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { ActionResponse } from "@/types/Statics";
 import { checkAdminPermission } from "./helpers-sf";
+import { auth } from "@/lib/auth";
+import { enforce, ManagementAction } from "@/lib/permissions";
+import { headers } from "next/headers";
+import { prisma } from "@/lib/db";
+import { writeAudit } from "@/lib/audit";
 
 /**
  * Get paginated organizations for admin review
@@ -416,4 +421,26 @@ export async function toggleFeaturedPartnerAction(
         error instanceof Error ? error.message : "حدث خطأ أثناء تحديث الشريك",
     };
   }
+}
+
+export async function approveOrganization(orgId: string) {
+  // 1. Authenticate
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthenticated");
+
+  // 2. Enforce (PEP delegates decision to PDP)
+  enforce(session.user.role, ManagementAction.APPROVE_ORGANIZATION);
+
+  // 3. Act
+  await prisma.organization.update({
+    where: { id: orgId },
+    data: { status: "approved" },
+  });
+
+  // 4. Audit
+  await writeAudit(
+    session.user.id,
+    ManagementAction.APPROVE_ORGANIZATION,
+    orgId,
+  );
 }
