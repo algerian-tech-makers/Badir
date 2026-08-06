@@ -59,9 +59,13 @@ type AdminStatsType = Awaited<ReturnType<typeof AdminService.getAdminStats>>;
 
 interface AdminDashboardProps {
   initialStats?: AdminStatsType;
+  canManageOrganizations?: boolean;
 }
 
-const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
+const AdminDashboard = ({
+  initialStats,
+  canManageOrganizations = true,
+}: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [stats] = useState<AdminStatsType>(
     initialStats || {
@@ -70,7 +74,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
     },
   );
 
-  // Use custom hooks for organizations (limited to 3 for dashboard)
   const {
     organizations,
     filters: orgFilters,
@@ -87,7 +90,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
   const [showOrgDetailsDialog, setShowOrgDetailsDialog] = useState(false);
   const [showOrgRejectionDialog, setShowOrgRejectionDialog] = useState(false);
 
-  // Use custom hooks for initiatives (limited to 3 for dashboard)
   const {
     initiatives,
     filters: initiativeFilters,
@@ -101,7 +103,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
 
   const isLoading = orgLoading || initLoading;
 
-  // Limit to 3 items for dashboard preview
   const displayOrganizations = organizations.slice(0, 3);
   const displayInitiatives = initiatives.slice(0, 3);
 
@@ -109,6 +110,11 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
     id: string,
     status: "approved" | "rejected",
   ) => {
+    if (!canManageOrganizations) {
+      toast.error("غير مصرح لك بتحديث حالة المنظمة");
+      return;
+    }
+
     if (status === "rejected" && !rejectionReason.trim()) {
       toast.error("يرجى إدخال سبب الرفض");
       return;
@@ -320,7 +326,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                 className="w-full"
               />
             </div>
-            {/* Filters */}
             <div className="grid shrink-0 grid-cols-2 gap-4" dir="rtl">
               <FilterSelect
                 value={orgFilters.status}
@@ -334,7 +339,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                 placeholder="الحالة"
                 className="w-40"
               />
-
               <FilterSelect
                 value={orgFilters.organizationType}
                 onChange={(value) =>
@@ -404,7 +408,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                           <span className="font-medium">المالك:</span>{" "}
                           {org.owner.name} ({org.owner.email})
                         </div>
-
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
@@ -439,6 +442,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
             )}
           </div>
 
+          {/* Organization Details Dialog */}
           <Dialog
             open={showOrgDetailsDialog}
             onOpenChange={setShowOrgDetailsDialog}
@@ -529,40 +533,42 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                     <Label className="mb-3 block font-medium text-gray-700">
                       معلومات التواصل:
                     </Label>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">
-                        {selectedOrg.contactEmail}
-                      </span>
-                    </div>
-                    {selectedOrg.contactPhone && (
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm" dir="ltr">
-                          {selectedOrg.contactPhone}
+                        <Mail className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
+                          {selectedOrg.contactEmail}
                         </span>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">
-                        {selectedOrg.city}, {selectedOrg.state},{" "}
-                        {selectedOrg.country}
-                      </span>
-                    </div>
-                    {selectedOrg.website && (
+                      {selectedOrg.contactPhone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm" dir="ltr">
+                            {selectedOrg.contactPhone}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">🌐</span>
-                        <a
-                          href={selectedOrg.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          {selectedOrg.website}
-                        </a>
+                        <MapPin className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
+                          {selectedOrg.city}, {selectedOrg.state},{" "}
+                          {selectedOrg.country}
+                        </span>
                       </div>
-                    )}
+                      {selectedOrg.website && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">🌐</span>
+                          <a
+                            href={selectedOrg.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            {selectedOrg.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="rounded-lg bg-blue-50 p-4">
@@ -593,9 +599,9 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                     </div>
                   </div>
 
-                  <div className="flex justify-center gap-4 pt-4">
-                    {selectedOrg.status === "pending" && (
-                      <>
+                  {canManageOrganizations &&
+                    selectedOrg.status === "pending" && (
+                      <div className="flex justify-center gap-4 pt-4">
                         <Button
                           onClick={() =>
                             handleOrganizationStatusUpdate(
@@ -620,9 +626,8 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                           <XCircle className="ml-1 h-4 w-4" />
                           رفض المنظمة
                         </Button>
-                      </>
+                      </div>
                     )}
-                  </div>
 
                   {selectedOrg.status !== "pending" && (
                     <div className="border-t py-4 text-center">
@@ -641,6 +646,7 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
             </DialogContent>
           </Dialog>
 
+          {/* Organization Rejection Dialog */}
           <Dialog
             open={showOrgRejectionDialog}
             onOpenChange={setShowOrgRejectionDialog}
@@ -770,8 +776,8 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                               <Calendar className="h-4 w-4" />
                               {new Date(
                                 initiative.startDate,
-                              ).toLocaleDateString("ar")}{" "}
-                              -{" "}
+                              ).toLocaleDateString("ar")}
+                              {" - "}
                               {new Date(initiative.endDate).toLocaleDateString(
                                 "ar",
                               )}
@@ -798,7 +804,6 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                           {initiative.organizerUser?.name || "غير محدد"} (
                           {initiative.organizerUser?.email || ""})
                         </div>
-
                         <div className="flex gap-2">
                           <Dialog>
                             <DialogTrigger
@@ -814,7 +819,8 @@ const AdminDashboard = ({ initialStats }: AdminDashboardProps) => {
                                   عرض التفاصيل
                                 </Button>
                               }
-                            ></DialogTrigger>
+                            />
+
                             <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>تفاصيل المبادرة</DialogTitle>

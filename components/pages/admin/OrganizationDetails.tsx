@@ -33,9 +33,13 @@ import { toast } from "sonner";
 
 interface OrganizationDetailsProps {
   organization: Awaited<ReturnType<typeof AdminService.getOrganizationById>>;
+  canManage?: boolean;
 }
 
-const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
+const OrganizationDetails = ({
+  organization,
+  canManage = true,
+}: OrganizationDetailsProps) => {
   const [isPending, startTransition] = useTransition();
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionForm, setShowRejectionForm] = useState(false);
@@ -328,7 +332,7 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status Actions */}
-          {organization.status === "pending" && (
+          {canManage && organization.status === "pending" && (
             <Card>
               <CardHeader>
                 <CardTitle>إجراءات المراجعة</CardTitle>
@@ -388,6 +392,14 @@ const OrganizationDetails = ({ organization }: OrganizationDetailsProps) => {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {!canManage && (
+            <Alert>
+              <AlertDescription>
+                هذا العرض للقراءة فقط. لا يمكن تعديل حالة المنظمة من هذا الحساب.
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Statistics */}

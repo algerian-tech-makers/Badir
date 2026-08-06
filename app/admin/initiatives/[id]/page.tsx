@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { getInitiativeDetailsAction } from "@/actions/admin";
 import InitiativeDetails from "@/components/pages/admin/InitiativeDetails";
+import { isManagementRole } from "@/lib/permissions";
 
 interface InitiativeDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -13,7 +14,7 @@ export default async function InitiativeDetailsPage({
 }: InitiativeDetailsPageProps) {
   const session = await getSessionWithCheckProfile();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session || !isManagementRole(session.user.role)) {
     redirect("/");
   }
 

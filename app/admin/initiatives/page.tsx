@@ -7,6 +7,7 @@ import InitiativesManagement from "@/components/pages/admin/InitiativesManagemen
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InitiativeStatus } from "@prisma/client";
+import { isManagementRole } from "@/lib/permissions";
 
 interface SearchParams {
   page?: string;
@@ -83,7 +84,7 @@ export default async function InitiativesPage({
   const awaitedSearchParams = await searchParams;
   const session = await getSessionWithCheckProfile();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session || !isManagementRole(session.user.role)) {
     redirect("/");
   }
 

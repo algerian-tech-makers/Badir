@@ -10,6 +10,7 @@ import { extractStoragePath } from "@/services/supabase-storage";
 import { UserService } from "@/services/user";
 import { prisma } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
+import { isManagementRole } from "@/lib/permissions";
 
 /**
  * Returns the public URL for a file stored in Supabase Storage.
@@ -24,45 +25,6 @@ export async function getPublicStorageUrl(
   if (!bucket || !path) return null;
   const storage = new StorageHelpers();
   return await storage.getPublicUrl(bucket, path);
-}
-
-/**
- * Helpers for manager-only member management
- * @param initiativeId Initiative ID
- * @returns User ID
- */
-export async function assertManager(initiativeId: string) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("unauthorized");
-  const initiative = await InitiativeService.getById(
-    initiativeId,
-    session.user.id,
-  );
-  const isManager =
-    initiative?.organizerUserId === session?.user.id ||
-    initiative?.organizerOrg?.userId === session?.user.id;
-  if (!isManager) throw new Error("forbidden");
-  return { userId: session.user.id };
-}
-
-/**
- * Check if user is admin of the platform
- * @returns User ID
- */
-export async function checkAdminPermission() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    throw new Error("يجب تسجيل الدخول");
-  }
-
-  if (session.user.role !== "ADMIN") {
-    throw new Error("غير مصرح لك بالوصول لهذه الصفحة");
-  }
-
-  return session.user.id;
 }
 
 /**

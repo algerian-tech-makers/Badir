@@ -6,6 +6,7 @@ import { getOrganizationsAction } from "@/actions/admin";
 import OrganizationsManagement from "@/components/pages/admin/OrganizationsManagement";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isManagementRole } from "@/lib/permissions";
 
 interface SearchParams {
   page?: string;
@@ -45,7 +46,10 @@ function OrganizationsLoading() {
   );
 }
 
-async function OrganizationsContent({ searchParams }: OrganizationsPageProps) {
+async function OrganizationsContent({
+  searchParams,
+  canManage,
+}: OrganizationsPageProps & { canManage: boolean }) {
   const { page, status, search, organizationType } = searchParams;
   const filters = {
     status: status as any,
@@ -74,7 +78,9 @@ async function OrganizationsContent({ searchParams }: OrganizationsPageProps) {
 
   if (!result.data) return <div className="p-6">لا توجد منظمات</div>;
 
-  return <OrganizationsManagement initialData={result.data} />;
+  return (
+    <OrganizationsManagement initialData={result.data} canManage={canManage} />
+  );
 }
 
 export default async function OrganizationsPage({
@@ -83,13 +89,16 @@ export default async function OrganizationsPage({
   const awaitedSearchParams = await searchParams;
   const session = await getSessionWithCheckProfile();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session || !isManagementRole(session.user.role)) {
     redirect("/");
   }
 
   return (
     <Suspense fallback={<OrganizationsLoading />}>
-      <OrganizationsContent searchParams={awaitedSearchParams} />
+      <OrganizationsContent
+        searchParams={awaitedSearchParams}
+        canManage={session.user.role === "ADMIN"}
+      />
     </Suspense>
   );
 }

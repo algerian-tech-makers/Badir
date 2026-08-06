@@ -10,7 +10,7 @@ import { ActionResponse } from "@/types/Statics";
 import { FormResponseType, JoinInitiativeParams } from "@/schemas";
 import { ParticipationService } from "@/services/participations";
 import { InitiativeService } from "@/services/initiatives";
-import { assertManager } from "./helpers-sf";
+import { assertInitiativeManager } from "@/lib/permissions";
 import { sanitizeHTMLServer } from "@/lib/santitize-server";
 
 export async function joinInitiativeAction(
@@ -127,7 +127,7 @@ export async function joinInitiativeAction(
 }
 
 export async function listApprovedMembersAction(initiativeId: string) {
-  await assertManager(initiativeId);
+  await assertInitiativeManager(initiativeId);
   const members = await prisma.initiativeParticipant.findMany({
     where: { initiativeId, status: ParticipationStatus.approved },
     include: { user: { select: { id: true, name: true } } },
@@ -145,7 +145,7 @@ export async function listApprovedMembersAction(initiativeId: string) {
 }
 
 export async function listPendingRequestsAction(initiativeId: string) {
-  await assertManager(initiativeId);
+  await assertInitiativeManager(initiativeId);
   const requests = await prisma.initiativeParticipant.findMany({
     where: { initiativeId, status: ParticipationStatus.registered },
     include: { user: { select: { id: true, name: true } } },
@@ -166,7 +166,7 @@ export async function approveParticipationAction(
   id: string,
   initiativeId: string,
 ) {
-  await assertManager(initiativeId);
+  await assertInitiativeManager(initiativeId);
   const participant = await prisma.initiativeParticipant.findUnique({
     where: { id },
     select: { status: true, initiativeId: true },
@@ -192,7 +192,7 @@ export async function rejectParticipationAction(
   id: string,
   initiativeId: string,
 ) {
-  await assertManager(initiativeId);
+  await assertInitiativeManager(initiativeId);
   await prisma.initiativeParticipant.update({
     where: { id },
     data: { status: ParticipationStatus.rejected },
@@ -202,7 +202,7 @@ export async function rejectParticipationAction(
 }
 
 export async function kickMemberAction(id: string, initiativeId: string) {
-  await assertManager(initiativeId);
+  await assertInitiativeManager(initiativeId);
   await prisma.initiativeParticipant.update({
     where: { id },
     data: { status: ParticipationStatus.kicked },

@@ -41,10 +41,12 @@ import { useAdminOrganizations } from "@/hooks/useAdminOrganizations";
 
 interface OrganizationsManagementProps {
   initialData: Awaited<ReturnType<typeof AdminService.getOrganizations>>;
+  canManage?: boolean;
 }
 
 const OrganizationsManagement = ({
   initialData,
+  canManage = true,
 }: OrganizationsManagementProps) => {
   const {
     organizations,
@@ -437,7 +439,7 @@ const OrganizationsManagement = ({
                 </div>
               </div>
 
-              {selectedOrg.status === "pending" && (
+              {canManage && selectedOrg.status === "pending" && (
                 <div className="flex justify-center gap-4 border-t pt-4">
                   <Button
                     onClick={() =>
@@ -463,7 +465,7 @@ const OrganizationsManagement = ({
                 </div>
               )}
 
-              {selectedOrg.status !== "pending" && (
+              {(!canManage || selectedOrg.status !== "pending") && (
                 <div className="border-t py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <AdminOrganizationStatusBadge status={selectedOrg.status} />

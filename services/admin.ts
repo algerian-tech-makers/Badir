@@ -3,6 +3,8 @@ import emailConfig from "@/lib/email";
 import { PaginatedResponse, PaginationParams } from "@/types/Pagination";
 import {
   Organization,
+  User,
+  UserRole,
   OrganizationStatus,
   Initiative,
   InitiativeStatus,
@@ -41,6 +43,15 @@ export interface AdminInitiativeCard extends Initiative {
   };
 }
 
+export interface AdminUserCard extends User {
+  role: UserRole;
+}
+
+export interface UserFilters {
+  q?: string;
+  role?: UserRole | "all";
+}
+
 export interface OrganizationFilters {
   status?: OrganizationStatus;
   search?: string;
@@ -59,6 +70,60 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export class AdminService {
   static API_PATH = "/admin";
+
+  /**
+   * Get paginated users for admin management
+   */
+  static async getUsers(
+    filters: UserFilters = {},
+    pagination: PaginationParams = { page: 1, limit: 20 },
+  ): Promise<PaginatedResponse<AdminUserCard>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = {};
+
+    if (filters.role && filters.role !== "all") {
+      where.role = filters.role;
+    }
+
+    if (filters.q) {
+      where.OR = [
+        { name: { contains: filters.q, mode: "insensitive" } },
+        { email: { contains: filters.q, mode: "insensitive" } },
+      ];
+    }
+
+    const total = await prisma.user.count({ where });
+
+    const users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: [{ createdAt: "desc" }],
+      skip,
+      take: limit,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: users as AdminUserCard[],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  }
 
   /**
    * Get paginated organizations for admin review

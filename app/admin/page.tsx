@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { getAdminStatsAction } from "@/actions/admin";
 import AdminDashboard from "@/components/pages/admin/Dashboard";
+import { isManagementRole } from "@/lib/permissions";
 
 export default async function AdminPage() {
   const session = await getSessionWithCheckProfile();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session || !isManagementRole(session.user.role)) {
     redirect("/");
   }
 
@@ -25,5 +26,10 @@ export default async function AdminPage() {
     );
   }
 
-  return <AdminDashboard initialStats={statsResult.data} />;
+  return (
+    <AdminDashboard
+      initialStats={statsResult.data}
+      canManageOrganizations={session.user.role === "ADMIN"}
+    />
+  );
 }

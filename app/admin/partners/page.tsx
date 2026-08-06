@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { getApprovedOrganizationsAction } from "@/actions/admin";
 import PartnersManagement from "@/components/pages/admin/PartnersManagement";
+import { isManagementRole } from "@/lib/permissions";
 
 interface PartnersPageProps {
   searchParams: { search?: string; page?: string };
@@ -13,7 +14,7 @@ export default async function PartnersPage({
 }: PartnersPageProps) {
   const session = await getSessionWithCheckProfile();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session || !isManagementRole(session.user.role)) {
     redirect("/");
   }
 
