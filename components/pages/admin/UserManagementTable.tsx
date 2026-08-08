@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { AdminService, AdminUserCard } from "@/services/admin";
@@ -21,6 +21,7 @@ import PaginationControls from "@/components/PaginationControls";
 import { formatDate } from "@/lib/utils";
 import FilterSelect from "@/components/FilterSelect";
 import { UserRole } from "@prisma/client";
+import { useAdminUsers } from "@/hooks/useAdminUsers";
 
 interface UserManagementTableProps {
   initialData: Awaited<ReturnType<typeof AdminService.getUsers>>;
@@ -44,67 +45,15 @@ export default function UserManagementTable({
   viewerRole,
 }: UserManagementTableProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
-
-  const currentRole = searchParams.get("role") ?? "all";
-
-  useEffect(() => {
-    setSearchValue(searchParams.get("q") ?? "");
-  }, [searchParams]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      const nextQuery = searchValue.trim();
-      const currentQuery = searchParams.get("q") ?? "";
-
-      if (nextQuery === currentQuery) {
-        return;
-      }
-
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (nextQuery) {
-        params.set("q", nextQuery);
-      } else {
-        params.delete("q");
-      }
-
-      params.delete("page");
-      router.replace(`${pathname}?${params.toString()}`);
-    }, 350); // Debounce the search input to avoid excessive updates
-
-    return () => window.clearTimeout(timeoutId);
-  }, [pathname, router, searchParams, searchValue]);
-
-  const updateQuery = (updates: Record<string, string | undefined>) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    });
-
-    params.delete("page");
-    router.replace(`${pathname}?${params.toString()}`);
-  };
-
-  const handleRoleChange = (nextRole: string | null) => {
-    if (nextRole === null) return;
-    updateQuery({ role: nextRole === "all" ? undefined : nextRole });
-  };
-
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(page));
-    router.replace(`${pathname}?${params.toString()}`);
-  };
+  const {
+    searchValue,
+    setSearchValue,
+    currentRole,
+    handleRoleChange,
+    handlePageChange,
+  } = useAdminUsers();
 
   const handleAssign = (user: AdminUserCard) => {
     setPendingUserId(user.id);
@@ -215,7 +164,7 @@ export default function UserManagementTable({
               <TableHead className="w-1/4">البريد الإلكتروني</TableHead>
               <TableHead className="w-32">الدور</TableHead>
               <TableHead className="w-44">تاريخ الانضمام</TableHead>
-              <TableHead className="text-left">الإجراءات</TableHead>
+              <TableHead className="text-start">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

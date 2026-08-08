@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   InitiativeCard as InitiativeCardType,
   InitiativeFilters,
@@ -43,6 +43,16 @@ export default function InitiativesList({
     useState<PaginatedResponse<InitiativeCardType>>(initialData);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<InitiativeFilters>({});
+  const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(searchValue.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchValue]);
 
   const categoryOptions = useMemo(() => {
     return [
@@ -91,6 +101,21 @@ export default function InitiativesList({
     }
   };
 
+  useEffect(() => {
+    const nextFilters = {
+      ...filters,
+      search: debouncedSearch || undefined,
+    };
+
+    if ((filters.search || "") === debouncedSearch) {
+      return;
+    }
+
+    setFilters(nextFilters);
+    fetchInitiatives(nextFilters, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   // Handle filter changes
   const handleFilterChange = (key: keyof InitiativeFilters, value: string) => {
     const newFilters = { ...filters };
@@ -109,23 +134,17 @@ export default function InitiativesList({
     }
 
     setFilters(newFilters);
-    fetchInitiatives(newFilters, 1);
-  };
-
-  const handleSearch = (searchTerm: string) => {
-    const newFilters = { ...filters };
-    if (searchTerm.trim() === "") {
-      delete newFilters.search;
-    } else {
-      newFilters.search = searchTerm;
-    }
-
-    setFilters(newFilters);
-    fetchInitiatives(newFilters, 1);
+    fetchInitiatives(
+      { ...newFilters, search: debouncedSearch || undefined },
+      1,
+    );
   };
 
   const handlePageChange = (page: number) => {
-    fetchInitiatives(filters, page);
+    fetchInitiatives(
+      { ...filters, search: debouncedSearch || undefined },
+      page,
+    );
   };
 
   return (
@@ -144,8 +163,8 @@ export default function InitiativesList({
             {/* Search */}
             <div className="flex-center mb-4 max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
               <SearchInput
-                value={filters.search || ""}
-                onChange={handleSearch}
+                value={searchValue}
+                onChange={setSearchValue}
                 placeholder="ابحث في المبادرات..."
                 className="w-full"
               />

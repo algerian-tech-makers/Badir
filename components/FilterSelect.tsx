@@ -18,6 +18,7 @@ interface FilterSelectProps {
   }>;
   placeholder?: string;
   className?: string;
+  showPlaceholderOutside?: boolean;
   dir?: "ltr" | "rtl";
 }
 
@@ -38,6 +39,7 @@ export default function FilterSelect({
   onChange,
   options,
   placeholder = "اختر فلتر...",
+  showPlaceholderOutside = false,
   className,
   dir = "rtl",
 }: FilterSelectProps) {
@@ -49,7 +51,9 @@ export default function FilterSelect({
         className,
       )}
     >
-      <span className="text-label text-neutrals-600">{placeholder}</span>
+      {showPlaceholderOutside && (
+        <span className="text-label text-neutrals-600">{placeholder}</span>
+      )}
       <Select
         value={value || ""}
         onValueChange={(nextValue) => onChange(nextValue || "")}

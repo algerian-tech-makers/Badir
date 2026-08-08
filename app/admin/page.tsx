@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
-import { getAdminStatsAction } from "@/actions/admin";
+import { getAdminStatsAction, getUsersAction } from "@/actions/admin";
 import AdminDashboard from "@/components/pages/admin/Dashboard";
 import { isManagementRole } from "@/lib/permissions";
+import { UserRole } from "@prisma/client";
 
 export default async function AdminPage() {
   const session = await getSessionWithCheckProfile();
@@ -12,6 +13,7 @@ export default async function AdminPage() {
   }
 
   const statsResult = await getAdminStatsAction();
+  const usersResult = await getUsersAction({}, 1, 20);
 
   if (!statsResult.success) {
     return (
@@ -29,7 +31,9 @@ export default async function AdminPage() {
   return (
     <AdminDashboard
       initialStats={statsResult.data}
+      initialUsers={usersResult.success ? usersResult.data : undefined}
       canManageOrganizations={session.user.role === "ADMIN"}
+      viewerRole={session.user.role as UserRole}
     />
   );
 }
