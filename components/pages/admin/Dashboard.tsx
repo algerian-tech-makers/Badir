@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserRole } from "@prisma/client";
-import { AdminService } from "@/services/admin";
+import { AdminService, AdminUserCard } from "@/services/admin";
 import { OverviewTab } from "./dashboard-tabs/OverviewTab";
 import { OrganizationsTab } from "./dashboard-tabs/OrganizationsTab";
 import { InitiativesTab } from "./dashboard-tabs/InitiativesTab";
 import UserManagementTable from "./UserManagementTable";
+import { PaginatedResponse } from "@/types/Pagination";
 
 type AdminStatsType = Awaited<ReturnType<typeof AdminService.getAdminStats>>;
 type AdminUsersType = Awaited<ReturnType<typeof AdminService.getUsers>>;
@@ -32,6 +33,18 @@ const AdminDashboard = ({
       initiatives: { draft: 0, published: 0, cancelled: 0, total: 0 },
     },
   );
+  const noPaginationUsers: PaginatedResponse<AdminUserCard> | null =
+    initialUsers
+      ? {
+          ...initialUsers!,
+          pagination: {
+            ...initialUsers!.pagination,
+            hasNext: false,
+            hasPrev: false,
+            totalPages: 1,
+          },
+        }
+      : null;
   const isAdmin = viewerRole === "ADMIN";
 
   return (
@@ -72,7 +85,7 @@ const AdminDashboard = ({
           <TabsContent value="users">
             <UserManagementTable
               initialData={
-                initialUsers || {
+                noPaginationUsers || {
                   data: [],
                   pagination: {
                     page: 1,
@@ -85,6 +98,7 @@ const AdminDashboard = ({
                 }
               }
               viewerRole={viewerRole}
+              inDashaboard={true}
             />
           </TabsContent>
         )}

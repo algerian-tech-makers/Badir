@@ -26,6 +26,7 @@ import { useAdminUsers } from "@/hooks/useAdminUsers";
 interface UserManagementTableProps {
   initialData: Awaited<ReturnType<typeof AdminService.getUsers>>;
   viewerRole: UserRole;
+  inDashaboard?: boolean;
 }
 
 const roleLabels = {
@@ -43,6 +44,7 @@ function roleBadgeVariant(role: AdminUserCard["role"]) {
 export default function UserManagementTable({
   initialData,
   viewerRole,
+  inDashaboard = false,
 }: UserManagementTableProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -113,50 +115,44 @@ export default function UserManagementTable({
 
   return (
     <div className="mx-auto max-w-7xl p-6" dir="rtl">
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
-          إدارة المستخدمين
-        </h1>
-        <p className="text-gray-600">تعيين وإلغاء صلاحيات المدير للمستخدمين</p>
-      </div>
+      {!inDashaboard && (
+        <div className="mb-8">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            إدارة المستخدمين
+          </h1>
+          <p className="text-gray-600">
+            تعيين وإلغاء صلاحيات المدير للمستخدمين
+          </p>
+        </div>
+      )}
 
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="mb-6">
         <div className="grid gap-4 lg:grid-cols-[1fr_240px] lg:items-end">
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">
-              البحث
-            </span>
-            <div className="relative">
-              <Search className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-                placeholder="البحث بالاسم أو البريد الإلكتروني"
-                className="h-9 rounded-xl border-gray-200 bg-white pr-10 pl-4"
-              />
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">
-              الدور
-            </span>
-            <FilterSelect
-              value={currentRole}
-              onChange={handleRoleChange}
-              options={[
-                { value: "all", label: "كل الأدوار" },
-                { value: "USER", label: "مستخدم" },
-                { value: "MANAGER", label: "مدير" },
-                { value: "ADMIN", label: "مسؤول" },
-              ]}
-              placeholder="جميع الأدوار"
+          <div className="relative">
+            <Search className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="البحث بالاسم أو البريد الإلكتروني"
+              className="h-9 rounded-xl border-gray-200 bg-white pr-10 pl-4"
             />
-          </label>
+          </div>
+
+          <FilterSelect
+            value={currentRole}
+            onChange={handleRoleChange}
+            options={[
+              { value: "all", label: "كل الأدوار" },
+              { value: "USER", label: "مستخدم" },
+              { value: "MANAGER", label: "مدير" },
+              { value: "ADMIN", label: "مسؤول" },
+            ]}
+            placeholder="جميع الأدوار"
+          />
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded border border-gray-200 bg-white px-2 shadow-xs">
         <Table>
           <TableHeader>
             <TableRow>
