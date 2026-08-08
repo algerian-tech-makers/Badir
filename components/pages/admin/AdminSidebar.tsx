@@ -8,37 +8,50 @@ import {
   Home,
   Tag,
   Handshake,
+  UserCog,
 } from "lucide-react";
 import Logout from "@/components/Logout";
 import { usePathname } from "next/navigation";
+import { UserRole } from "@prisma/client";
 const navigation = [
   {
+    id: "dashboard",
     name: "الإحصائيات",
     href: "/admin",
     icon: LayoutDashboard,
   },
   {
+    id: "organizations",
     name: "إدارة المنظمات",
     href: "/admin/organizations",
     icon: Building2,
   },
   {
+    id: "initiatives",
     name: "إدارة المبادرات",
     href: "/admin/initiatives",
     icon: Users,
   },
   {
+    id: "users",
+    name: "إدارة المستخدمين",
+    href: "/admin/users",
+    icon: UserCog,
+  },
+  {
+    id: "categories",
     name: "إدارة الفئات",
     href: "/admin/categories",
     icon: Tag,
   },
   {
+    id: "partners",
     name: "إدارة الشركاء",
     href: "/admin/partners",
     icon: Handshake,
   },
 ];
-const AdminSidebar = () => {
+const AdminSidebar = ({ role }: { role: Omit<UserRole, "USER"> }) => {
   const pathname = usePathname();
 
   return (
@@ -56,29 +69,40 @@ const AdminSidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-2 p-4">
-        {navigation.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-gray-50",
-                pathname === item.href
-                  ? "bg-primary-50 text-primary-700 border-primary-200 border"
-                  : "text-gray-700 hover:text-gray-900",
-              )}
-            >
-              <Icon
+        {navigation
+          .filter((item) => {
+            if (
+              role === UserRole.MANAGER &&
+              ["categories", "partners"].includes(item.id)
+            )
+              return false;
+            return true;
+          })
+          .map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
                 className={cn(
-                  "h-5 w-5",
-                  pathname === item.href ? "text-primary-600" : "text-gray-500",
+                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-gray-50",
+                  pathname === item.href
+                    ? "bg-primary-50 text-primary-700 border-primary-200 border"
+                    : "text-gray-700 hover:text-gray-900",
                 )}
-              />
-              {item.name}
-            </Link>
-          );
-        })}
+              >
+                <Icon
+                  className={cn(
+                    "h-5 w-5",
+                    pathname === item.href
+                      ? "text-primary-600"
+                      : "text-gray-500",
+                  )}
+                />
+                {item.name}
+              </Link>
+            );
+          })}
       </nav>
 
       {/* Bottom Navigation */}

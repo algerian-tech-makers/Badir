@@ -1,21 +1,21 @@
 "use client";
 
+import { UserRole, UserType } from "@prisma/client";
 import { useSession } from "@/lib/auth-client";
 import { useState, useEffect, useCallback } from "react";
-import { Star } from "lucide-react";
-import SignInButton from "./SignInButton";
-import SignUpButton from "./SignUpButton";
+import { Settings2Icon, Star } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
-import { UserType } from "@prisma/client";
-import { getUserImage } from "@/actions/user-profile";
-import Image from "next/image";
 import { getOrganizationLogo } from "@/actions/organization-profile";
+import { getUserImage } from "@/actions/user-profile";
+import SignInButton from "./SignInButton";
+import SignUpButton from "./SignUpButton";
+import Link from "next/link";
+import Image from "next/image";
 import Logout from "./Logout";
 
 export function AuthProfileButtons({
@@ -131,7 +131,6 @@ export function AuthProfileButtons({
                       {session.user.email}
                     </p>
                   </div>
-
                   {/* Profile Link */}
                   <Link
                     href="/profile"
@@ -155,7 +154,7 @@ export function AuthProfileButtons({
                     <Star className="h-4 w-4" />
                     شاركنا رأيك
                   </Link>
-                  <Link
+                  {/* <Link
                     href="/profile#newsletter"
                     className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
                     onClick={handleProfileClick}
@@ -168,8 +167,20 @@ export function AuthProfileButtons({
                       className="text-neutrals-600 h-4 w-4"
                     />
                     النشرة البريدية
-                  </Link>
-
+                  </Link> */}
+                  {[
+                    UserRole.ADMIN.toString(),
+                    UserRole.MANAGER.toString(),
+                  ].includes(session.user?.role) && (
+                    <Link
+                      href="/admin"
+                      className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                      onClick={handleProfileClick}
+                    >
+                      <Settings2Icon className="h-4 w-4" />
+                      الإدارة
+                    </Link>
+                  )}
                   {/* Logout Button */}
                   <Logout
                     onMenuAction={onMenuAction}
@@ -249,7 +260,7 @@ export function AuthProfileButtons({
                     <Star className="h-4 w-4" />
                     شاركنا رأيك
                   </Link>
-                  <Link
+                  {/* <Link
                     href="/profile#newsletter"
                     className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
                     onClick={handleProfileClick}
@@ -262,7 +273,20 @@ export function AuthProfileButtons({
                       className="text-neutrals-600 h-4 w-4"
                     />
                     النشرة البريدية
-                  </Link>
+                  </Link> */}
+                  {[
+                    UserRole.ADMIN.toString(),
+                    UserRole.MANAGER.toString(),
+                  ].includes(session.user?.role) && (
+                    <Link
+                      href="/admin"
+                      className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                      onClick={handleProfileClick}
+                    >
+                      <Settings2Icon className="h-4 w-4" />
+                      الإدارة
+                    </Link>
+                  )}
 
                   {/* Logout Button */}
                   <Logout

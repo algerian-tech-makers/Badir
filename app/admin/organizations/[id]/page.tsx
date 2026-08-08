@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { getOrganizationDetailsAction } from "@/actions/admin";
 import OrganizationDetails from "@/components/pages/admin/OrganizationDetails";
+import { isManagementRole } from "@/lib/permissions";
 
 interface OrganizationDetailsPageProps {
   params: { id: string };
@@ -13,7 +14,7 @@ export default async function OrganizationDetailsPage({
   const { id } = await params;
   const session = await getSessionWithCheckProfile();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session || !isManagementRole(session.user.role)) {
     redirect("/");
   }
 
@@ -36,5 +37,10 @@ export default async function OrganizationDetailsPage({
   }
 
   if (!result.data) return <div className="p-6">لا توجد منظمة</div>;
-  return <OrganizationDetails organization={result.data} />;
+  return (
+    <OrganizationDetails
+      organization={result.data}
+      canManage={session.user.role === "ADMIN"}
+    />
+  );
 }

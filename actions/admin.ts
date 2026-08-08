@@ -4,11 +4,17 @@ import {
   AdminService,
   OrganizationFilters,
   InitiativeFilters,
+  UserFilters,
 } from "@/services/admin";
-import { OrganizationStatus, InitiativeStatus } from "@prisma/client";
+import { OrganizationStatus, InitiativeStatus, UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { ActionResponse } from "@/types/Statics";
-import { checkAdminPermission } from "./helpers-sf";
+import { checkAdminPermission } from "@/lib/permissions";
+import { auth } from "@/lib/auth";
+import { enforce, ManagementAction } from "@/lib/permissions";
+import { headers } from "next/headers";
+import { prisma } from "@/lib/db";
+import { writeAudit } from "@/lib/audit";
 
 /**
  * Get paginated organizations for admin review
@@ -19,7 +25,7 @@ export async function getOrganizationsAction(
   limit: number = 10,
 ) {
   try {
-    await checkAdminPermission();
+    await checkAdminPermission(true);
 
     const result = await AdminService.getOrganizations(filters, {
       page,
@@ -40,6 +46,35 @@ export async function getOrganizationsAction(
 }
 
 /**
+ * Get paginated users for admin management
+ */
+export async function getUsersAction(
+  filters: UserFilters = {},
+  page: number = 1,
+  limit: number = 20,
+) {
+  try {
+    await checkAdminPermission(true);
+
+    const result = await AdminService.getUsers(filters, {
+      page,
+      limit,
+    });
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "حدث خطأ أثناء جلب المستخدمين",
+    };
+  }
+}
+
+/**
  * Get user initiatives for admin review
  */
 export async function getUserInitiativesAction(
@@ -48,7 +83,7 @@ export async function getUserInitiativesAction(
   limit: number = 10,
 ) {
   try {
-    await checkAdminPermission();
+    await checkAdminPermission(true);
 
     const result = await AdminService.getUserInitiatives(filters, {
       page,
@@ -115,7 +150,7 @@ export async function updateInitiativeStatusAction(
   rejectionReason?: string,
 ): Promise<ActionResponse<{}, {}>> {
   try {
-    const adminUserId = await checkAdminPermission();
+    const adminUserId = await checkAdminPermission(true);
 
     const result = await AdminService.updateInitiativeStatus(
       initiativeId,
@@ -149,7 +184,7 @@ export async function updateInitiativeStatusAction(
  */
 export async function getOrganizationDetailsAction(organizationId: string) {
   try {
-    await checkAdminPermission();
+    await checkAdminPermission(true);
 
     const organization = await AdminService.getOrganizationById(organizationId);
 
@@ -181,7 +216,7 @@ export async function getOrganizationDetailsAction(organizationId: string) {
  */
 export async function getInitiativeDetailsAction(initiativeId: string) {
   try {
-    await checkAdminPermission();
+    await checkAdminPermission(true);
 
     const initiative = await AdminService.getInitiativeById(initiativeId);
 
@@ -213,7 +248,7 @@ export async function getInitiativeDetailsAction(initiativeId: string) {
  */
 export async function getAdminStatsAction() {
   try {
-    await checkAdminPermission();
+    await checkAdminPermission(true);
 
     const stats = await AdminService.getAdminStats();
 
@@ -394,7 +429,12 @@ export async function toggleFeaturedPartnerAction(
   isFeatured: boolean,
 ): Promise<ActionResponse<{}, {}>> {
   try {
-    await checkAdminPermission();
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+      throw new Error("يجب تسجيل الدخول");
+    }
+
+    enforce(session.user.role, ManagementAction.SET_FEATURED_PARTNER);
 
     await AdminService.toggleFeaturedPartner(organizationId, isFeatured);
 
@@ -414,6 +454,124 @@ export async function toggleFeaturedPartnerAction(
       success: false,
       error:
         error instanceof Error ? error.message : "حدث خطأ أثناء تحديث الشريك",
+    };
+  }
+}
+
+export async function approveOrganization(orgId: string) {
+  // 1. Authenticate
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthenticated");
+
+  // 2. Enforce (PEP delegates decision to PDP)
+  enforce(session.user.role, ManagementAction.APPROVE_ORGANIZATION);
+
+  // 3. Act
+  await prisma.organization.update({
+    where: { id: orgId },
+    data: { status: "approved" },
+  });
+
+  // 4. Audit
+  await writeAudit(
+    session.user.id,
+    ManagementAction.APPROVE_ORGANIZATION,
+    orgId,
+  );
+}
+
+export async function assignManager(
+  userId: string,
+): Promise<ActionResponse<{}, {}>> {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+      throw new Error("يجب تسجيل الدخول");
+    }
+
+    enforce(session.user.role, ManagementAction.ASSIGN_MANAGER);
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+
+    if (!targetUser) {
+      throw new Error("المستخدم غير موجود");
+    }
+
+    if (targetUser.role === UserRole.ADMIN) {
+      throw new Error("لا يمكن تعديل دور المدير العام");
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: UserRole.MANAGER },
+    });
+
+    await writeAudit(session.user.id, ManagementAction.ASSIGN_MANAGER, userId);
+
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "تم تعيين المستخدم كمدير بنجاح",
+    };
+  } catch (error) {
+    console.error("Error assigning manager:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "حدث خطأ أثناء تعيين المدير",
+    };
+  }
+}
+
+export async function revokeManager(
+  userId: string,
+): Promise<ActionResponse<{}, {}>> {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+      throw new Error("يجب تسجيل الدخول");
+    }
+
+    enforce(session.user.role, ManagementAction.ASSIGN_MANAGER);
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+
+    if (!targetUser) {
+      throw new Error("المستخدم غير موجود");
+    }
+
+    if (targetUser.role === UserRole.ADMIN) {
+      throw new Error("لا يمكن تعديل دور المدير العام");
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: UserRole.USER },
+    });
+
+    await writeAudit(session.user.id, ManagementAction.ASSIGN_MANAGER, userId);
+
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "تمت إزالة صلاحيات المدير بنجاح",
+    };
+  } catch (error) {
+    console.error("Error revoking manager:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "حدث خطأ أثناء سحب صلاحيات المدير",
     };
   }
 }
