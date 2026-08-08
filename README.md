@@ -91,6 +91,7 @@ erDiagram
     User ||--o{ UserInitiativeRating : rates
     User ||--o{ PlatformRating : gives
     User ||--o{ UserQualification : has
+    User ||--o{ AuditLog : "performs"
     Organization ||--o{ Initiative : "organizes as org"
     Organization ||--o{ SupportRequest : requests
     Initiative ||--o{ InitiativeParticipant : has
@@ -113,17 +114,21 @@ erDiagram
         string bio
         enum userType
         enum role
-        decimal latitude
-        decimal longitude
+        string geohash
         string city
         string state
         string country
         boolean isActive
         datetime createdAt
         datetime updatedAt
+        datetime lastActiveAt
         boolean profileCompleted
         boolean newsletterSubscribed
         datetime newsletterSubscribedAt
+        datetime newsletterUnsubscribedAt
+        boolean consentGiven
+        datetime consentGivenAt
+        string consentVersion
         string mailerLiteId
     }
 
@@ -263,6 +268,8 @@ erDiagram
         string initiativeId FK
         decimal rating
         string comment
+        datetime createdAt
+        datetime updatedAt
     }
 
     PlatformRating {
@@ -333,6 +340,14 @@ erDiagram
         string email
         string initiativeId FK
         string postId FK
+        datetime createdAt
+    }
+
+    AuditLog {
+        string id PK
+        string actorId FK
+        string action
+        string targetId
         datetime createdAt
     }
 ```
@@ -539,7 +554,9 @@ UPSTASH_REDIS_REST_TOKEN=...
 - **Cost**: MailerLite provides better economics for bulk newsletters
 - **Features**: MailerLite offers advanced analytics, A/B testing, and audience management
 
----
+## Role-Based Access Control
+
+## Badir implements a three-tier RBAC model with `USER`, `MANAGER`, and `ADMIN` roles stored on the `User` record. Admins are promoted via a CLI script; managers are assigned by admins from the `/admin/users` panel and cannot assign or revoke other managers. The permission matrix lives in a single PDP (`lib/permissions.ts`) that enumerates all privileged actions and maps each role to an allowed set — admin-only actions such as approving organizations, setting featured partners, and assigning managers are explicitly excluded from the manager policy. Every server action enforces permissions by calling `enforce(role, action)` before touching the database, and every privileged action is recorded to the `audit_logs` table with the actor, their role at the time, the action type, and the target resource.
 
 # License
 
