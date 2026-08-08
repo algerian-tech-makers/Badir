@@ -253,7 +253,7 @@ const OrganizationDetails = ({
                     حالة التحقق
                   </Label>
                   <p className="mt-1 text-sm text-gray-500">
-                    يتم التحقق من المنظمة من طرف الإدارة.
+                    يتم التحقق من المنظمة من طرف المسؤول.
                   </p>
                 </div>
                 <SwitchInput
@@ -263,6 +263,7 @@ const OrganizationDetails = ({
                   label="تبديل حالة توثيق المنظمة"
                   name="isVerified"
                   type={"switch"}
+                  className="gap-0.5"
                 />
               </div>
               <div className="mt-4 flex items-center gap-2">
