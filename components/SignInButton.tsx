@@ -21,7 +21,7 @@ export default function SignInButton({
 
   return (
     <AppButton
-      type="primary"
+      type="outline"
       url={authRoutes.login.url}
       border="rounded"
       size={buttonSize}

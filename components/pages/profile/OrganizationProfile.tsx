@@ -36,7 +36,10 @@ import ImageManager from "@/components/ImageManager";
 import { useRouter } from "next/navigation";
 
 interface OrganizationProfileFormProps {
-  defaultValues: Partial<OrganizationProfile> & { createdAt?: Date | string };
+  defaultValues: Partial<OrganizationProfile> & {
+    createdAt?: Date | string;
+    isVerified?: boolean;
+  };
 }
 
 export default function OrganizationProfileForm({
@@ -66,6 +69,7 @@ export default function OrganizationProfileForm({
   });
 
   const isLicensed = watch("isLicensed");
+  const isVerified = Boolean(defaultValues.isVerified);
 
   const handleUploadLogo = async (file: File) => {
     const formData = new FormData();
@@ -189,17 +193,17 @@ export default function OrganizationProfileForm({
             <span
               className={cn(
                 "text-caption inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium",
-                defaultValues.officialLicense
+                isVerified
                   ? "bg-green-50 text-green-700"
                   : "bg-yellow-50 text-yellow-700",
               )}
             >
-              {defaultValues.officialLicense ? (
+              {isVerified ? (
                 <CheckCircle className="h-4 w-4" />
               ) : (
                 <AlertTriangle className="h-4 w-4" />
               )}
-              {defaultValues.officialLicense ? "منظمة مرخصة" : "غير مرخصة"}
+              {isVerified ? "منظمة موثقة" : "غير موثقة"}
             </span>
           </h2>
 

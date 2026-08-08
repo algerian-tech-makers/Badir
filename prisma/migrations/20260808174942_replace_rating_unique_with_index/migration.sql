@@ -1,0 +1,3 @@
+-- @@unique([userId, initiativeId]) removed from schema.
+-- A partial unique index WHERE user_id IS NOT NULL already exists in the DB
+-- and is intentionally managed manually to preserve ratings on user deletion.

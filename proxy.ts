@@ -43,10 +43,16 @@ export default async function proxy(request: NextRequest) {
     // if (!session?.user.profileCompleted && pathname !== "/complete-profile") {
     //   return NextResponse.redirect(new URL("/complete-profile", request.url));
     // } ---> Moved it to component level validation
+
     if (sessionCookie) {
       const session = await auth.api.getSession({ headers: request.headers });
+      if (!session?.user?.id) {
+        // Cookie exists but session is invalid/expired — let them reach the auth route
+        return null;
+      }
+
       const user = await prisma.user.findUnique({
-        where: { id: session?.user?.id },
+        where: { id: session.user.id },
         select: { consentGiven: true },
       });
       if (

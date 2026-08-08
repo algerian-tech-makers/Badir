@@ -130,6 +130,7 @@ const OrganizationProfileSchema = z
 
     isLicensed: z.boolean().default(false),
     officialLicense: trustedDocumentPreviewLinkSchema,
+    isVerified: z.boolean().optional(),
     logo: z.string().optional().nullable(),
     // identificationCard: z.string().optional().nullable(),
   })

@@ -6,9 +6,7 @@ import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import { handleFileUpload, mimeTypeToExtension } from "@/lib/utils";
 
 export default function Step6Documents() {
-  const { control, setValue, watch } =
-    useFormContext<OrgRegistrationFormData>();
-  const isLicensed = watch("isLicensed");
+  const { control } = useFormContext<OrgRegistrationFormData>();
 
   return (
     <div className="space-y-6">
@@ -20,41 +18,27 @@ export default function Step6Documents() {
 
       <div className="space-y-4">
         <Controller
-          name="isLicensed"
-          control={control}
-          render={({ field }) => (
-            <FormInput
-              type="switch"
-              label="هل المنظمة مرخصة أو معتمدة رسميا؟"
-              name={field.name}
-              value={field.value || false}
-              onChange={(checked) => {
-                field.onChange(checked);
-                if (!checked) {
-                  setValue("officialLicense", "", { shouldValidate: true });
-                }
-              }}
-              className="justify-start"
-            />
-          )}
-        />
-
-        <Controller
           name="officialLicense"
           control={control}
           render={({ field, fieldState }) => (
-            <FormInput
-              type="url"
-              label="نسخة من الترخيص أو الاعتماد الرسمي"
-              name={field.name}
-              placeholder="ضع رابط معاينة موثوق للترخيص"
-              value={field.value || ""}
-              onChange={field.onChange}
-              error={fieldState.error?.message}
-              rtl={true}
-              disabled={!isLicensed}
-              isOptional={!isLicensed}
-            />
+            <div className="space-y-2">
+              <FormInput
+                type="url"
+                label="نسخة من الترخيص أو الاعتماد الرسمي"
+                name={field.name}
+                placeholder="ضع رابط معاينة موثوق للترخيص"
+                value={field.value || ""}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+                rtl={true}
+                isOptional
+              />
+              <p className="text-neutrals-500 text-xs leading-6">
+                هذا الرابط سيكون ظاهراً للعموم. التحقق من المنظمة يتم من طرف
+                الإدارة عبر مراجعة الرابط أو التواصل معك بالبريد الإلكتروني. إذا
+                تأخروا، يمكنك مراسلتهم.
+              </p>
+            </div>
           )}
         />
       </div>

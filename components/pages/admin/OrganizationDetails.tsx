@@ -28,8 +28,12 @@ import {
 import { AdminService } from "@/services/admin";
 import { formatDate } from "@/lib/utils";
 import { AdminOrganizationStatusBadge } from "../AdminStatusBadge";
-import { updateOrganizationStatusAction } from "@/actions/admin";
+import {
+  updateOrganizationStatusAction,
+  updateOrgVerificationAction,
+} from "@/actions/admin";
 import { toast } from "sonner";
+import { SwitchInput } from "@/components/form-input/index";
 
 interface OrganizationDetailsProps {
   organization: Awaited<ReturnType<typeof AdminService.getOrganizationById>>;
@@ -43,6 +47,9 @@ const OrganizationDetails = ({
   const [isPending, startTransition] = useTransition();
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionForm, setShowRejectionForm] = useState(false);
+  const [isVerified, setIsVerified] = useState(
+    Boolean(organization?.isVerified),
+  );
 
   if (!organization) {
     return (
@@ -80,6 +87,35 @@ const OrganizationDetails = ({
     } finally {
       setShowRejectionForm(false);
       setRejectionReason("");
+    }
+  };
+
+  const handleVerificationChange = async (
+    checked: boolean | string | string[],
+  ) => {
+    if (!canManage || !organization) {
+      return;
+    }
+    if (typeof checked !== "boolean") return;
+    try {
+      startTransition(async () => {
+        const result = await updateOrgVerificationAction(
+          organization.id,
+          checked,
+        );
+
+        if (result.success) {
+          setIsVerified(checked);
+          toast.success(
+            checked ? "تم توثيق المنظمة بنجاح" : "تم إلغاء توثيق المنظمة",
+          );
+        } else {
+          toast.error(result.error || "حدث خطأ أثناء تحديث توثيق المنظمة");
+        }
+      });
+    } catch (error) {
+      console.error("Error updating organization verification:", error);
+      toast.error("حدث خطأ أثناء تحديث توثيق المنظمة");
     }
   };
 
@@ -202,6 +238,45 @@ const OrganizationDetails = ({
                     </Badge>
                   ))}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>التحقق من المنظمة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">
+                    حالة التحقق
+                  </Label>
+                  <p className="mt-1 text-sm text-gray-500">
+                    يتم التحقق من المنظمة من طرف المسؤول.
+                  </p>
+                </div>
+                <SwitchInput
+                  value={isVerified}
+                  onChange={handleVerificationChange}
+                  disabled={isPending || !canManage}
+                  label="تبديل حالة توثيق المنظمة"
+                  name="isVerified"
+                  type={"switch"}
+                  className="gap-0.5"
+                />
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <Badge
+                  className={`flex items-center gap-1 text-xs ${isVerified ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}
+                >
+                  {isVerified ? (
+                    <CheckCircle className="h-3 w-3" />
+                  ) : (
+                    <AlertTriangle className="h-3 w-3" />
+                  )}
+                  {isVerified ? "منظمة موثقة" : "غير موثقة"}
+                </Badge>
               </div>
             </CardContent>
           </Card>
