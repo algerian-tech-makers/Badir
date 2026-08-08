@@ -16,6 +16,7 @@ import OrganizationStatusEmail from "@/emails/OrganizationStatusEmail";
 import InitiativeStatusEmail from "@/emails/InitiativeStatusEmail";
 
 export interface AdminOrganizationCard extends Organization {
+  isVerified: boolean;
   owner: {
     id: string;
     name: string;
@@ -359,6 +360,19 @@ export class AdminService {
       console.error("Error updating organization status:", error);
       throw new Error("فشل في تحديث حالة المنظمة");
     }
+  }
+
+  /**
+   * Update organization verification state
+   */
+  static async updateOrgVerification(orgId: string, isVerified: boolean) {
+    return await prisma.organization.update({
+      where: { id: orgId },
+      data: {
+        isVerified,
+        updatedAt: new Date(),
+      },
+    });
   }
 
   /**

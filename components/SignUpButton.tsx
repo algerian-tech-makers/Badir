@@ -29,7 +29,7 @@ export default function SignUpButton({
       <DialogTrigger
         render={
           <AppButton
-            type="outline"
+            type="primary"
             border="rounded"
             size={buttonSize}
             onClick={onMenuAction ? onMenuAction : undefined}

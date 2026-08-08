@@ -74,6 +74,7 @@ model Organization {
   identificationCard  String?            @map("identification_card") @db.VarChar(500)
   membersCount        Int?               @map("members_count")
   officialLicense     String?            @map("official_license") @db.VarChar(500)
+  isVerified          Boolean            @default(false)
   organizationType    String             @map("organization_type") @db.VarChar(50)
   previousInitiatives String?            @map("previous_initiatives")
   shortName           String             @map("short_name") @db.VarChar(100)
@@ -235,7 +236,6 @@ model UserInitiativeRating {
   initiative   Initiative @relation(fields: [initiativeId], references: [id])
   user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  @@unique([userId, initiativeId])
   @@index([initiativeId])
   @@map("user_initiative_ratings")
 }

@@ -239,6 +239,16 @@ const OrganizationsManagement = ({
                         <Badge variant="outline" className="text-xs">
                           {org.organizationType}
                         </Badge>
+                        <Badge
+                          className={`flex items-center gap-1 text-xs ${org.isVerified ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}
+                        >
+                          {org.isVerified ? (
+                            <CheckCircle className="h-3 w-3" />
+                          ) : (
+                            <XCircle className="h-3 w-3" />
+                          )}
+                          {org.isVerified ? "موثقة" : "غير موثقة"}
+                        </Badge>
                         <span className="text-sm text-gray-500">
                           {org._count.initiatives} مبادرة
                         </span>

@@ -142,6 +142,40 @@ export async function updateOrganizationStatusAction(
 }
 
 /**
+ * Toggle organization verification state
+ */
+export async function updateOrgVerificationAction(
+  organizationId: string,
+  isVerified: boolean,
+): Promise<ActionResponse<{}, {}>> {
+  try {
+    await checkAdminPermission();
+
+    await AdminService.updateOrgVerification(organizationId, isVerified);
+
+    revalidatePath("/admin/organizations");
+    revalidatePath(`/admin/organizations/${organizationId}`);
+    revalidatePath(`/organizations/${organizationId}`);
+    revalidatePath(`/profile/${organizationId}`);
+
+    return {
+      success: true,
+      message: isVerified ? "تم توثيق المنظمة بنجاح" : "تم إلغاء توثيق المنظمة",
+      data: {},
+    };
+  } catch (error) {
+    console.error("Error updating organization verification:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "حدث خطأ أثناء تحديث توثيق المنظمة",
+    };
+  }
+}
+
+/**
  * Update initiative approval status
  */
 export async function updateInitiativeStatusAction(

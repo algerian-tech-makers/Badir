@@ -44,8 +44,12 @@ export default function UserSignupPage() {
                 <h1 className="text-primary-500 text-3xl font-bold lg:text-4xl">
                   مرحباً بك في منصة العمل التطوعي
                 </h1>
-                <p className="max-w-md text-lg text-gray-600">
-                  ابدأ رحلتك في التطوع وساهم في بناء مجتمع أفضل
+                <p className="max-w-md text-center text-lg text-gray-600">
+                  ابدأ رحلتك في التطوع{" "}
+                  <span className="text-primary-500 text-xl font-bold">
+                    كمنظمة
+                  </span>{" "}
+                  وساهم في بناء مجتمع أفضل
                 </p>
               </div>
 
