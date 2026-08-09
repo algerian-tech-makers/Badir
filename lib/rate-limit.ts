@@ -26,3 +26,29 @@ export const newsletterSubscriptionRateLimiter = new Ratelimit({
   analytics: true,
   prefix: "newsletter",
 });
+
+/**
+ * Rate limiter for sign-in endpoint.
+ *
+ * Limit: 5 attempts per 60 seconds per IP
+ * Mitigates brute-force and credential-stuffing attacks.
+ */
+export const signInRateLimiter = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "60 s"),
+  analytics: true,
+  prefix: "auth-sign-in",
+});
+
+/**
+ * Rate limiter for sign-up endpoint.
+ *
+ * Limit: 10 attempts per 60 minutes per IP
+ * Prevents mass account-creation abuse.
+ */
+export const signUpRateLimiter = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, "60 m"),
+  analytics: true,
+  prefix: "auth-sign-up",
+});
