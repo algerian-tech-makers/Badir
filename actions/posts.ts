@@ -11,23 +11,82 @@ import {
 } from "@/services/supabase-storage";
 import { PostType, PostStatus, InitiativeStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import { extractImageSrcsFromHtml } from "@/lib/utils";
-import { ALLOWED_INITIATIVE_IMAGES } from "@/types/Statics";
+import { sanitizeHTMLServer } from "@/lib/santitize-server";
+import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import { PostEmailQueueService } from "@/services/post-email-queue";
 import { postCreationRateLimiter } from "@/lib/rate-limit";
 
+const MAX_POST_IMAGES = 5;
+
 /**
- * Create a new post
- * @param initiativeId Initiative ID
- * @param content Post content (HTML)
- * @param title Post title (optional)
- * @param postType Post type (announcement, update, event)
- * @param status Post status (published, draft, archived)
- * @returns Success/error response with post data
+ * Uploads post image files to storage and returns their public URLs.
+ * @param initiativeId
+ * @param userId
+ * @param imageFiles
+ * @returns An array of public URLs for the uploaded images.
  */
+async function uploadPostImageFiles(
+  initiativeId: string,
+  userId: string,
+  imageFiles: File[] = [],
+) {
+  if (imageFiles.length > MAX_POST_IMAGES) {
+    throw new Error("الحد الأقصى لعدد الصور هو 5");
+  }
+
+  const storage = new StorageHelpers();
+
+  return Promise.all(
+    imageFiles.map(async (file) => {
+      if (!BUCKET_MIME_TYPES["post-images"].includes(file.type)) {
+        throw new Error("نوع الصورة غير مدعوم");
+      }
+
+      if (file.size > BUCKET_SIZE_LIMITS["post-images"]) {
+        throw new Error("حجم الصورة كبير جدا");
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, "-")}`;
+      const path = `${initiativeId}/${userId}/${fileName}`;
+      const uploaded = await storage.uploadFile(
+        "post-images",
+        path,
+        buffer,
+        file.type,
+      );
+
+      return storage.getPublicUrl("post-images", uploaded.path);
+    }),
+  );
+}
+
+/**
+ * Deletes post images from storage given their public URLs.
+ * @param imageUrls An array of public URLs for the images to delete.
+ */
+async function deletePostImagesFromStorage(imageUrls: string[]) {
+  const storage = new StorageHelpers();
+
+  for (const imageUrl of imageUrls) {
+    const pathToDelete = extractStoragePath(imageUrl);
+    if (!pathToDelete) {
+      console.warn("Could not derive storage path for:", imageUrl);
+      continue;
+    }
+
+    try {
+      await storage.deleteFile("post-images", pathToDelete);
+    } catch (error) {
+      console.warn("Failed to delete file from storage:", pathToDelete, error);
+    }
+  }
+}
+
 export async function createPostAction(
   initiativeId: string,
   content: string,
+  imageFiles: File[] = [],
   title?: string | null,
   postType: PostType = "announcement",
   status: PostStatus = "published",
@@ -35,7 +94,6 @@ export async function createPostAction(
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
 
-  // Completed initiatives are read-only: no new posts allowed
   const initiativeState = await InitiativeService.getStatus(initiativeId);
   if (initiativeState === InitiativeStatus.completed) {
     return {
@@ -44,7 +102,6 @@ export async function createPostAction(
     };
   }
 
-  // Rate limit post creation (only if publishing)
   if (status === "published") {
     const { success: rateLimitSuccess } = await postCreationRateLimiter.limit(
       session.user.id,
@@ -52,96 +109,83 @@ export async function createPostAction(
     if (!rateLimitSuccess) {
       return {
         success: false,
-        error: "تجاوزت الحد المسموح من المنشورات. حاول مرة أخرى لاحقاً",
+        error: "تجاوزت الحد المسموح من المنشورات. حاول مرة أخرى لاحقا",
       };
     }
   }
 
-  const imageSrcs = extractImageSrcsFromHtml(content)
-    .map((s) => s.trim())
-    .filter((s): s is string => !!s);
-
-  if (imageSrcs.length > ALLOWED_INITIATIVE_IMAGES) {
+  if (imageFiles.length > MAX_POST_IMAGES) {
     return {
       success: false,
-      error: `تجاوزت الحد المسموح لعدد الصور في المنشور (${ALLOWED_INITIATIVE_IMAGES})`,
+      error: "الحد الأقصى لعدد الصور هو 5",
     };
   }
-  const post = await InitiativePostsService.create({
-    initiativeId,
-    authorId: session.user.id,
-    content,
-    title: title ?? null,
-    postType,
-    status,
-  });
-  const uploadResults = await Promise.allSettled(
-    imageSrcs.map((src) => InitiativePostsService.addAttachment(post.id, src)),
-  );
 
-  const failed = uploadResults
-    .map((res, i) => ({ res, src: imageSrcs[i] }))
-    .filter(({ res }) => res.status === "rejected");
+  let uploadedImageUrls: string[] = [];
 
-  if (failed.length) {
-    console.error(
-      "Failed to add some attachments:",
-      failed.map((f) => ({
-        src: f.src,
-        reason: (f.res as PromiseRejectedResult).reason,
-      })),
+  try {
+    const sanitizedContent = sanitizeHTMLServer(content || "");
+    const post = await InitiativePostsService.create({
+      initiativeId,
+      authorId: session.user.id,
+      content: sanitizedContent,
+      title: title ?? null,
+      postType,
+      status,
+    });
+
+    uploadedImageUrls = await uploadPostImageFiles(
+      initiativeId,
+      session.user.id,
+      imageFiles,
     );
-  }
 
-  // Enqueue emails if post is published
-  if (status === "published") {
-    try {
-      await PostEmailQueueService.enqueuePostEmails({
-        postId: post.id,
-        initiativeId,
-      });
-    } catch (error) {
-      console.error("Failed to enqueue post emails:", error);
-      // Don't fail the post creation if email queueing fails
+    await Promise.all(
+      uploadedImageUrls.map((imageUrl) =>
+        InitiativePostsService.addAttachment(post.id, imageUrl),
+      ),
+    );
+
+    if (status === "published") {
+      try {
+        await PostEmailQueueService.enqueuePostEmails({
+          postId: post.id,
+          initiativeId,
+        });
+      } catch (error) {
+        console.error("Failed to enqueue post emails:", error);
+      }
     }
-  }
 
-  revalidatePath(`/initiatives/${initiativeId}`);
-  updateTag(`initiative-${initiativeId}-posts`);
-  return { success: true, message: "تم نشر المنشور" };
+    revalidatePath(`/initiatives/${initiativeId}`);
+    updateTag(`initiative-${initiativeId}-posts`);
+    return { success: true, message: "تم نشر المنشور" };
+  } catch (error) {
+    console.error("Failed to create post:", error);
+    if (uploadedImageUrls.length) {
+      await deletePostImagesFromStorage(uploadedImageUrls);
+    }
+    return { success: false, error: "فشل حفظ المنشور" };
+  }
 }
 
-/**
- * Delete a post attachment (image attachment) from DB
- * @param imageUrl Image URL
- */
 export async function deletePostAttachments(imageUrl: string) {
   await InitiativePostsService.removeAttachment(imageUrl);
 }
 
-/**
- * Update a post
- * @param postId Post ID
- * @param initiativeId Initiative ID
- * @param content New content
- * @param title New title
- * @param postType New post type
- * @param status New status
- * @returns Success/error response
- */
 export async function updatePostAction(
   postId: string,
   initiativeId: string,
   content: string,
+  attachmentUrls: string[] = [],
+  imageFiles: File[] = [],
   title?: string | null,
   postType?: PostType,
   status?: PostStatus,
-  removedImageUrls?: string[],
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
 
-  // Completed initiatives are read-only: no edits allowed
   const initiativeState = await InitiativeService.getStatus(initiativeId);
   if (initiativeState === InitiativeStatus.completed) {
     return {
@@ -150,104 +194,100 @@ export async function updatePostAction(
     };
   }
 
-  // Get current post status to check if we're transitioning to published
-  const existingPost = await InitiativePostsService.getById(postId);
-  const wasNotPublished = existingPost?.status !== "published";
-
-  const updateData: any = {
-    content,
-    title: title ?? null,
-  };
-
-  if (postType) updateData.postType = postType;
-  if (status) updateData.status = status;
-
-  const newImageUrls = extractImageSrcsFromHtml(content)
-    .map((s) => s.trim())
-    .filter((s): s is string => !!s);
-  const initiativeAttachments =
-    await InitiativePostsService.checkInitiativeAttachmentsLimit(initiativeId);
-
-  if (newImageUrls.length + initiativeAttachments > ALLOWED_INITIATIVE_IMAGES) {
+  if (attachmentUrls.length + imageFiles.length > MAX_POST_IMAGES) {
     return {
       success: false,
-      error: `تجاوزت الحد المسموح لعدد الصور في المبادرة (${ALLOWED_INITIATIVE_IMAGES})`,
+      error: "الحد الأقصى لعدد الصور هو 5",
     };
   }
-  await InitiativePostsService.update(postId, session.user.id, updateData);
 
-  const uploadResults = await Promise.allSettled(
-    newImageUrls.map((src) =>
-      InitiativePostsService.addAttachment(postId, src),
-    ),
+  const existingPost = await InitiativePostsService.getById(postId);
+  const wasNotPublished = existingPost?.status !== "published";
+  const existingImageUrls =
+    existingPost?.attachments.map((attachment) => attachment.imageUrl) ?? [];
+  const initiative = await InitiativeService.getById(
+    initiativeId,
+    session.user.id,
   );
+  const isManager =
+    initiative?.organizerUserId === session.user.id ||
+    initiative?.organizerOrg?.userId === session.user.id;
+  let uploadedImages: string[] = [];
 
-  const failed = uploadResults
-    .map((res, i) => ({ res, src: newImageUrls[i] }))
-    .filter(({ res }) => res.status === "rejected");
-  if (failed.length) {
-    console.error(
-      "Failed to add some attachments:",
-      failed.map((f) => ({
-        src: f.src,
-        reason: (f.res as PromiseRejectedResult).reason,
-      })),
+  try {
+    uploadedImages = await uploadPostImageFiles(
+      initiativeId,
+      session.user.id,
+      imageFiles,
     );
-  }
+    const nextAttachmentUrls = [...attachmentUrls, ...uploadedImages];
+    const removedImageUrls = existingImageUrls.filter(
+      (imageUrl) => !nextAttachmentUrls.includes(imageUrl),
+    );
+    const addedImageUrls = nextAttachmentUrls.filter(
+      (imageUrl) => !existingImageUrls.includes(imageUrl),
+    );
 
-  if (removedImageUrls && removedImageUrls.length) {
-    const storage = new StorageHelpers();
-    for (const imageUrl of removedImageUrls) {
+    const updateData: {
+      title?: string | null;
+      content?: string;
+      postType?: PostType;
+      status?: PostStatus;
+    } = {
+      content: sanitizeHTMLServer(content || ""),
+      title: title ?? null,
+    };
+
+    if (postType) updateData.postType = postType;
+    if (status) updateData.status = status;
+
+    await InitiativePostsService.update(
+      postId,
+      session.user.id,
+      updateData,
+      !!isManager,
+    );
+
+    if (removedImageUrls.length) {
+      await Promise.all(
+        removedImageUrls.map((imageUrl) =>
+          InitiativePostsService.removeAttachment(imageUrl),
+        ),
+      );
+      await deletePostImagesFromStorage(removedImageUrls);
+    }
+
+    if (addedImageUrls.length) {
+      await Promise.all(
+        addedImageUrls.map((imageUrl) =>
+          InitiativePostsService.addAttachment(postId, imageUrl),
+        ),
+      );
+    }
+
+    if (status === "published" && wasNotPublished) {
       try {
-        await InitiativePostsService.removeAttachment(imageUrl);
-
-        const pathToDelete = extractStoragePath(imageUrl);
-        if (pathToDelete) {
-          try {
-            await storage.deleteFile("post-images", pathToDelete);
-          } catch (e) {
-            console.warn(
-              "Failed to delete file from storage:",
-              pathToDelete,
-              e,
-            );
-          }
-        } else {
-          console.warn("Could not derive storage path for:", imageUrl);
-        }
-      } catch (err) {
-        console.error(
-          "Failed to remove attachment or storage file for",
-          imageUrl,
-          err,
-        );
+        await PostEmailQueueService.enqueuePostEmails({
+          postId,
+          initiativeId,
+        });
+      } catch (error) {
+        console.error("Failed to enqueue post emails:", error);
       }
     }
-  }
 
-  // Enqueue emails if post is being published for the first time
-  if (status === "published" && wasNotPublished) {
-    try {
-      await PostEmailQueueService.enqueuePostEmails({
-        postId,
-        initiativeId,
-      });
-    } catch (error) {
-      console.error("Failed to enqueue post emails:", error);
+    revalidatePath(`/initiatives/${initiativeId}`);
+    updateTag(`initiative-${initiativeId}-posts`);
+    return { success: true, message: "تم تحديث المنشور" };
+  } catch (error) {
+    console.error("Failed to update post:", error);
+    if (uploadedImages.length) {
+      await deletePostImagesFromStorage(uploadedImages);
     }
+    return { success: false, error: "فشل تحديث المنشور" };
   }
-
-  revalidatePath(`/initiatives/${initiativeId}`);
-  updateTag(`initiative-${initiativeId}-posts`);
-  return { success: true, message: "تم تحديث المنشور" };
 }
 
-/**
- * Delete a post
- * @param postId  Post ID
- * @param initiativeId Initiative ID
- * @returns Success/error response
- */
 export async function deletePostAction(postId: string, initiativeId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
@@ -260,18 +300,20 @@ export async function deletePostAction(postId: string, initiativeId: string) {
     initiative?.organizerUserId === session.user.id ||
     initiative?.organizerOrg?.userId === session.user.id;
 
+  const existingPost = await InitiativePostsService.getById(postId);
   await InitiativePostsService.delete(postId, session.user.id, !!isManager);
+
+  if (existingPost?.attachments?.length) {
+    await deletePostImagesFromStorage(
+      existingPost.attachments.map((attachment) => attachment.imageUrl),
+    );
+  }
+
   revalidatePath(`/initiatives/${initiativeId}`);
   updateTag(`initiative-${initiativeId}-posts`);
   return { success: true, message: "تم حذف المنشور" };
 }
 
-/** * Pin or unpin a post
- * @param postId Post ID
- * @param initiativeId Initiative ID
- * @param pin Whether to pin or unpin
- * @returns Success/error response
- */
 export async function pinPostAction(
   postId: string,
   initiativeId: string,
@@ -296,69 +338,6 @@ export async function pinPostAction(
   return { success: true, message: pin ? "تم التثبيت" : "تم إلغاء التثبيت" };
 }
 
-/**
- * Upload a post image
- * @param initiativeId Initiative ID
- * @param base64 Base64 encoded image
- * @param name Image name
- * @param type Image type
- * @returns public URL or error
- */
-export async function uploadPostImageAction(
-  initiativeId: string,
-  base64: string,
-  name: string,
-  type: string,
-) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
-
-  const initiativeAttachments =
-    await InitiativePostsService.checkInitiativeAttachmentsLimit(initiativeId);
-  if (initiativeAttachments + 1 > ALLOWED_INITIATIVE_IMAGES) {
-    return {
-      success: false,
-      error: `تجاوزت الحد المسموح لعدد الصور في المبادرة (${ALLOWED_INITIATIVE_IMAGES})`,
-    };
-  }
-
-  try {
-    const storage = new StorageHelpers();
-    const buffer = Buffer.from(base64, "base64");
-    const fileName = `${uuidv4()}-${name.replace(/\s+/g, "-")}`;
-    const path = `${initiativeId}/${session.user.id}/${fileName}`;
-
-    const res = await storage.uploadFile("post-images", path, buffer, type);
-    const publicUrl = await storage.getPublicUrl("post-images", res.path);
-    return { success: true, url: publicUrl };
-  } catch {
-    return { success: false, error: "فشل رفع الصورة" };
-  }
-}
-
-export async function deletePostImageAction(imageUrl: string) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
-  try {
-    const storage = new StorageHelpers();
-    const pathToDelete = extractStoragePath(imageUrl);
-    if (pathToDelete) {
-      await storage.deleteFile("post-images", pathToDelete);
-    }
-    return { success: true };
-  } catch {
-    return { success: false, error: "فشل حذف الصورة" };
-  }
-}
-
-/**
- * List posts (supports onlyUserId for "your posts" tab)
- * @param initiativeId Initiative ID
- * @param onlyUserId Only user ID
- * @param status Filter by status (optional)
- * @param postType Filter by post type (optional)
- * @returns List of posts
- */
 export async function listPostsAction(
   initiativeId: string,
   onlyUserId?: string,
@@ -379,7 +358,7 @@ export async function listPostsAction(
         status: p.status,
         isPinned: p.isPinned,
         author: p.author,
-        createdAt: p.createdAt.toISOString(), // Serialize dates
+        createdAt: p.createdAt.toISOString(),
         attachments: p.attachments,
       }));
     },
@@ -398,11 +377,6 @@ export async function listPostsAction(
   };
 }
 
-/**
- * Get single post by ID
- * @param postId Post ID
- * @returns Post data
- */
 export async function getPostAction(postId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return { success: false, error: "يجب تسجيل الدخول" };
@@ -429,13 +403,6 @@ export async function getPostAction(postId: string) {
   }
 }
 
-/**
- * Update post status (publish, draft, archive)
- * @param postId Post ID
- * @param initiativeId Initiative ID
- * @param status New status
- * @returns Success/error response
- */
 export async function updatePostStatusAction(
   postId: string,
   initiativeId: string,
@@ -461,14 +428,8 @@ export async function updatePostStatusAction(
   revalidatePath(`/initiatives/${initiativeId}`);
   updateTag(`initiative-${initiativeId}-posts`);
 
-  const statusLabels = {
-    published: "منشور",
-    draft: "مسودة",
-    archived: "مؤرشف",
-  };
-
   return {
     success: true,
-    message: `تم تغيير حالة المنشور إلى ${statusLabels[status]}`,
+    message: `تم تغيير حالة المنشور إلى ${status}`,
   };
 }

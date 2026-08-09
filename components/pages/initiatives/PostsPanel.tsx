@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   deletePostAction,
   pinPostAction,
@@ -36,6 +36,8 @@ import { cn, formatDate } from "@/lib/utils";
 import "reactjs-tiptap-editor/style.css";
 import { Post } from "@/services/posts";
 import Link from "next/link";
+import parse from "html-react-parser";
+import { toast } from "sonner";
 
 export default function PostsPanel({
   initiativeId,
@@ -58,6 +60,7 @@ export default function PostsPanel({
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleSetPosts = useCallback(
     (posts: Post[]) => {
@@ -87,9 +90,17 @@ export default function PostsPanel({
     load();
   }, [initiativeId, load, onlyMine]);
 
-  const onDelete = async (postId: string) => {
-    const res = await deletePostAction(postId, initiativeId);
-    if ((res as any).success) load();
+  const onDelete = (postId: string) => {
+    startTransition(async () => {
+      try {
+        const res = await deletePostAction(postId, initiativeId);
+        if ((res as any).success) load();
+        setDeleteDialogOpen(false);
+        setPostToDelete(null);
+      } catch (error) {
+        toast.error("حدث خطأ أثناء حذف المنشور. يرجى المحاولة مرة أخرى.");
+      }
+    });
   };
 
   const onPin = async (postId: string, pin: boolean) => {
@@ -146,6 +157,8 @@ export default function PostsPanel({
                 id: editingPost.id,
                 title: editingPost.title || "",
                 content: editingPost.content,
+                attachmentUrls:
+                  editingPost.attachments?.map((atch) => atch.imageUrl) ?? [],
                 postType: editingPost.postType,
                 status: editingPost.status,
               }
@@ -316,11 +329,10 @@ export default function PostsPanel({
                               <AlertDialogAction
                                 onClick={async () => {
                                   if (postToDelete) {
-                                    await onDelete(postToDelete);
-                                    setDeleteDialogOpen(false);
-                                    setPostToDelete(null);
+                                    onDelete(postToDelete);
                                   }
                                 }}
+                                disabled={isPending}
                                 className="text-button-sm sm:text-button-md bg-primary-500 hover:bg-primary-400 h-8 px-3 text-white sm:h-10 sm:px-4"
                               >
                                 حذف
@@ -377,10 +389,22 @@ export default function PostsPanel({
                 </CardHeader>
 
                 <CardContent dir="rtl">
-                  <div
-                    className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                  />
+                  <div className="prose prose-sm max-w-none">
+                    {parse(post.content ?? "")}
+                  </div>
+
+                  {post.attachments?.length > 0 && (
+                    <div className="mt-3 flex gap-2 overflow-x-auto">
+                      {post.attachments.map((atch) => (
+                        <img
+                          key={`${atch.id}`}
+                          src={atch.imageUrl}
+                          alt=""
+                          className="h-48 w-auto shrink-0 rounded-md object-cover"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );

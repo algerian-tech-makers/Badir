@@ -556,7 +556,7 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 ## Role-Based Access Control
 
-## Badir implements a three-tier RBAC model with `USER`, `MANAGER`, and `ADMIN` roles stored on the `User` record. Admins are promoted via a CLI script; managers are assigned by admins from the `/admin/users` panel and cannot assign or revoke other managers. The permission matrix lives in a single PDP (`lib/permissions.ts`) that enumerates all privileged actions and maps each role to an allowed set — admin-only actions such as approving organizations, setting featured partners, and assigning managers are explicitly excluded from the manager policy. Every server action enforces permissions by calling `enforce(role, action)` before touching the database, and every privileged action is recorded to the `audit_logs` table with the actor, their role at the time, the action type, and the target resource.
+Badir implements a three-tier RBAC model with `USER`, `MANAGER`, and `ADMIN` roles stored on the `User` record. Admins are promoted via a CLI script; managers are assigned by admins from the `/admin/users` panel and cannot assign or revoke other managers. The permission matrix lives in a single PDP (`lib/permissions.ts`) that enumerates all privileged actions and maps each role to an allowed set — admin-only actions such as approving organizations, setting featured partners, and assigning managers are explicitly excluded from the manager policy. Every server action enforces permissions by calling `enforce(role, action)` before touching the database, and every privileged action is recorded to the `audit_logs` table with the actor, their role at the time, the action type, and the target resource.
 
 # License
 
