@@ -330,6 +330,7 @@ export class InitiativeService {
               name: true,
               logo: true,
               userId: true,
+              status: true,
             },
           },
           participants: userId
@@ -351,6 +352,17 @@ export class InitiativeService {
           },
         },
       });
+
+      if (!initiative) return null;
+
+      // Mirror the org-approval guard from getMany:
+      // hide initiatives whose organizer organisation is not yet approved.
+      if (
+        initiative.organizerType === "organization" &&
+        initiative.organizerOrg?.status !== "approved"
+      ) {
+        return null;
+      }
 
       return initiative;
     } catch (error) {
@@ -541,8 +553,8 @@ export class InitiativeService {
    * Get the current user's existing rating for an initiative, if any.
    */
   static async getUserRating(userId: string, initiativeId: string) {
-    return await prisma.userInitiativeRating.findUnique({
-      where: { userId_initiativeId: { userId, initiativeId } },
+    return await prisma.userInitiativeRating.findFirst({
+      where: { userId, initiativeId },
     });
   }
 

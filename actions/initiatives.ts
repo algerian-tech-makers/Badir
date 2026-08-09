@@ -17,6 +17,7 @@ import { OrganizationService } from "@/services/organizations";
 import { ActionResponse } from "@/types/Statics";
 import { InitiativeService } from "@/services/initiatives";
 import { getPublicStorageUrl } from "./helpers-sf";
+import { sanitizePlainText, sanitizeRichText } from "@/lib/santitize-server";
 
 export async function createInitiativeAction(
   data: NewInitiativeFormData,
@@ -57,12 +58,18 @@ export async function createInitiativeAction(
         organizerUserId: organizerUserId,
         organizerOrgId: organizerOrgId,
         categoryId: data.categoryId,
-        titleAr: data.titleAr,
-        titleEn: data.titleEn,
-        descriptionAr: data.descriptionAr,
-        descriptionEn: data.descriptionEn,
-        shortDescriptionAr: data.shortDescriptionAr,
-        shortDescriptionEn: data.shortDescriptionEn,
+        titleAr: sanitizePlainText(data.titleAr),
+        titleEn: data.titleEn ? sanitizePlainText(data.titleEn) : undefined,
+        descriptionAr: sanitizeRichText(data.descriptionAr),
+        descriptionEn: data.descriptionEn
+          ? sanitizeRichText(data.descriptionEn)
+          : undefined,
+        shortDescriptionAr: data.shortDescriptionAr
+          ? sanitizePlainText(data.shortDescriptionAr)
+          : undefined,
+        shortDescriptionEn: data.shortDescriptionEn
+          ? sanitizePlainText(data.shortDescriptionEn)
+          : undefined,
         isOnline: data.isOnline,
         location: data.location || "",
         city: data.city || "",
@@ -233,12 +240,20 @@ export async function updateInitiativeAction(
     const updateData = await prisma.initiative.update({
       where: { id: initiativeId },
       data: {
-        titleAr: data.titleAr,
-        titleEn: data.titleEn,
-        shortDescriptionAr: data.shortDescriptionAr,
-        shortDescriptionEn: data.shortDescriptionEn,
-        descriptionAr: data.descriptionAr,
-        descriptionEn: data.descriptionEn,
+        titleAr: sanitizePlainText(data.titleAr),
+        titleEn: data.titleEn ? sanitizePlainText(data.titleEn) : undefined,
+        shortDescriptionAr: data.shortDescriptionAr
+          ? sanitizePlainText(data.shortDescriptionAr)
+          : undefined,
+        shortDescriptionEn: data.shortDescriptionEn
+          ? sanitizePlainText(data.shortDescriptionEn)
+          : undefined,
+        descriptionAr: data.descriptionAr
+          ? sanitizeRichText(data.descriptionAr)
+          : undefined,
+        descriptionEn: data.descriptionEn
+          ? sanitizeRichText(data.descriptionEn)
+          : undefined,
         categoryId: data.categoryId,
         isOnline: data.isOnline,
         location: data.location || "",
