@@ -12,7 +12,6 @@ import { BulletList } from "reactjs-tiptap-editor/bulletlist";
 import { OrderedList } from "reactjs-tiptap-editor/orderedlist";
 import { Link } from "reactjs-tiptap-editor/link";
 import { Color } from "reactjs-tiptap-editor/color";
-import { Image } from "reactjs-tiptap-editor/image";
 import { BubbleMenuDrawer } from "reactjs-tiptap-editor/bubble-extra";
 import { SlashCommand } from "reactjs-tiptap-editor/slashcommand";
 import { ColumnActionButton } from "reactjs-tiptap-editor/multicolumn";
@@ -262,24 +261,6 @@ export default function PostEditor({
           />
 
           <div className="space-y-2">
-            {/* <Label htmlFor="postType">نوع المنشور</Label> */}
-            {/* <Select
-              value={postType}
-              onValueChange={(value) => {
-                if (value) setPostType(value);
-              }}
-            >
-              <SelectTrigger className="text-right" dir="rtl">
-                <SelectValue placeholder="اختر نوع المنشور" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(postTypeLabels).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> */}
             <FormInput
               label="نوع المنشور"
               name="postType"

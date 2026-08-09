@@ -38,6 +38,7 @@ import { Post } from "@/services/posts";
 import Link from "next/link";
 import parse from "html-react-parser";
 import { toast } from "sonner";
+import { ImageStrip } from "@/components/ImageStrip";
 
 export default function PostsPanel({
   initiativeId,
@@ -394,16 +395,7 @@ export default function PostsPanel({
                   </div>
 
                   {post.attachments?.length > 0 && (
-                    <div className="mt-3 flex gap-2 overflow-x-auto">
-                      {post.attachments.map((atch) => (
-                        <img
-                          key={`${atch.id}`}
-                          src={atch.imageUrl}
-                          alt=""
-                          className="h-48 w-auto shrink-0 rounded-md object-cover"
-                        />
-                      ))}
-                    </div>
+                    <ImageStrip attachments={post.attachments} />
                   )}
                 </CardContent>
               </Card>

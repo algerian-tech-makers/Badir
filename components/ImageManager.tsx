@@ -99,7 +99,7 @@ export default function ImageManager({
       {currentImageUrl && onDelete && (
         <AppButton
           type="outline"
-          className="absolute -right-2 -bottom-2 flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center rounded-full border-gray-200 bg-white p-0 text-red-500 shadow-md hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+          className="absolute -right-2 -bottom-2 flex h-11 min-h-11 w-11 min-w-11 items-center justify-center rounded-full border-gray-200 bg-white p-0 text-red-500 shadow-md hover:border-red-200 hover:bg-red-50 hover:text-red-600"
           onClick={handleDelete}
           disabled={isDeleting || isUploading}
           aria-label="Delete image"
