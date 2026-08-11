@@ -45,8 +45,8 @@ next-env.d.ts
 
 /*.txt
 
+.idea
+.idea/
 
 # docker files (I used it just to emulate vercel environment locally)
-dockerfile
-docker-compose.yml
 .dockerignore
