@@ -5,16 +5,14 @@ import { headers } from "next/headers";
 import { revalidatePath, updateTag, unstable_cache } from "next/cache";
 import { InitiativeService } from "@/services/initiatives";
 import { InitiativePostsService } from "@/services/posts";
-import {
-  StorageHelpers,
-  extractStoragePath,
-} from "@/services/supabase-storage";
+import { extractStoragePath } from "@/services/supabase-storage";
 import { PostType, PostStatus, InitiativeStatus } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { sanitizeHTMLServer } from "@/lib/santitize-server";
 import { BUCKET_MIME_TYPES, BUCKET_SIZE_LIMITS } from "@/types/Statics";
 import { PostEmailQueueService } from "@/services/post-email-queue";
 import { postCreationRateLimiter } from "@/lib/rate-limit";
+import { storageService } from "@/services/storage.factory";
 
 const MAX_POST_IMAGES = 5;
 
@@ -34,7 +32,7 @@ async function uploadPostImageFiles(
     throw new Error("الحد الأقصى لعدد الصور هو 5");
   }
 
-  const storage = new StorageHelpers();
+  //const storage = new StorageHelpers();
 
   return Promise.all(
     imageFiles.map(async (file) => {
@@ -49,14 +47,14 @@ async function uploadPostImageFiles(
       const buffer = Buffer.from(await file.arrayBuffer());
       const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, "-")}`;
       const path = `${initiativeId}/${userId}/${fileName}`;
-      const uploaded = await storage.uploadFile(
+      const uploaded = await storageService.uploadFile(
         "post-images",
         path,
         buffer,
         file.type,
       );
 
-      return storage.getPublicUrl("post-images", uploaded.path);
+      return storageService.getPublicUrl("post-images", uploaded.path);
     }),
   );
 }
@@ -66,7 +64,7 @@ async function uploadPostImageFiles(
  * @param imageUrls An array of public URLs for the images to delete.
  */
 async function deletePostImagesFromStorage(imageUrls: string[]) {
-  const storage = new StorageHelpers();
+  //const storage = new StorageHelpers();
 
   for (const imageUrl of imageUrls) {
     const pathToDelete = extractStoragePath(imageUrl);
@@ -76,7 +74,7 @@ async function deletePostImagesFromStorage(imageUrls: string[]) {
     }
 
     try {
-      await storage.deleteFile("post-images", pathToDelete);
+      await storageService.deleteFile("post-images", pathToDelete);
     } catch (error) {
       console.warn("Failed to delete file from storage:", pathToDelete, error);
     }

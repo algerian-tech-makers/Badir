@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { BUCKETS } from "@/types/Statics";
+import { StorageService } from "@/services/storage.interface";
 
 /**
  * Extract storage path from a public URL
@@ -12,7 +13,7 @@ export function extractStoragePath(url: string | null): string | null {
   return match ? match[1] : url;
 }
 
-export class StorageHelpers {
+export class StorageHelpers implements StorageService {
   private supabase: ReturnType<typeof createClient>;
 
   constructor() {
@@ -35,14 +36,18 @@ export class StorageHelpers {
   }
 
   async deleteFile(bucket: BUCKETS, path: string) {
-    const { error } = await (await this.supabase).storage
+    const { error } = await (
+      await this.supabase
+    ).storage
       .from(bucket)
       .remove([path]);
     if (error) throw error;
   }
 
   async downloadFile(bucket: BUCKETS, path: string) {
-    const { data, error } = await (await this.supabase).storage
+    const { data, error } = await (
+      await this.supabase
+    ).storage
       .from(bucket)
       .download(path);
     if (error) throw error;
@@ -50,10 +55,29 @@ export class StorageHelpers {
   }
 
   async listFiles(bucket: BUCKETS, folder: string = "") {
-    const { data, error } = await (await this.supabase).storage
+    const { data, error } = await (
+      await this.supabase
+    ).storage
       .from(bucket)
       .list(folder);
+
     if (error) throw error;
-    return data;
+
+    const formattedData = (data || []).map((file) => ({
+      name: file.name,
+      key: file.name,
+      size: file.metadata?.size,
+      lastModified: file.updated_at ? new Date(file.updated_at) : undefined,
+    }));
+
+    return { data: formattedData };
+  }
+
+  getPresignedUrl(
+    bucket: BUCKETS,
+    path: string,
+    expiresIn: number,
+  ): Promise<string> {
+    return Promise.resolve("");
   }
 }

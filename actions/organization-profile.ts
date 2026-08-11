@@ -12,16 +12,14 @@ import {
 } from "@/schemas/signupOrgSchema";
 import { AUTHORIZED_REDIRECTION } from "@/data/routes";
 import { OrganizationStatus, UserType } from "@prisma/client";
-import {
-  StorageHelpers,
-  extractStoragePath,
-} from "@/services/supabase-storage";
+import { extractStoragePath } from "@/services/supabase-storage";
 import { ActionResponse, BUCKETS } from "@/types/Statics";
 import { OrganizationService } from "@/services/organizations";
 import { getCallingCodeFromCountry, mimeTypeToExtension } from "@/lib/utils";
 import path from "path";
 import { OrganizationProfile, validateOrganizationProfile } from "@/schemas";
 import { getPublicStorageUrl } from "./helpers-sf";
+import { storageService } from "@/services/storage.factory";
 
 type FileField = "officialLicense" | "logo" | "identificationCard";
 type UploadFileField = Exclude<FileField, "officialLicense">;
@@ -96,8 +94,8 @@ export async function completeOrgProfileAction(
         const bucketName: BUCKETS = field === "logo" ? "avatars" : "documents";
         const filePath = `${userId}/${fileName}`;
 
-        const storage = new StorageHelpers();
-        const uploadResult = await storage
+        //const storage = new StorageHelpers();
+        const uploadResult = await storageService
           .uploadFile(bucketName, filePath, fileBuffer, type)
           .then((result) => ({
             field,
@@ -334,8 +332,8 @@ export async function updateOrganizationProfileAction(
             field === "logo" ? "avatars" : "documents";
           const filePath = `${userId}/${fileName}`;
 
-          const storage = new StorageHelpers();
-          const result = await storage.uploadFile(
+          //const storage = new StorageHelpers();
+          const result = await storageService.uploadFile(
             bucketName,
             filePath,
             fileBuffer,
@@ -346,7 +344,7 @@ export async function updateOrganizationProfileAction(
             try {
               const pathToDelete = extractStoragePath(orgLogo);
               if (pathToDelete) {
-                await storage.deleteFile("avatars", pathToDelete);
+                await storageService.deleteFile("avatars", pathToDelete);
               }
             } catch (deleteError) {
               console.error("Failed to delete old profile image:", deleteError);

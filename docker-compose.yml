@@ -39,7 +39,6 @@ services:
           cpus: "0.5"
           memory: 512M
 
-
   prisma-migrate:
     image: node:20-alpine
     container_name: prisma_migrate_badir
@@ -52,7 +51,7 @@ services:
       db:
         condition: service_healthy
     command: >
-        sh -c "npm install && rm -rf prisma/migrations/*/ && npx prisma migrate dev --name init && npx prisma db seed"
+      sh -c "npm install && rm -rf prisma/migrations/*/ && npx prisma migrate dev --name init && npx prisma db seed"
     networks:
       - badir-network
 

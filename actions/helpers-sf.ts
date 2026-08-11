@@ -1,7 +1,6 @@
 "use server";
 import { auth } from "@/lib/auth";
-import { InitiativeService } from "@/services/initiatives";
-import { StorageHelpers } from "@/services/supabase-storage";
+
 import { BUCKETS } from "@/types/Statics";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -10,7 +9,7 @@ import { extractStoragePath } from "@/services/supabase-storage";
 import { UserService } from "@/services/user";
 import { prisma } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
-import { isManagementRole } from "@/lib/permissions";
+import { storageService } from "@/services/storage.factory";
 
 /**
  * Returns the public URL for a file stored in Supabase Storage.
@@ -23,8 +22,8 @@ export async function getPublicStorageUrl(
   path: string | null,
 ): Promise<string | null> {
   if (!bucket || !path) return null;
-  const storage = new StorageHelpers();
-  return await storage.getPublicUrl(bucket, path);
+  //const storage = new StorageHelpers();
+  return await storageService.getPublicUrl(bucket, path);
 }
 
 /**
@@ -47,12 +46,12 @@ export async function uploadUserProfileImage(
     const fileBuffer = Buffer.from(arrayBuffer);
 
     const currentImage = await UserService.getUserImage(userId);
-    const storage = new StorageHelpers();
+    //const storage = new StorageHelpers();
 
     const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, "-")}`;
     const filePath = `${userId}/${fileName}`;
 
-    const result = await storage.uploadFile(
+    const result = await storageService.uploadFile(
       "avatars",
       filePath,
       fileBuffer,
@@ -63,7 +62,7 @@ export async function uploadUserProfileImage(
       try {
         const pathToDelete = extractStoragePath(currentImage.image);
         if (pathToDelete) {
-          await storage.deleteFile("avatars", pathToDelete);
+          await storageService.deleteFile("avatars", pathToDelete);
         }
       } catch (deleteError) {
         console.error("Failed to delete old profile image:", deleteError);
@@ -113,12 +112,12 @@ export async function uploadOrganizationLogo(
     const arrayBuffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(arrayBuffer);
 
-    const storage = new StorageHelpers();
+    //const storage = new StorageHelpers();
 
     const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, "-")}`;
     const filePath = `${userId}/${fileName}`;
 
-    const result = await storage.uploadFile(
+    const result = await storageService.uploadFile(
       "avatars",
       filePath,
       fileBuffer,
@@ -129,7 +128,7 @@ export async function uploadOrganizationLogo(
       try {
         const pathToDelete = extractStoragePath(orgLogo);
         if (pathToDelete) {
-          await storage.deleteFile("avatars", pathToDelete);
+          await storageService.deleteFile("avatars", pathToDelete);
         }
       } catch (deleteError) {
         console.error("Failed to delete old logo:", deleteError);
@@ -164,10 +163,10 @@ export async function deleteUserProfileImage(): Promise<
   try {
     const currentImage = await UserService.getUserImage(userId);
     if (currentImage?.image) {
-      const storage = new StorageHelpers();
+      //const storage = new StorageHelpers();
       const pathToDelete = extractStoragePath(currentImage.image);
       if (pathToDelete) {
-        await storage.deleteFile("avatars", pathToDelete);
+        await storageService.deleteFile("avatars", pathToDelete);
       }
     }
     await prisma.user.update({
@@ -204,10 +203,10 @@ export async function deleteOrganizationLogo(): Promise<
     const orgLogo = userWithOrg.organization.logo;
 
     if (orgLogo) {
-      const storage = new StorageHelpers();
+      //const storage = new StorageHelpers();
       const pathToDelete = extractStoragePath(orgLogo);
       if (pathToDelete) {
-        await storage.deleteFile("avatars", pathToDelete);
+        await storageService.deleteFile("avatars", pathToDelete);
       }
     }
     await prisma.organization.update({
@@ -239,10 +238,10 @@ export async function deleteInitiativeCoverImage(
     if (!initiative) return { success: false, error: "المبادرة غير موجودة" };
 
     if (initiative.coverImage) {
-      const storage = new StorageHelpers();
+      //const storage = new StorageHelpers();
       const pathToDelete = extractStoragePath(initiative.coverImage);
       if (pathToDelete) {
-        await storage.deleteFile("post-images", pathToDelete);
+        await storageService.deleteFile("post-images", pathToDelete);
       }
     }
     await prisma.initiative.update({

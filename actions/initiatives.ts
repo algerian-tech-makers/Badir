@@ -5,10 +5,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { NewInitiativeFormData } from "@/schemas/newInitiativeSchema";
-import {
-  extractStoragePath,
-  StorageHelpers,
-} from "@/services/supabase-storage";
+import { extractStoragePath } from "@/services/supabase-storage";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { mimeTypeToExtension } from "@/lib/utils";
@@ -18,6 +15,7 @@ import { ActionResponse } from "@/types/Statics";
 import { InitiativeService } from "@/services/initiatives";
 import { getPublicStorageUrl } from "./helpers-sf";
 import { sanitizePlainText, sanitizeRichText } from "@/lib/santitize-server";
+import { storageService } from "@/services/storage.factory";
 
 export async function createInitiativeAction(
   data: NewInitiativeFormData,
@@ -112,8 +110,8 @@ export async function createInitiativeAction(
           .replace(ext, "")}${ext}`;
         const filePath = `${session.user.id}/${initiative.id}/${fileName}`;
 
-        const storage = new StorageHelpers();
-        const result = await storage.uploadFile(
+        //const storage = new StorageHelpers();
+        const result = await storageService.uploadFile(
           "post-images",
           filePath,
           fileBuffer,
@@ -194,8 +192,8 @@ export async function updateInitiativeAction(
     ) {
       try {
         if (initiative.coverImage && initiative.coverImage !== null) {
-          const storage = new StorageHelpers();
-          await storage.deleteFile(
+          //const storage = new StorageHelpers();
+          await storageService.deleteFile(
             "post-images",
             extractStoragePath(initiative.coverImage) || "",
           );
@@ -213,8 +211,8 @@ export async function updateInitiativeAction(
           .replace(ext, "")}${ext}`;
         const filePath = `${session.user.id}/${initiativeId}/${fileName}`;
 
-        const storage = new StorageHelpers();
-        const result = await storage.uploadFile(
+        //const storage = new StorageHelpers();
+        const result = await storageService.uploadFile(
           "post-images",
           filePath,
           fileBuffer,
@@ -229,8 +227,8 @@ export async function updateInitiativeAction(
     }
 
     if (data.coverImage === null && initiative.coverImage) {
-      const storage = new StorageHelpers();
-      await storage.deleteFile(
+      //const storage = new StorageHelpers();
+      await storageService.deleteFile(
         "post-images",
         extractStoragePath(initiative.coverImage) || "",
       );
