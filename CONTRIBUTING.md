@@ -33,7 +33,7 @@ cd Badir
 2. **Install dependencies**
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. **Set up environment**
@@ -59,7 +59,7 @@ npx prisma db seed
 5. **Run**
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Visit http://localhost:3000
@@ -90,9 +90,9 @@ docs: add contribution guide
 Before pushing:
 
 ```bash
-npm run lint
-npm run build
-npm run test    # when test suite available
+pnpm run lint
+pnpm run build
+pnpm run test    # when test suite available
 ```
 
 ### Linting
@@ -100,7 +100,7 @@ npm run test    # when test suite available
 Badir uses ESLint + Prettier:
 
 ```bash
-npm run lint --fix
+pnpm run lint --fix
 ```
 
 ## Submitting a Pull Request

@@ -376,7 +376,7 @@ Client Request → Server Function / Next.js API Route → Service Layer → Pri
 ### Install dependencies
 
 ```bash
-   npm install
+   pnpm install
 ```
 
 ### Set up environment variables
@@ -406,7 +406,7 @@ Client Request → Server Function / Next.js API Route → Service Layer → Pri
 ### Start development server
 
 ```bash
-   npm run dev
+   pnpm run dev
 ```
 
 ### Open your browser
@@ -420,7 +420,7 @@ Client Request → Server Function / Next.js API Route → Service Layer → Pri
 ### Install dependencies
 
 ```bash
-   npm install
+   pnpm install
 ```
 
 ### set environment variables
@@ -461,7 +461,7 @@ docker compose up -d --wait
 ### Start the app
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ## Key Components
@@ -514,7 +514,7 @@ actions
 
 ## Admin Setup
 
-To promote a user to admin role, run: `npm run admin:promote` and follow the prompts to enter the user's email address.
+To promote a user to admin role, run: `pnpm run admin:promote` and follow the prompts to enter the user's email address.
 
 ---
 
@@ -591,7 +591,7 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 **Deployment Notes**:
 
-- Run `npm run db:migrate` to create `webhook_events` table
+- Run `pnpm run db:migrate` to create `webhook_events` table
 - Configure webhook in MailerLite dashboard after deployment
 - Vercel Cron activates automatically in production
 - See `WEBHOOK_QUEUE_QUICK_START.md` for complete setup guide

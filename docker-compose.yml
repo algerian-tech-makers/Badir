@@ -17,7 +17,7 @@ services:
       - badir-network
 
     volumes:
-      - postgres_db_badir:/var/lib/postgresql
+      - postgres_db_badir:/var/lib/postgresql/data
     # 6. Performance: Optimize internal PostgreSQL configurations
     command: >
       postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} -c shared_buffers=256MB -c work_mem=16MB -c maintenance_work_mem=64MB -c min_wal_size=1GB -c max_wal_size=4GB
@@ -40,7 +40,7 @@ services:
           memory: 512M
 
   prisma-migrate:
-    image: node:20-alpine
+    image: node:22.15.0-alpine3.24
     container_name: prisma_migrate_badir
     working_dir: /app
     volumes:
@@ -51,7 +51,7 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c "npm install && rm -rf prisma/migrations/*/ && npx prisma migrate dev --name init && npx prisma db seed"
+      sh -c "corepack enable && pnpm install && pnpm prisma migrate deploy && pnpm run db:seed"
     networks:
       - badir-network
 
@@ -139,13 +139,13 @@ services:
       /bin/sh -c "
       mc alias set local http://minio:9000 '${MINIO_ROOT_USER:-minioadmin}' '${MINIO_ROOT_PASSWORD:-minioadmin}' &&
       mc mb --ignore-existing local/${AVATARS_BUCKET:-avatars} &&
-      mc anonymous set download local/${S3_BUCKET:-avatars} &&
+      mc anonymous set download local/${AVATARS_BUCKET:-avatars} &&
 
       mc mb --ignore-existing local/${DOCUMENTS_BUCKET:-documents} &&
-            mc anonymous set download local/${S3_BUCKET:-documents} &&
+      mc anonymous set download local/${DOCUMENTS_BUCKET:-documents} &&
 
       mc mb --ignore-existing local/${POST_IMAGES_BUCKET:-post-images} &&
-      mc anonymous set download local/${S3_BUCKET:-post-images}
+      mc anonymous set download local/${POST_IMAGES_BUCKET:-post-images}
       "
 
 volumes:
