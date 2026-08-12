@@ -125,7 +125,7 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: minio_provisioner
+    container_name: minio-init
     depends_on:
       minio:
         condition: service_healthy
