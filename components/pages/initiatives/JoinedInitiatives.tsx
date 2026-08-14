@@ -1,0 +1,209 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  ParticipationService,
+  UserParticipation,
+} from "@/services/participations";
+import { participationStatusOptions } from "@/data/statics";
+import InitiativeCard from "@/components/pages/InitiativeCard";
+import SearchInput from "@/components/SearchInput";
+import FilterSelect from "@/components/FilterSelect";
+import PaginationControls from "@/components/PaginationControls";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, RotateCcw } from "lucide-react";
+import api from "@/services/api";
+import { PaginatedResponse } from "@/types/Pagination";
+import AppButton from "@/components/AppButton";
+import BackButton from "@/components/BackButton";
+import { ParticipationStatus } from "@prisma/client";
+
+interface JoinedInitiativesProps {
+  initialData: PaginatedResponse<UserParticipation>;
+}
+
+export default function JoinedInitiatives({
+  initialData,
+}: JoinedInitiativesProps) {
+  const [participations, setParticipations] =
+    useState<PaginatedResponse<UserParticipation>>(initialData);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<ParticipationStatus | undefined>(
+    undefined,
+  );
+  const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(searchValue.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchValue]);
+
+  const fetchJoined = async (
+    nextStatus?: ParticipationStatus,
+    search?: string,
+    page: number = 1,
+  ) => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+
+      if (search) params.append("search", search);
+      if (nextStatus) params.append("status", nextStatus);
+      params.append("page", page.toString());
+      params.append("limit", "12");
+
+      const response = await api.get(
+        `${ParticipationService.API_PATH}/joined?${params.toString()}`,
+      );
+      const data = response.data;
+
+      if (data.success) {
+        setParticipations(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching joined initiatives:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!debouncedSearch && !status) {
+      return;
+    }
+
+    fetchJoined(status, debouncedSearch, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
+  const handleStatusChange = (value: string) => {
+    const nextStatus =
+      value === "all" ? undefined : (value as ParticipationStatus);
+    setStatus(nextStatus);
+    fetchJoined(nextStatus, debouncedSearch, 1);
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchJoined(status, debouncedSearch, page);
+  };
+
+  const hasActiveFilters = searchValue !== "" || status !== undefined;
+
+  const handleClear = () => {
+    setSearchValue("");
+    setDebouncedSearch("");
+    setStatus(undefined);
+    fetchJoined(undefined, "", 1);
+  };
+
+  return (
+    <div className="bg-neutrals-100 min-h-screen" dir="rtl">
+      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <BackButton url="/initiatives" />
+          <h1 className="text-primary-md text-neutrals-700 font-bold">
+            مبادراتي
+          </h1>
+          <div className="w-24" />
+        </div>
+
+        {/* Filters Section */}
+        <Card className="mb-8 border-none bg-transparent shadow-none">
+          <CardContent className="p-4">
+            <div className="flex-center mb-4 max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
+              <SearchInput
+                value={searchValue}
+                onChange={setSearchValue}
+                placeholder="ابحث في مبادراتك..."
+                className="w-full"
+              />
+              <FilterSelect
+                value={status || "all"}
+                onChange={handleStatusChange}
+                options={participationStatusOptions}
+                placeholder="حالة المشاركة"
+              />
+              {hasActiveFilters && (
+                <AppButton
+                  type="outline"
+                  border="rounded"
+                  size="sm"
+                  onClick={handleClear}
+                  icon={<RotateCcw className="h-4 w-4" />}
+                >
+                  مسح
+                </AppButton>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Results Info */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="text-neutrals-600">
+            <span className="font-medium">
+              {participations.pagination.total}
+            </span>{" "}
+            {participations.data.length > 1 ? "مبادرات" : "مبادرة"}
+            {participations.pagination.total > 0 && (
+              <span className="mr-2">• من مشاركاتك</span>
+            )}
+          </div>
+
+          {loading && (
+            <div className="text-neutrals-500 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>جاري التحميل...</span>
+            </div>
+          )}
+        </div>
+
+        {/* Initiatives Grid */}
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {participations.data.map((participation) => (
+            <div key={participation.initiative.id} className="h-full">
+              <InitiativeCard
+                mode="participation"
+                participation={participation}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {participations.data.length === 0 && !loading && (
+          <div className="py-12 text-center">
+            <div className="mb-4">
+              <div className="bg-neutrals-200 mx-auto flex h-24 w-24 items-center justify-center rounded-full">
+                <span className="text-neutrals-400 text-2xl">🔍</span>
+              </div>
+            </div>
+            <h3 className="text-neutrals-600 mb-2 text-xl font-semibold">
+              لا توجد مبادرات
+            </h3>
+            <p className="text-neutrals-500">
+              لم نتمكن من العثور على مبادرات تطابق المعايير المحددة
+            </p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {participations.pagination.totalPages > 1 && (
+          <PaginationControls
+            currentPage={participations.pagination.page}
+            totalPages={participations.pagination.totalPages}
+            hasNext={participations.pagination.hasNext}
+            hasPrev={participations.pagination.hasPrev}
+            onPageChange={handlePageChange}
+            className="mt-8"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
