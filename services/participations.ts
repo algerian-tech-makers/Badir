@@ -49,51 +49,43 @@ export class ParticipationService {
     const skip = (page - 1) * limit;
 
     const where: Prisma.InitiativeParticipantWhereInput = { userId };
+    const initiativeWhere: Prisma.InitiativeWhereInput = {};
 
     if (filters.status) {
       where.status = filters.status;
     }
 
     if (filters.categoryId) {
-      where.initiative = {
-        categoryId: filters.categoryId,
-      };
+      initiativeWhere.categoryId = filters.categoryId;
     }
 
     if (filters.targetAudience) {
-      where.initiative = {
-        ...where.initiative,
-        targetAudience:
-          filters.targetAudience !== TargetAudience.both
-            ? { in: [filters.targetAudience, TargetAudience.both] }
-            : undefined,
-      };
+      initiativeWhere.targetAudience =
+        filters.targetAudience !== TargetAudience.both
+          ? { in: [filters.targetAudience, TargetAudience.both] }
+          : undefined;
     }
 
     if (filters.organizerType) {
-      where.initiative = {
-        ...where.initiative,
-        organizerType: filters.organizerType,
-      };
+      initiativeWhere.organizerType = filters.organizerType;
     }
 
     if (filters.initiativeStatus) {
       const now = new Date();
-      where.initiative = {
-        ...where.initiative,
-        ...(filters.initiativeStatus === "ongoing"
-          ? {
-              startDate: { lte: now },
-              endDate: { gte: now },
-              status: InitiativeStatus.published,
-            }
-          : filters.initiativeStatus === "completed"
-            ? {
-                endDate: { lt: now },
-                status: InitiativeStatus.published,
-              }
-            : { status: filters.initiativeStatus }),
-      };
+      if (filters.initiativeStatus === "ongoing") {
+        initiativeWhere.startDate = { lte: now };
+        initiativeWhere.endDate = { gte: now };
+        initiativeWhere.status = InitiativeStatus.published;
+      } else if (filters.initiativeStatus === "completed") {
+        initiativeWhere.endDate = { lt: now };
+        initiativeWhere.status = InitiativeStatus.published;
+      } else {
+        initiativeWhere.status = filters.initiativeStatus;
+      }
+    }
+
+    if (Object.keys(initiativeWhere).length > 0) {
+      where.initiative = initiativeWhere;
     }
 
     if (filters.search) {
