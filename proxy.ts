@@ -19,6 +19,7 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith("/initiatives/") &&
     pathname !== "/initiatives/" &&
     !pathname.startsWith("/initiatives/new") &&
+    !pathname.startsWith("/initiatives/joined") &&
     !pathname.includes("/edit");
 
   const isPublicRoute =

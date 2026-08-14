@@ -4,7 +4,6 @@ import OrganizationProfileForm from "@/components/pages/profile/OrganizationProf
 import NewsletterSubscription from "@/components/pages/NewsletterSubscription";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { toPlainOrganization, toPlainUser } from "@/lib/utils";
-import { ParticipationService } from "@/services/participations";
 import { UserService } from "@/services/user";
 import { OrganizationService } from "@/services/organizations";
 import { OrganizationStatus, UserType } from "@prisma/client";
@@ -106,11 +105,6 @@ export default async function Page() {
         );
       }
 
-      const participations = await ParticipationService.getUserParticipations(
-        session.user.id,
-        true,
-      );
-
       return (
         <div className="bg-neutrals-100 min-h-screen p-6" dir="rtl">
           <div
@@ -121,23 +115,6 @@ export default async function Page() {
             <div className="mt-6">
               <NewsletterSubscription />
             </div>
-            {participations.length > 0 && (
-              <div
-                className="container w-full px-4 pt-2 pb-6 md:px-6"
-                dir="rtl"
-              >
-                <h2 className="mb-4 text-2xl font-semibold">مشاركاتي</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {participations.map((participation) => (
-                    <InitiativeCard
-                      key={participation.initiative.id}
-                      mode="participation"
-                      participation={participation}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
           <div className="border-neutrals-300 mx-auto mt-6 max-w-5xl rounded-lg bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-2xl font-semibold text-red-600">

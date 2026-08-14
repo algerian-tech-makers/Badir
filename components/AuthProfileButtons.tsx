@@ -3,7 +3,7 @@
 import { UserRole, UserType } from "@prisma/client";
 import { useSession } from "@/lib/auth-client";
 import { useState, useEffect, useCallback } from "react";
-import { Settings2Icon, Star } from "lucide-react";
+import { Settings2Icon, Star, HandHeart } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -147,6 +147,14 @@ export function AuthProfileButtons({
                     الملف الشخصي
                   </Link>
                   <Link
+                    href="/initiatives/joined"
+                    className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                    onClick={handleProfileClick}
+                  >
+                    <HandHeart className="h-4 w-4" />
+                    مبادراتي
+                  </Link>
+                  <Link
                     href="/feedback"
                     className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
                     onClick={handleProfileClick}
@@ -251,6 +259,14 @@ export function AuthProfileButtons({
                       className="text-neutrals-600 h-4 w-4"
                     />
                     الملف الشخصي
+                  </Link>
+                  <Link
+                    href="/initiatives/joined"
+                    className="text-neutrals-600 hover:bg-neutrals-200 flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                    onClick={handleProfileClick}
+                  >
+                    <HandHeart className="h-4 w-4" />
+                    مبادراتي
                   </Link>
                   <Link
                     href="/feedback"
