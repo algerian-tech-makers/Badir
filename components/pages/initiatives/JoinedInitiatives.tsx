@@ -17,7 +17,7 @@ import SearchInput from "@/components/SearchInput";
 import FilterSelect from "@/components/FilterSelect";
 import PaginationControls from "@/components/PaginationControls";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import api from "@/services/api";
 import { PaginatedResponse } from "@/types/Pagination";
 import AppButton from "@/components/AppButton";
@@ -137,6 +137,9 @@ export default function JoinedInitiatives({
     fetchJoined({}, "", 1);
   };
 
+  const hasActiveFilters =
+    searchValue !== "" || Object.keys(filters).length > 0;
+
   return (
     <div className="bg-neutrals-100 min-h-screen" dir="rtl">
       <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
@@ -165,7 +168,8 @@ export default function JoinedInitiatives({
                 border="rounded"
                 size="sm"
                 onClick={handleClear}
-                icon={<RotateCcw className="h-4 w-4" />}
+                disabled={!hasActiveFilters}
+                icon={<X className="h-4 w-4" />}
               >
                 مسح
               </AppButton>
