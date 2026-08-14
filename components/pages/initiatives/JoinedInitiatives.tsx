@@ -174,50 +174,62 @@ export default function JoinedInitiatives({
                 مسح
               </AppButton>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-center gap-4">
               {/* Category Filter */}
-              <FilterSelect
-                value={filters.categoryId || "all"}
-                onChange={(value) => handleFilterChange("categoryId", value)}
-                options={categoryOptions}
-                placeholder="فئة المبادرة"
-              />
+              <div className="min-w-0 flex-1">
+                <FilterSelect
+                  value={filters.categoryId || "all"}
+                  onChange={(value) => handleFilterChange("categoryId", value)}
+                  options={categoryOptions}
+                  placeholder="فئة المبادرة"
+                />
+              </div>
 
               {/* Target Audience Filter */}
-              <FilterSelect
-                value={filters.targetAudience || "both"}
-                onChange={(value) =>
-                  handleFilterChange("targetAudience", value)
-                }
-                options={targetAudienceOptions}
-                placeholder="الجمهور المستهدف"
-              />
+              <div className="min-w-0 flex-1">
+                <FilterSelect
+                  value={filters.targetAudience || "both"}
+                  onChange={(value) =>
+                    handleFilterChange("targetAudience", value)
+                  }
+                  options={targetAudienceOptions}
+                  placeholder="الجمهور المستهدف"
+                />
+              </div>
 
               {/* Initiative Status Filter */}
-              <FilterSelect
-                value={filters.initiativeStatus || "all"}
-                onChange={(value) =>
-                  handleFilterChange("initiativeStatus", value)
-                }
-                options={statusOptions}
-                placeholder="حالة المبادرة"
-              />
+              <div className="min-w-0 flex-1">
+                <FilterSelect
+                  value={filters.initiativeStatus || "all"}
+                  onChange={(value) =>
+                    handleFilterChange("initiativeStatus", value)
+                  }
+                  options={statusOptions}
+                  placeholder="حالة المبادرة"
+                />
+              </div>
 
               {/* Organizer Type Filter */}
-              <FilterSelect
-                value={filters.organizerType || "all"}
-                onChange={(value) => handleFilterChange("organizerType", value)}
-                options={organizerTypeOptions}
-                placeholder="نوع المنظم"
-              />
+              <div className="min-w-0 flex-1">
+                <FilterSelect
+                  value={filters.organizerType || "all"}
+                  onChange={(value) =>
+                    handleFilterChange("organizerType", value)
+                  }
+                  options={organizerTypeOptions}
+                  placeholder="نوع المنظم"
+                />
+              </div>
 
               {/* Participation Status Filter */}
-              <FilterSelect
-                value={filters.status || "all"}
-                onChange={(value) => handleFilterChange("status", value)}
-                options={participationStatusOptions}
-                placeholder="حالة المشاركة"
-              />
+              <div className="min-w-0 flex-1">
+                <FilterSelect
+                  value={filters.status || "all"}
+                  onChange={(value) => handleFilterChange("status", value)}
+                  options={participationStatusOptions}
+                  placeholder="حالة المشاركة"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
