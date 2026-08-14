@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { PaginatedResponse, PaginationParams } from "@/types/Pagination";
 import {
   Initiative,
   InitiativeCategory,
@@ -6,6 +7,7 @@ import {
   Organization,
   ParticipantRole,
   ParticipationStatus,
+  Prisma,
   User,
   UserInitiativeRating,
 } from "@prisma/client";
@@ -25,6 +27,135 @@ export type UserParticipation = {
 
 export class ParticipationService {
   static API_PATH = "/participations";
+
+  static async getJoinedParticipations(
+    userId: string,
+    filters: { search?: string; status?: ParticipationStatus } = {},
+    pagination: PaginationParams = { page: 1, limit: 12 },
+  ): Promise<PaginatedResponse<UserParticipation>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.InitiativeParticipantWhereInput = { userId };
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    if (filters.search) {
+      where.OR = [
+        {
+          initiative: {
+            titleAr: { contains: filters.search, mode: "insensitive" },
+          },
+        },
+        {
+          initiative: {
+            titleEn: { contains: filters.search, mode: "insensitive" },
+          },
+        },
+        {
+          initiative: {
+            shortDescriptionAr: {
+              contains: filters.search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          initiative: {
+            shortDescriptionEn: {
+              contains: filters.search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          initiative: {
+            city: { contains: filters.search, mode: "insensitive" },
+          },
+        },
+        {
+          initiative: {
+            category: {
+              nameAr: { contains: filters.search, mode: "insensitive" },
+            },
+          },
+        },
+        {
+          initiative: {
+            category: {
+              nameEn: { contains: filters.search, mode: "insensitive" },
+            },
+          },
+        },
+      ];
+    }
+
+    const total = await prisma.initiativeParticipant.count({ where });
+
+    const participations = await prisma.initiativeParticipant.findMany({
+      where,
+      include: {
+        initiative: {
+          include: {
+            category: true,
+            organizerUser: true,
+            organizerOrg: true,
+          },
+        },
+      },
+      orderBy: [{ createdAt: "desc" }],
+      skip,
+      take: limit,
+    });
+
+    const initiativeIds = participations.map((p) => p.initiativeId);
+
+    const ratings = await prisma.userInitiativeRating.findMany({
+      where: {
+        userId,
+        initiativeId: { in: initiativeIds },
+      },
+    });
+
+    const ratingAverages = await prisma.userInitiativeRating.groupBy({
+      by: ["initiativeId"],
+      _avg: {
+        rating: true,
+      },
+      where: {
+        initiativeId: {
+          in: initiativeIds,
+        },
+      },
+    });
+
+    const data: UserParticipation[] = participations.map((p) => ({
+      type: "participant",
+      participantRole: p.participantRole,
+      status: p.status,
+      initiative: p.initiative,
+      rating: ratings.find((r) => r.initiativeId === p.initiativeId) || null,
+      avgRating:
+        Number(
+          ratingAverages.find((r) => r.initiativeId === p.initiativeId)?._avg
+            .rating,
+        ) || null,
+    }));
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      },
+    };
+  }
 
   static async getUserParticipations(
     userId: string,
