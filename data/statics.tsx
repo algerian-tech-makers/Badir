@@ -4,7 +4,7 @@ import {
   Partner,
   TestimonialOpinion,
 } from "@/types/Statics";
-import { ParticipantRole } from "@prisma/client";
+import { ParticipantRole, ParticipationStatus } from "@prisma/client";
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import arLocale from "i18n-iso-countries/langs/ar.json";
@@ -140,6 +140,14 @@ const participationRoleOptions = [
   { value: ParticipantRole.participant, label: "مشارك" },
 ];
 
+const participationStatusOptions = [
+  { value: "all", label: "جميع الحالات" },
+  { value: ParticipationStatus.approved, label: "تمت الموافقة" },
+  { value: ParticipationStatus.registered, label: "قيد المراجعة" },
+  { value: ParticipationStatus.rejected, label: "مرفوض" },
+  { value: ParticipationStatus.kicked, label: "مطرود" },
+];
+
 const statusOptions = [
   { value: "all", label: "جميع الحالات" },
   { value: "published", label: "منشورة" },
@@ -162,4 +170,5 @@ export {
   statusOptions,
   organizerTypeOptions,
   participationRoleOptions,
+  participationStatusOptions,
 };
