@@ -4,7 +4,13 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AppButton from "./AppButton";
 
-export default function BackButton({ url }: { url?: string }) {
+export default function BackButton({
+  url,
+  label = "العودة",
+}: {
+  url?: string;
+  label?: string;
+}) {
   const router = useRouter();
 
   return (
@@ -15,7 +21,7 @@ export default function BackButton({ url }: { url?: string }) {
       size="sm"
       border="default"
     >
-      العودة
+      {label}
     </AppButton>
   );
 }

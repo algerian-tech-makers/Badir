@@ -146,7 +146,7 @@ export default function JoinedInitiatives({
           <h1 className="text-primary-md text-neutrals-700 font-bold">
             مبادراتي
           </h1>
-          <BackButton url="/initiatives" />
+          <BackButton url="/initiatives" label="مبادرات" />
         </div>
 
         {/* Filters Section */}
