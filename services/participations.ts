@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { sanitizePlainText } from "@/lib/santitize-server";
 import { PaginatedResponse, PaginationParams } from "@/types/Pagination";
 import {
   Initiative,
@@ -48,6 +49,10 @@ export class ParticipationService {
     const { page, limit } = pagination;
     const skip = (page - 1) * limit;
 
+    const sanitizedSearch = filters.search
+      ? sanitizePlainText(filters.search)
+      : undefined;
+
     const where: Prisma.InitiativeParticipantWhereInput = { userId };
     const initiativeWhere: Prisma.InitiativeWhereInput = {};
 
@@ -88,22 +93,22 @@ export class ParticipationService {
       where.initiative = initiativeWhere;
     }
 
-    if (filters.search) {
+    if (sanitizedSearch) {
       where.OR = [
         {
           initiative: {
-            titleAr: { contains: filters.search, mode: "insensitive" },
+            titleAr: { contains: sanitizedSearch, mode: "insensitive" },
           },
         },
         {
           initiative: {
-            titleEn: { contains: filters.search, mode: "insensitive" },
+            titleEn: { contains: sanitizedSearch, mode: "insensitive" },
           },
         },
         {
           initiative: {
             shortDescriptionAr: {
-              contains: filters.search,
+              contains: sanitizedSearch,
               mode: "insensitive",
             },
           },
@@ -111,73 +116,199 @@ export class ParticipationService {
         {
           initiative: {
             shortDescriptionEn: {
-              contains: filters.search,
+              contains: sanitizedSearch,
               mode: "insensitive",
             },
           },
         },
         {
           initiative: {
-            city: { contains: filters.search, mode: "insensitive" },
+            city: { contains: sanitizedSearch, mode: "insensitive" },
           },
         },
         {
           initiative: {
             category: {
-              nameAr: { contains: filters.search, mode: "insensitive" },
+              nameAr: { contains: sanitizedSearch, mode: "insensitive" },
             },
           },
         },
         {
           initiative: {
             category: {
-              nameEn: { contains: filters.search, mode: "insensitive" },
+              nameEn: { contains: sanitizedSearch, mode: "insensitive" },
             },
           },
         },
       ];
     }
 
-    const total = await prisma.initiativeParticipant.count({ where });
+    // Branch 2: initiatives created by the user directly
+    const organizedByUserWhere: Prisma.InitiativeWhereInput = {
+      organizerType: OrganizerType.user,
+      organizerUserId: userId,
+      ...initiativeWhere,
+    };
 
-    const participations = await prisma.initiativeParticipant.findMany({
-      where,
-      include: {
-        initiative: {
-          include: {
-            category: true,
-            organizerUser: true,
-            organizerOrg: true,
+    // Branch 3: initiatives created under the user's org
+    const organizedByOrgWhere: Prisma.InitiativeWhereInput = {
+      organizerType: OrganizerType.organization,
+      organizerOrg: { userId },
+      ...initiativeWhere,
+    };
+
+    const initiativeSearchOR = sanitizedSearch
+      ? [
+          {
+            titleAr: {
+              contains: sanitizedSearch,
+              mode: "insensitive" as const,
+            },
           },
-        },
+          {
+            titleEn: {
+              contains: sanitizedSearch,
+              mode: "insensitive" as const,
+            },
+          },
+          {
+            shortDescriptionAr: {
+              contains: sanitizedSearch,
+              mode: "insensitive" as const,
+            },
+          },
+          {
+            shortDescriptionEn: {
+              contains: sanitizedSearch,
+              mode: "insensitive" as const,
+            },
+          },
+          { city: { contains: sanitizedSearch, mode: "insensitive" as const } },
+          {
+            category: {
+              nameAr: {
+                contains: sanitizedSearch,
+                mode: "insensitive" as const,
+              },
+            },
+          },
+          {
+            category: {
+              nameEn: {
+                contains: sanitizedSearch,
+                mode: "insensitive" as const,
+              },
+            },
+          },
+        ]
+      : null;
+
+    if (initiativeSearchOR) {
+      organizedByUserWhere.OR = initiativeSearchOR;
+      organizedByOrgWhere.OR = initiativeSearchOR;
+    }
+
+    const [participantCount, organizedByUserCount, organizedByOrgCount] =
+      await Promise.all([
+        prisma.initiativeParticipant.count({ where }),
+        prisma.initiative.count({ where: organizedByUserWhere }),
+        prisma.initiative.count({ where: organizedByOrgWhere }),
+      ]);
+
+    const total = participantCount + organizedByUserCount + organizedByOrgCount;
+
+    const participantSliceSize = Math.min(
+      limit,
+      Math.max(0, participantCount - skip),
+    );
+
+    const organizedByUserSkip = Math.max(0, skip - participantCount);
+    const organizedByUserSliceSize = Math.min(
+      limit - participantSliceSize,
+      Math.max(0, organizedByUserCount - organizedByUserSkip),
+    );
+
+    const organizedByOrgSkip = Math.max(
+      0,
+      skip - participantCount - organizedByUserCount,
+    );
+    const organizedByOrgSliceSize =
+      limit - participantSliceSize - organizedByUserSliceSize;
+
+    const includeFields = {
+      category: true,
+      organizerUser: true,
+      organizerOrg: true,
+    };
+
+    const [
+      participations,
+      organizedByUserInitiatives,
+      organizedByOrgInitiatives,
+    ] = await Promise.all([
+      prisma.initiativeParticipant.findMany({
+        where,
+        include: { initiative: { include: includeFields } },
+        orderBy: [{ createdAt: "desc" }],
+        skip,
+        take: participantSliceSize,
+      }),
+      organizedByUserSliceSize > 0
+        ? prisma.initiative.findMany({
+            where: organizedByUserWhere,
+            include: includeFields,
+            orderBy: [{ createdAt: "desc" }],
+            skip: organizedByUserSkip,
+            take: organizedByUserSliceSize,
+          })
+        : Promise.resolve([]),
+      organizedByOrgSliceSize > 0
+        ? prisma.initiative.findMany({
+            where: organizedByOrgWhere,
+            include: includeFields,
+            orderBy: [{ createdAt: "desc" }],
+            skip: organizedByOrgSkip,
+            take: organizedByOrgSliceSize,
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const allInitiativeIds = [
+      ...participations.map((p) => p.initiativeId),
+      ...organizedByUserInitiatives.map((i) => i.id),
+      ...organizedByOrgInitiatives.map((i) => i.id),
+    ];
+
+    const [ratings, ratingAverages] = await Promise.all([
+      prisma.userInitiativeRating.findMany({
+        where: { userId, initiativeId: { in: allInitiativeIds } },
+      }),
+      prisma.userInitiativeRating.groupBy({
+        by: ["initiativeId"],
+        _avg: { rating: true },
+        where: { initiativeId: { in: allInitiativeIds } },
+      }),
+    ]);
+
+    const toUserParticipation = (
+      i: Initiative & {
+        category: InitiativeCategory;
+        organizerUser: User | null;
+        organizerOrg: Organization | null;
       },
-      orderBy: [{ createdAt: "desc" }],
-      skip,
-      take: limit,
+    ): UserParticipation => ({
+      type: "organizer",
+      participantRole: ParticipantRole.manager,
+      status: ParticipationStatus.approved,
+      initiative: i,
+      rating: ratings.find((r) => r.initiativeId === i.id) || null,
+      avgRating:
+        Number(
+          ratingAverages.find((r) => r.initiativeId === i.id)?._avg.rating,
+        ) || null,
     });
 
-    const initiativeIds = participations.map((p) => p.initiativeId);
-
-    const ratings = await prisma.userInitiativeRating.findMany({
-      where: {
-        userId,
-        initiativeId: { in: initiativeIds },
-      },
-    });
-
-    const ratingAverages = await prisma.userInitiativeRating.groupBy({
-      by: ["initiativeId"],
-      _avg: {
-        rating: true,
-      },
-      where: {
-        initiativeId: {
-          in: initiativeIds,
-        },
-      },
-    });
-
-    const data: UserParticipation[] = participations.map((p) => ({
+    const participationsData: UserParticipation[] = participations.map((p) => ({
       type: "participant",
       participantRole: p.participantRole,
       status: p.status,
@@ -191,7 +322,11 @@ export class ParticipationService {
     }));
 
     return {
-      data,
+      data: [
+        ...participationsData,
+        ...organizedByUserInitiatives.map(toUserParticipation),
+        ...organizedByOrgInitiatives.map(toUserParticipation),
+      ],
       pagination: {
         page,
         limit,
@@ -202,7 +337,6 @@ export class ParticipationService {
       },
     };
   }
-
   static async getUserParticipations(
     userId: string,
     isOwner: boolean = false,
