@@ -147,9 +147,6 @@ export default function InitiativesList({
     );
   };
 
-  const hasActiveFilters =
-    searchValue !== "" || Object.keys(filters).length > 0;
-
   const handleClear = () => {
     setSearchValue("");
     setDebouncedSearch("");
@@ -195,17 +192,15 @@ export default function InitiativesList({
                   مبادرة جديدة
                 </AppButton>
               )}
-              {hasActiveFilters && (
-                <AppButton
-                  type="outline"
-                  border="rounded"
-                  size="sm"
-                  onClick={handleClear}
-                  icon={<RotateCcw className="h-4 w-4" />}
-                >
-                  مسح
-                </AppButton>
-              )}
+              <AppButton
+                type="outline"
+                border="rounded"
+                size="sm"
+                onClick={handleClear}
+                icon={<RotateCcw className="h-4 w-4" />}
+              >
+                مسح
+              </AppButton>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               {/* Category Filter */}
