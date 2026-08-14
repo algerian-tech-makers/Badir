@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ParticipationService,
   UserParticipation,
 } from "@/services/participations";
-import { participationStatusOptions } from "@/data/statics";
+import { CategoryCard } from "@/services/categories";
+import {
+  organizerTypeOptions,
+  participationStatusOptions,
+  statusOptions,
+  targetAudienceOptions,
+} from "@/data/statics";
 import InitiativeCard from "@/components/pages/InitiativeCard";
 import SearchInput from "@/components/SearchInput";
 import FilterSelect from "@/components/FilterSelect";
@@ -20,17 +26,25 @@ import { ParticipationStatus } from "@prisma/client";
 
 interface JoinedInitiativesProps {
   initialData: PaginatedResponse<UserParticipation>;
+  categories: CategoryCard[];
+}
+
+interface JoinedFilters {
+  categoryId?: string;
+  targetAudience?: string;
+  organizerType?: string;
+  initiativeStatus?: string;
+  status?: ParticipationStatus;
 }
 
 export default function JoinedInitiatives({
   initialData,
+  categories,
 }: JoinedInitiativesProps) {
   const [participations, setParticipations] =
     useState<PaginatedResponse<UserParticipation>>(initialData);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<ParticipationStatus | undefined>(
-    undefined,
-  );
+  const [filters, setFilters] = useState<JoinedFilters>({});
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -42,8 +56,18 @@ export default function JoinedInitiatives({
     return () => window.clearTimeout(timeoutId);
   }, [searchValue]);
 
+  const categoryOptions = useMemo(() => {
+    return [
+      { value: "all", label: "جميع الفئات" },
+      ...categories.map((cat) => ({
+        value: cat.id.toString(),
+        label: cat.nameAr,
+      })),
+    ];
+  }, [categories]);
+
   const fetchJoined = async (
-    nextStatus?: ParticipationStatus,
+    newFilters: JoinedFilters,
     search?: string,
     page: number = 1,
   ) => {
@@ -52,7 +76,15 @@ export default function JoinedInitiatives({
       const params = new URLSearchParams();
 
       if (search) params.append("search", search);
-      if (nextStatus) params.append("status", nextStatus);
+      if (newFilters.categoryId)
+        params.append("categoryId", newFilters.categoryId);
+      if (newFilters.targetAudience)
+        params.append("targetAudience", newFilters.targetAudience);
+      if (newFilters.organizerType)
+        params.append("organizerType", newFilters.organizerType);
+      if (newFilters.initiativeStatus)
+        params.append("initiativeStatus", newFilters.initiativeStatus);
+      if (newFilters.status) params.append("status", newFilters.status);
       params.append("page", page.toString());
       params.append("limit", "12");
 
@@ -72,32 +104,37 @@ export default function JoinedInitiatives({
   };
 
   useEffect(() => {
-    if (!debouncedSearch && !status) {
+    if (debouncedSearch === "" && Object.keys(filters).length === 0) {
       return;
     }
 
-    fetchJoined(status, debouncedSearch, 1);
+    fetchJoined(filters, debouncedSearch, 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
-  const handleStatusChange = (value: string) => {
-    const nextStatus =
-      value === "all" ? undefined : (value as ParticipationStatus);
-    setStatus(nextStatus);
-    fetchJoined(nextStatus, debouncedSearch, 1);
+  const handleFilterChange = (key: keyof JoinedFilters, value: string) => {
+    const newFilters = { ...filters };
+
+    if (value === "all" || value === "") {
+      delete newFilters[key];
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (newFilters as any)[key] = value;
+    }
+
+    setFilters(newFilters);
+    fetchJoined(newFilters, debouncedSearch, 1);
   };
 
   const handlePageChange = (page: number) => {
-    fetchJoined(status, debouncedSearch, page);
+    fetchJoined(filters, debouncedSearch, page);
   };
-
-  const hasActiveFilters = searchValue !== "" || status !== undefined;
 
   const handleClear = () => {
     setSearchValue("");
     setDebouncedSearch("");
-    setStatus(undefined);
-    fetchJoined(undefined, "", 1);
+    setFilters({});
+    fetchJoined({}, "", 1);
   };
 
   return (
@@ -105,16 +142,17 @@ export default function JoinedInitiatives({
       <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
-          <BackButton url="/initiatives" />
+          <div className="w-24" />
           <h1 className="text-primary-md text-neutrals-700 font-bold">
             مبادراتي
           </h1>
-          <div className="w-24" />
+          <BackButton url="/initiatives" />
         </div>
 
         {/* Filters Section */}
         <Card className="mb-8 border-none bg-transparent shadow-none">
           <CardContent className="p-4">
+            {/* Search */}
             <div className="flex-center mb-4 max-w-full gap-4 max-sm:flex-wrap sm:justify-center">
               <SearchInput
                 value={searchValue}
@@ -122,23 +160,60 @@ export default function JoinedInitiatives({
                 placeholder="ابحث في مبادراتك..."
                 className="w-full"
               />
+              <AppButton
+                type="outline"
+                border="rounded"
+                size="sm"
+                onClick={handleClear}
+                icon={<RotateCcw className="h-4 w-4" />}
+              >
+                مسح
+              </AppButton>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {/* Category Filter */}
               <FilterSelect
-                value={status || "all"}
-                onChange={handleStatusChange}
+                value={filters.categoryId || "all"}
+                onChange={(value) => handleFilterChange("categoryId", value)}
+                options={categoryOptions}
+                placeholder="فئة المبادرة"
+              />
+
+              {/* Target Audience Filter */}
+              <FilterSelect
+                value={filters.targetAudience || "both"}
+                onChange={(value) =>
+                  handleFilterChange("targetAudience", value)
+                }
+                options={targetAudienceOptions}
+                placeholder="الجمهور المستهدف"
+              />
+
+              {/* Initiative Status Filter */}
+              <FilterSelect
+                value={filters.initiativeStatus || "all"}
+                onChange={(value) =>
+                  handleFilterChange("initiativeStatus", value)
+                }
+                options={statusOptions}
+                placeholder="حالة المبادرة"
+              />
+
+              {/* Organizer Type Filter */}
+              <FilterSelect
+                value={filters.organizerType || "all"}
+                onChange={(value) => handleFilterChange("organizerType", value)}
+                options={organizerTypeOptions}
+                placeholder="نوع المنظم"
+              />
+
+              {/* Participation Status Filter */}
+              <FilterSelect
+                value={filters.status || "all"}
+                onChange={(value) => handleFilterChange("status", value)}
                 options={participationStatusOptions}
                 placeholder="حالة المشاركة"
               />
-              {hasActiveFilters && (
-                <AppButton
-                  type="outline"
-                  border="rounded"
-                  size="sm"
-                  onClick={handleClear}
-                  icon={<RotateCcw className="h-4 w-4" />}
-                >
-                  مسح
-                </AppButton>
-              )}
             </div>
           </CardContent>
         </Card>

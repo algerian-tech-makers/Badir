@@ -4,10 +4,13 @@ import {
   Initiative,
   InitiativeCategory,
   InitiativeParticipant,
+  InitiativeStatus,
   Organization,
+  OrganizerType,
   ParticipantRole,
   ParticipationStatus,
   Prisma,
+  TargetAudience,
   User,
   UserInitiativeRating,
 } from "@prisma/client";
@@ -25,12 +28,21 @@ export type UserParticipation = {
   avgRating: number | null;
 };
 
+export type JoinedParticipationFilters = {
+  search?: string;
+  categoryId?: string;
+  targetAudience?: TargetAudience;
+  organizerType?: OrganizerType;
+  initiativeStatus?: InitiativeStatus | "ongoing" | "completed";
+  status?: ParticipationStatus;
+};
+
 export class ParticipationService {
   static API_PATH = "/participations";
 
   static async getJoinedParticipations(
     userId: string,
-    filters: { search?: string; status?: ParticipationStatus } = {},
+    filters: JoinedParticipationFilters = {},
     pagination: PaginationParams = { page: 1, limit: 12 },
   ): Promise<PaginatedResponse<UserParticipation>> {
     const { page, limit } = pagination;
@@ -40,6 +52,48 @@ export class ParticipationService {
 
     if (filters.status) {
       where.status = filters.status;
+    }
+
+    if (filters.categoryId) {
+      where.initiative = {
+        categoryId: filters.categoryId,
+      };
+    }
+
+    if (filters.targetAudience) {
+      where.initiative = {
+        ...where.initiative,
+        targetAudience:
+          filters.targetAudience !== TargetAudience.both
+            ? { in: [filters.targetAudience, TargetAudience.both] }
+            : undefined,
+      };
+    }
+
+    if (filters.organizerType) {
+      where.initiative = {
+        ...where.initiative,
+        organizerType: filters.organizerType,
+      };
+    }
+
+    if (filters.initiativeStatus) {
+      const now = new Date();
+      where.initiative = {
+        ...where.initiative,
+        ...(filters.initiativeStatus === "ongoing"
+          ? {
+              startDate: { lte: now },
+              endDate: { gte: now },
+              status: InitiativeStatus.published,
+            }
+          : filters.initiativeStatus === "completed"
+            ? {
+                endDate: { lt: now },
+                status: InitiativeStatus.published,
+              }
+            : { status: filters.initiativeStatus }),
+      };
     }
 
     if (filters.search) {

@@ -1,6 +1,13 @@
 import { auth } from "@/lib/auth";
-import { ParticipationService } from "@/services/participations";
-import { ParticipationStatus } from "@prisma/client";
+import {
+  JoinedParticipationFilters,
+  ParticipationService,
+} from "@/services/participations";
+import {
+  OrganizerType,
+  ParticipationStatus,
+  TargetAudience,
+} from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -18,7 +25,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
 
-    const filters: { search?: string; status?: ParticipationStatus } = {};
+    const filters: JoinedParticipationFilters = {};
 
     const search = searchParams.get("search");
     if (search) filters.search = search;
@@ -29,6 +36,31 @@ export async function GET(request: NextRequest) {
       Object.values(ParticipationStatus).includes(status as ParticipationStatus)
     ) {
       filters.status = status as ParticipationStatus;
+    }
+
+    const categoryId = searchParams.get("categoryId");
+    if (categoryId) filters.categoryId = categoryId;
+
+    const targetAudience = searchParams.get("targetAudience");
+    if (
+      targetAudience &&
+      Object.values(TargetAudience).includes(targetAudience as TargetAudience)
+    ) {
+      filters.targetAudience = targetAudience as TargetAudience;
+    }
+
+    const organizerType = searchParams.get("organizerType");
+    if (
+      organizerType &&
+      Object.values(OrganizerType).includes(organizerType as OrganizerType)
+    ) {
+      filters.organizerType = organizerType as OrganizerType;
+    }
+
+    const initiativeStatus = searchParams.get("initiativeStatus");
+    if (initiativeStatus) {
+      filters.initiativeStatus =
+        initiativeStatus as JoinedParticipationFilters["initiativeStatus"];
     }
 
     const result = await ParticipationService.getJoinedParticipations(

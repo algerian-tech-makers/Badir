@@ -1,6 +1,7 @@
 import JoinedInitiatives from "@/components/pages/initiatives/JoinedInitiatives";
 import getSessionWithCheckProfile from "@/hooks/getSessionWithCheckProfile";
 import { ParticipationService } from "@/services/participations";
+import { CategoryService } from "@/services/categories";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -17,13 +18,18 @@ export default async function Page() {
   }
 
   try {
-    const initialData = await ParticipationService.getJoinedParticipations(
-      session.user.id,
-      {},
-      { page: 1, limit: 12 },
-    );
+    const [initialData, categories] = await Promise.all([
+      ParticipationService.getJoinedParticipations(
+        session.user.id,
+        {},
+        { page: 1, limit: 12 },
+      ),
+      CategoryService.getAll(),
+    ]);
 
-    return <JoinedInitiatives initialData={initialData} />;
+    return (
+      <JoinedInitiatives initialData={initialData} categories={categories} />
+    );
   } catch (error) {
     console.error("Error loading joined initiatives page:", error);
     return (
