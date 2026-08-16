@@ -427,31 +427,7 @@ Client Request → Server Function / Next.js API Route → Service Layer → Pri
 
 ```bash
    cp .env.example .env.local
-
-- POSTGRES_USER=user
-- POSTGRES_PASSWORD=password
-- POSTGRES_DB=postgres
-- DB_PORT=54332
-- POSTGRES_MAX_CONNECTIONS=100
-- DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:54332/${POSTGRES_DB}"
-- DIRECT_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
-
-- BETTER_AUTH_SECRET=your_auth_secret
-- BETTER_AUTH_URL=http://localhost:3000
-
-- MINIO_ROOT_USER=minioAdmin
-- MINIO_ROOT_PASSWORD=minioAdmin
-
-
-- MINIO_ENDPOINT=http://localhost:9000
-
-- STORAGE_PROVIDER=minio  # see next.config.ts
-
-- MINIO_REGION=us-east-1
-- MINIO_USE_SSL=false
-- UPSTASH_REDIS_REST_URL=https://your-actual-url.upstash.io
 ```
-
 ### start containers
 
 ```bash
