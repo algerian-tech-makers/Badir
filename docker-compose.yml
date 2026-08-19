@@ -1,56 +1,28 @@
 name: badir
 
-# The container reads everything at start — no env is compiled into the image,
-# so the same artifact promotes across dev1 / staging1 / prod.
+# =============================================================================
+# LOCAL DEVELOPMENT ONLY.
+#
+# This compose file runs the EXTERNAL SERVICES the Next.js app needs to talk to:
+# PostgreSQL, MinIO (S3-compatible object storage) and Mailpit.
+#
+# The application itself is NOT a service here — it is launched from your IDE
+# (`pnpm dev`, or the run config of your choice) so you keep HMR, breakpoints
+# and source maps. As a result:
+#
+#   * DATABASE_URL / S3_ENDPOINT / etc. in .env point at `localhost` (see
+#     .env.example), because both ends are on the host.
+#   * Schema migrations are applied on the host with `pnpm db:migrate`
+#     (or `pnpm db:reset-seed` for a wiped + seeded dev database).
+#   * Cron jobs (/api/cron/*) are triggered manually with curl + CRON_SECRET;
+#     the scheduler (ofelia) that runs them in production lives in the
+#     separate `badir-core-compose/` repo, not here.
+#
+# Production / staging / dev1 stacks live in `badir-core-compose/` and are
+# managed by Portainer — do not promote this file.
+# =============================================================================
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-
-    ports:
-      - "127.0.0.1:${APP_PORT:-3000}:3000"
-
-    env_file:
-      - .env
-
-    environment:
-      # On the compose network, S3 lives at the minio service, not localhost.
-      S3_ENDPOINT: http://minio:9000
-      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-http://localhost:9000/badir}
-      S3_FORCE_PATH_STYLE: "true"
-
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-      minio-init:
-        condition: service_completed_successfully
-
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # One-shot: prisma migrate deploy. Exits 0 on success; `app` waits on it via
-  # depends_on above. This is what vercel.json used to do inside buildCommand.
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: migrator
-    restart: "no"
-
-    env_file:
-      - .env
-
-    depends_on:
-      db:
-        condition: service_healthy
-
   db:
     image: postgres:18-alpine
     restart: unless-stopped
@@ -81,7 +53,7 @@ services:
     ports:
       # Web UI — http://127.0.0.1:8025
       - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
-      # SMTP — point SMTP_* in .env at this
+      # SMTP — point SMTP_* in .env at this if/when the app sends via SMTP
       - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
 
     volumes:
@@ -145,51 +117,6 @@ services:
       mc mb --ignore-existing local/${S3_BUCKET:-badir} &&
       mc anonymous set download local/${S3_BUCKET:-badir}
       "
-
-  # Cron scheduler. Replaces vercel.json. Each job is a `job-local` HTTP call
-  # against `app` on the compose network, carrying the same `CRON_SECRET`
-  # bearer token the routes already validate. Ofelia uses 6-field cron, so a
-  # leading seconds field is prepended to every schedule.
-  ofelia:
-    image: mcuadros/ofelia:latest
-    restart: unless-stopped
-
-    depends_on:
-      app:
-        condition: service_healthy
-
-    command: daemon --docker
-
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-    labels:
-      ofelia.enabled: "true"
-      # ─── daily jobs ──────────────────────────────────────────────────────
-      ofelia.job-exec.process-webhooks.schedule: "0 0 8 * * *"
-      ofelia.job-exec.process-webhooks.command: >
-        curl -fsS -H "Authorization: Bearer $CRON_SECRET"
-        http://app:3000/api/cron/process-webhooks
-      ofelia.job-exec.process-webhooks.no-overlap: "true"
-      ofelia.job-exec.process-post-emails.schedule: "0 0 13 * * *"
-      ofelia.job-exec.process-post-emails.command: >
-        curl -fsS -H "Authorization: Bearer $CRON_SECRET"
-        http://app:3000/api/cron/process-post-emails
-      ofelia.job-exec.process-post-emails.no-overlap: "true"
-      ofelia.job-exec.close-initiatives.schedule: "0 5 0 * * *"
-      ofelia.job-exec.close-initiatives.command: >
-        curl -fsS -H "Authorization: Bearer $CRON_SECRET"
-        http://app:3000/api/cron/close-initiatives
-      ofelia.job-exec.close-initiatives.no-overlap: "true"
-      # ─── weekly ───────────────────────────────────────────────────────────
-      ofelia.job-exec.inactive-users.schedule: "0 0 9 * * 1"
-      ofelia.job-exec.inactive-users.command: >
-        curl -fsS -H "Authorization: Bearer $CRON_SECRET"
-        http://app:3000/api/cron/inactive-users
-      ofelia.job-exec.inactive-users.no-overlap: "true"
-
-    environment:
-      CRON_SECRET: ${CRON_SECRET:?CRON_SECRET must be set in .env}
 
 volumes:
   badir_pgdata:
