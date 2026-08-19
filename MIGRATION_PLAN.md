@@ -3,8 +3,12 @@
 Migrating `badir-core-web` off Vercel/Supabase onto a portable, self-hosted container
 pipeline modelled on `miqraa-core-api`.
 
-**Status:** Phases 1–6 implemented (§4 Storage→S3, §5 Remove Vercel, §6 semantic-release,
-§7 commitlint + husky, §8 Docker + compose, §9 CI). Phase 7 (§10 Dependabot) not yet started.
+**Status:** Phases 1–7 implemented (§4 Storage→S3, §5 Remove Vercel, §6 semantic-release,
+§7 commitlint + husky, §8 Docker + compose, §9 CI, §10 Dependabot). End-to-end verified locally:
+`tsc --noEmit` clean, `eslint` 0 errors (64 pre-existing warnings), `next build` succeeds with stub
+env; full Docker image runs and `/api/health` returns `{"status":"ok","version":"…"}`; ofelia cron
+endpoints return 401/200 against Bearer `CRON_SECRET`; `docker compose config` resolves 7 services +
+3 volumes cleanly.
 **Reference project:** `../../miqraa/miqraa-core-api`
 
 ---
@@ -405,6 +409,15 @@ the same rule would also reject semantic-release's own release commit.
 `commitlint.config.cjs` (§7). Because `wagoid/commitlint-github-action` reads the repo's own
 config, this single change fixes the CI validation stage and the local `commit-msg` hook
 together.
+
+> **Note on bug 1's stated mechanism (corrected after local verification):**
+> `@commitlint/config-conventional` does not enforce "exactly one scope" by default — its
+> header pattern `^(\w*)(?:\((.*)\))?!?: (.*)$` greedily captures `chore(ci)(deps)` as
+> `type=chore, scope=ci)(deps`, and commitlint reports the header as valid. The practical
+> consequence is identical, though: both forms categorize as `chore`, so neither triggers a
+> semantic-release version bump. The config-side fix in §10 (avoid combining a parenthesised
+> prefix with `include: "scope"`) still produces cleaner messages and matches Conventional
+> Commits. No additional commitlint rule is required.
 
 > **Apply these two fixes to `miqraa-core-api` as well** — that repo has the same latent bugs.
 > Say the word and I will do it there in the same pass.

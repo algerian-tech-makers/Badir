@@ -111,6 +111,13 @@ updates:
     commit-message:
       # Parenthesised prefix WITHOUT include → `chore(docker): bump …`. (Bug 1 fix.)
       prefix: "chore(docker)"
+    # Major bumps (node 22 → 24, postgres 18 → 19, …) deserve a human eye:
+    # they may need a code change, a Prisma engine rebuild, or a base-image
+    # security review that a weekly bot PR doesn't carry.
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
 
   # ────────────────────────────────────────────────────────────────────────────
   # docker-compose — service image references
@@ -129,6 +136,13 @@ updates:
     commit-message:
       # Parenthesised prefix WITHOUT include → `chore(compose): bump …`. (Bug 1 fix.)
       prefix: "chore(compose)"
+    # Same reasoning as the docker ecosystem: postgres/minio/ofelia major
+    # bumps need operator attention (volume formats, env-var names, healthcheck
+    # semantics), not an automatic weekly PR.
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
 
   # ────────────────────────────────────────────────────────────────────────────
   # github-actions — pinned SHAs in .github/workflows/*
@@ -147,3 +161,10 @@ updates:
     commit-message:
       # Parenthesised prefix WITHOUT include → `chore(ci): bump …`. (Bug 1 fix.)
       prefix: "chore(ci)"
+    # Major version bumps on action SHAs (v6 → v7, v4 → v5) routinely change
+    # node-version requirements, breaking-change defaults, or inputs the rest
+    # of the workflow relies on. Reserve those for a deliberate PR.
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
