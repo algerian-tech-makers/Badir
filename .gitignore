@@ -34,9 +34,6 @@ yarn-error.log*
 .env*
 !.env.example
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -44,9 +41,3 @@ next-env.d.ts
 /lib/generated/prisma
 
 /*.txt
-
-
-# docker files (I used it just to emulate vercel environment locally)
-dockerfile
-docker-compose.yml
-.dockerignore

@@ -333,7 +333,7 @@ export class AdminService {
           ownerName: organization.owner.name,
           status: status === "approved" ? "approved" : "rejected",
           rejectionReason: status === "rejected" ? rejectionReason : undefined,
-          dashboardLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://badir.space"}/profile`,
+          dashboardLink: `${process.env.APP_URL || "https://badir.space"}/profile`,
         }),
       );
 
@@ -409,7 +409,7 @@ export class AdminService {
             status: status === "published" ? "published" : "cancelled",
             rejectionReason:
               status === "cancelled" ? rejectionReason : undefined,
-            initiativeLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://badir.space"}/initiatives/${initiative.id}`,
+            initiativeLink: `${process.env.APP_URL || "https://badir.space"}/initiatives/${initiative.id}`,
           }),
         );
 

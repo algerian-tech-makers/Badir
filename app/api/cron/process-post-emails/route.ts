@@ -11,7 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 /**
  * Post Email Queue Processor (Cron Worker)
  *
- * Runs daily via Vercel Cron to process queued post email notifications.
+ * Runs daily, triggered by the scheduler, to process queued post email notifications.
  * Processes queued post email notifications with rate limiting.
  *
  * Flow:
@@ -43,7 +43,7 @@ interface PostDetails {
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
 
-  // Verify Vercel Cron secret
+  // Verify the scheduler's shared secret
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
             postTitle: postDetails.title || undefined,
             postContent: postDetails.content,
             authorName: postDetails.author.name || "مستخدم_محذوف",
-            postUrl: `${process.env.NEXT_PUBLIC_APP_URL}/initiatives/${postDetails.initiative.id}`,
+            postUrl: `${process.env.APP_URL}/initiatives/${postDetails.initiative.id}`,
           }),
         );
 
