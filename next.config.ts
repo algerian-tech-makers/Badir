@@ -24,6 +24,7 @@ const extraImageHosts: NonNullable<NextConfig["images"]>["remotePatterns"] =
   })();
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   experimental: {
     serverActions: {
       bodySizeLimit: "40mb",
