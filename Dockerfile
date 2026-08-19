@@ -34,9 +34,21 @@ COPY . .
 # The release this image was built from — CI passes the semantic-release
 # version (or `unknown` locally) and /api/health echoes it back.
 ARG APP_VERSION=unknown
+
+# Build-time stubs. `next build` imports every route module to collect page
+# data; a handful of them (`/api/send-email`'s Resend client, better-auth's
+# secret check, the Upstash rate limiter) throw at module-load time when their
+# env vars are absent. The dummies below are never read at runtime — the
+# runner stage does not inherit them, and `app/api/health` only echoes
+# APP_VERSION — so a single image still promotes across dev1 / staging1 / prod
+# without rebuilding.
 ENV APP_VERSION=${APP_VERSION} \
     NEXT_TELEMETRY_DISABLED=1 \
-    NODE_ENV=production
+    NODE_ENV=production \
+    RESEND_API_KEY=re_build_dummy \
+    BETTER_AUTH_SECRET=build_only_dummy_secret_at_least_32_chars_xx \
+    UPSTASH_REDIS_REST_URL=https://placeholder.invalid \
+    UPSTASH_REDIS_REST_TOKEN=build_dummy_token
 RUN pnpm run build
 
 # ---------------------------------------------------------------------------
