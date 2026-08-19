@@ -3,8 +3,8 @@
 Migrating `badir-core-web` off Vercel/Supabase onto a portable, self-hosted container
 pipeline modelled on `miqraa-core-api`.
 
-**Status:** Phases 1–3 implemented (§4 Storage→S3, §5 Remove Vercel, §6 semantic-release).
-Phases 4–7 (§7 husky/commitlint, §8 Docker, §9 CI, §10 Dependabot) not yet started.
+**Status:** Phases 1–6 implemented (§4 Storage→S3, §5 Remove Vercel, §6 semantic-release,
+§7 commitlint + husky, §8 Docker + compose, §9 CI). Phase 7 (§10 Dependabot) not yet started.
 **Reference project:** `../../miqraa/miqraa-core-api`
 
 ---
@@ -481,16 +481,17 @@ Monday 06:00 UTC, major updates ignored, with grouping retuned for this dependen
 
 ## 13. Open questions
 
-1. **`app/organizations/page.tsx`** (§3.1) — apply the `force-dynamic` + `unstable_cache`
-   change so the build never touches the DB? _Recommended._ Otherwise the image needs a
-   build-time `DATABASE_URL`.
-2. **`keep-alive` cron** (§8.3) — delete it? It existed only to stop Supabase's free tier
-   idling.
-3. **`typescript.ignoreBuildErrors: true`** (§9) — remove it now that `tsc` is clean?
-   _Recommended._
-4. **Storage data migration** (§4) — do you want the Supabase → R2 copy script in this
-   pass, or tracked separately? Nothing here moves existing files.
-5. **Fix the same two Dependabot bugs in `miqraa-core-api`** (§10) in this pass?
+1. **`app/organizations/page.tsx`** (§3.1) — **resolved** (`force-dynamic` + `unstable_cache`).
+   The build no longer needs `DATABASE_URL`.
+2. **`keep-alive` cron** (§8.3) — **resolved** (route + schedule deleted).
+3. **`typescript.ignoreBuildErrors: true`** (§9) — **resolved** (removed from `next.config.ts`
+   now that `tsc` is clean). The CI `type-check` step covers it.
+4. **Storage data migration** (§4) — **tracked separately.** Removing the dependency does
+   not move the bytes. Existing files remain in Supabase Storage, and old URLs keep
+   resolving only while that project is alive. The Supabase → R2 copy script plus DB
+   URL-rewrite is a separate ticket; nothing in this pass moves existing files.
+5. **Fix the same two Dependabot bugs in `miqraa-core-api`** (§10) — **out of scope for
+   this pass.** Focus is on `badir-core-web` only.
 
 ---
 
