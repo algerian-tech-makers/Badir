@@ -512,7 +512,7 @@ MAILERLITE_API_KEY=eyJ...
 MAILERLITE_WEBHOOK_SECRET=...
 ```
 
-**Implementation**: Uses [MailerLite](https://mailerlite.com) API for subscription management with production-ready rate limiting via Upstash Redis.
+**Implementation**: Uses [MailerLite](https://mailerlite.com) API for subscription management with production-ready rate limiting via Redis.
 
 ### Webhook Queue System
 
@@ -536,8 +536,7 @@ To keep user newsletter status synchronized with MailerLite (unsubscribes, bounc
 
 ```bash
 CRON_SECRET=...  # Generated via: openssl rand -base64 32
-UPSTASH_REDIS_REST_URL=https://...  # For rate limiting
-UPSTASH_REDIS_REST_TOKEN=...
+REDIS_URL=redis://localhost:6379  # For rate limiting
 ```
 
 **Deployment Notes**:

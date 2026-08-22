@@ -12,15 +12,13 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * Post Email Queue Processor (Cron Worker)
  *
  * Runs daily, triggered by the scheduler, to process queued post email notifications.
- * Processes queued post email notifications with rate limiting.
  *
  * Flow:
  * 1. Fetch batch of queued emails (respecting Resend batch limits)
- * 2. Apply Upstash rate limiting
- * 3. Group by post/initiative and fetch post details
- * 4. Send emails using resend.batch.send
- * 5. Delete successfully sent queue entries
- * 6. Failed entries remain for retry on next run
+ * 2. Group by post/initiative and fetch post details
+ * 3. Send emails using resend.batch.send
+ * 4. Delete successfully sent queue entries
+ * 5. Failed entries remain for retry on next run
  */
 
 // Resend batch limit is 100 emails per call

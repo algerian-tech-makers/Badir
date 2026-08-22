@@ -71,8 +71,6 @@ jobs:
           # container start (no env in the build — see Dockerfile).
           RESEND_API_KEY: re_ci_dummy
           BETTER_AUTH_SECRET: ci_only_dummy_secret_at_least_32_chars
-          UPSTASH_REDIS_REST_URL: https://placeholder.invalid
-          UPSTASH_REDIS_REST_TOKEN: ci_dummy_token
         run: pnpm run build
 
   # ── PR preview image — build & push a pr-<n> tag ────────────────────────────

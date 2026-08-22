@@ -4,7 +4,7 @@ name: badir
 # LOCAL DEVELOPMENT ONLY.
 #
 # This compose file runs the EXTERNAL SERVICES the Next.js app needs to talk to:
-# PostgreSQL, MinIO (S3-compatible object storage) and Mailpit.
+# PostgreSQL, Redis, MinIO (S3-compatible object storage) and Mailpit.
 #
 # The application itself is NOT a service here — it is launched from your IDE
 # (`pnpm dev`, or the run config of your choice) so you keep HMR, breakpoints
@@ -45,6 +45,25 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  # Rate-limiter counter store (lib/rate-limit.ts). No password locally — it is
+  # bound to loopback only. Deployed environments run their own Redis on the
+  # stack's internal network with `--requirepass`; see badir-core-compose.
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+
+    command: redis-server --save "" --appendonly no
+
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   mailpit:
     image: axllent/mailpit
