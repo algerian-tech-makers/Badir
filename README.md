@@ -356,13 +356,13 @@ erDiagram
 
 Client Request → Server Function / Next.js API Route → Service Layer → Prisma ORM → PostgreSQL
 
-## Setup Instructions
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- PostgreSQL database
-- Supabase account (for file storage)
+- Node.js 18+ and npm/pnpm
+- Docker Engine
+- Docker Compose
 
 ### Installation
 
@@ -376,7 +376,7 @@ Client Request → Server Function / Next.js API Route → Service Layer → Pri
 ### Install dependencies
 
 ```bash
-   npm install
+   pnpm install
 ```
 
 ### Set up environment variables
@@ -385,22 +385,30 @@ Client Request → Server Function / Next.js API Route → Service Layer → Pri
    cp .env.example .env.local
 ```
 
+### Start Postgres + the other services
+
 ```bash
-   cp .env.example .env.local
+docker compose up -d --wait
 ```
-
-### Configure the following in .env.local:
-
-- Database URL (PostgreSQL)
-- Better Auth secrets
-- Supabase credentials
-- Resend API key and email configuration
 
 ### Set up database
 
 ```bash
    npx prisma migrate dev
    npx prisma db seed
+```
+
+### Set up S3_ENDPOINT
+
+Open the following file based on your OS:
+
+- Windows: C:\Windows\System32\drivers\etc\hostsmacOS
+- Linux: /etc/hosts
+
+Add this line at the bottom of the file and save it:
+
+```bash
+127.0.0.1  minio
 ```
 
 ### Start development server
