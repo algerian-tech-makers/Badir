@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-
+const isDev = process.env.NODE_ENV === "development";
 /**
  * Allows a deployment to serve objects from a custom CDN domain without editing
  * this file: set S3_PUBLIC_URL at build time and its host joins the allowlist.
@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
     // Build-time allowlist of hosts next/image may optimise from. It is baked
     // into the build, so it deliberately covers every environment at once —
     // that keeps a single image promotable across dev1/staging1/prod.
+    dangerouslyAllowLocalIP: isDev,
     remotePatterns: [
       // Rows written before the S3 migration still hold Supabase public URLs.
       {
