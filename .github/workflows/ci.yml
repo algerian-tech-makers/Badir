@@ -109,7 +109,7 @@ jobs:
           flavor: latest=false
           tags: type=ref,event=pr
 
-      - name: Build and push
+      - name: Build and push (runner)
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -120,6 +120,22 @@ jobs:
           # No APP_VERSION: a PR build is deliberately unversioned, /api/health says "unknown".
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Sibling migrator image for the dedicated one-shot `migrate` service in
+      # badir-core-compose. Same `docker buildx` cache as the runner build (the
+      # `deps` stage is the only thing the migrator adds on top), so this second
+      # push is metadata + a thin layer — no second build, no second build minute.
+      - name: Build and push (migrator)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: migrator
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}-migrator
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -187,7 +203,7 @@ jobs:
             type=raw,value=${{ needs.release.outputs.version }}
             type=raw,value=latest
 
-      - name: Build and push
+      - name: Build and push (runner)
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -202,5 +218,21 @@ jobs:
             APP_VERSION=${{ needs.release.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Sibling migrator image for the dedicated one-shot `migrate` service in
+      # badir-core-compose. Same `docker buildx` cache as the runner build; see
+      # the matching comment in the pr-image job for why this is metadata + a
+      # thin layer rather than a second full build.
+      - name: Build and push (migrator)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: migrator
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}-migrator
           cache-from: type=gha
           cache-to: type=gha,mode=max
