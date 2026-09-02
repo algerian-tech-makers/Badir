@@ -5,7 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import PasswordResetEmail from "@/emails/PasswordResetEmail";
 import { Resend } from "resend";
 import { render } from "react-email";
-import { waitUntil } from "@vercel/functions";
+import { runAfterResponse } from "@/lib/background";
 import { createAuthMiddleware } from "better-auth/api";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -88,12 +88,8 @@ export const auth = betterAuth({
         }
       };
 
-      // waitUntil in production (Vercel) will keep function alive for background email sending
-      if (typeof waitUntil !== "undefined") {
-        waitUntil(sendEmail());
-      } else {
-        await sendEmail();
-      }
+      // Defer the send so the response is not blocked on the mail provider.
+      await runAfterResponse(sendEmail());
     },
   },
   secret: process.env.BETTER_AUTH_SECRET as string,
@@ -127,7 +123,7 @@ export const auth = betterAuth({
 
   advanced: {
     backgroundTasks: {
-      handler: waitUntil,
+      handler: runAfterResponse,
     },
   },
 

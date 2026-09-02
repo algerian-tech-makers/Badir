@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
               InactivityWarningEmail({
                 firstName: user.firstName,
                 daysRemaining: (DELETION_DAYS - WARNING_DAYS).toString(),
-                platformUrl: process.env.NEXT_PUBLIC_APP_URL!,
+                platformUrl: process.env.APP_URL!,
               }),
             ),
           })),
